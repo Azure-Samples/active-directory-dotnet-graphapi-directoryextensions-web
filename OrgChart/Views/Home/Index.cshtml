@@ -1,9 +1,9 @@
 ﻿@using Microsoft.WindowsAzure.ActiveDirectory.GraphHelper;
-@using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 @{
     ViewBag.Title = "Home Page";
 }
+
 @section featured {
     <section class="featured">
         <div class="content-wrapper">
@@ -18,163 +18,40 @@
     </section>
 }
 
-Main person: @ViewBag.UPN
-<br />
-Users returned: @ViewBag.foundUsers.user.Count
-<table>
-@foreach (AadUser user in @ViewBag.foundUsers.user)
-{
-    <tr>
-        <td>@user.displayName</td>
-    </tr>
-}
-</table>
-
 <table id="ManagerList">
 	<tr>
-		<th>Photo</th>
-        <th>Employee | Title</th>
-        <th>Department</th>
-        <th>Working On...</th>
-        <th>In Org</th>
+		<th>displayName</th>
+        <th>mailNickname</th>
+        <th>jobTitle</th>
+        <th>department</th>
     </tr>
+@foreach (AadUser user in ViewBag.ancestorsAndMainPerson)
+{
 	<tr>
-		<td></td>
-		<td>Steve Ballmer, CEO</td>
-		<td>Executive Leadership</td>
-		<td>many things</td>
-		<td>+184,243</td>
+		<td>@user.displayName</td>
+		<td>@user.mailNickname</td>
+		<td>@user.jobTitle</td>
+		<td>@user.department</td>
 	</tr>
-	<tr>
-		<td></td>
-		<td>Satya Nadella, EVP</td>
-		<td>Cloud and Enterprise</td>
-		<td>Azure, Server, SQL, Dev Div</td>
-		<td>+17,657</td>
-    </tr>
-	<tr>
-		<td></td>
-		<td>Scott Guthrie, CVP PM</td>
-		<td>Windows Azure</td>
-		<td>Azure, Autopilot</td>
-		<td>+569</td>
-	</tr>
-	<tr>
-		<td></td>
-		<td>Alex Simons, Director, PM</td>
-		<td>Azure Active Directory</td>
-		<td>Authentication, Authorization, Access Management</td>
-		<td>+74</td>
-	</tr>
-</table>
-
-<table id="MainPerson">
-	<tr>
-		<td></td>
-		<td>Cliff Didcock, Group Program Manager</td>
-		<td>MSODS</td>
-		<td>Viral Tenants, X-Tenant Collaboration</td>
-		<td>+12</td>
-	</tr>
+}
 </table>
 
 <table id="OrgColumns">
 	<tr>
-        <td>
-            <table id="Column1">
-	            <tr>
-                    <td></td>
-                    <td>Girish Chander, Lead Program Manager</td>
-		            <td>MSODS Core</td>
-		            <td>X-Tenant Collaboration</td>
-		            <td>+5</td>
+@foreach (List<AadUser> directList in ViewBag.directsOfDirects)
+{
+    <td>
+        <table>
+            @foreach (AadUser user in directList)
+            {
+                <tr>
+		            <td>@user.displayName</td>
+		            <td>@user.mailNickname</td>
+		            <td>@user.jobTitle</td>
+		            <td>@user.department</td>
                 </tr>
-	            <tr>
-                    <td></td>
-                    <td>Arvind Suthar, Principal Program Manager</td>
-		            <td>MSODS Core</td>
-		            <td>Directory Extensions</td>
-		            <td>+0</td>
-                </tr>
-	            <tr>
-                    <td></td>
-                    <td>John Morrison, Program Manager</td>
-		            <td>MSODS Core</td>
-		            <td>CSLMS</td>
-		            <td>+0</td>
-                </tr>
-	            <tr>
-                    <td></td>
-                    <td>Jono Luk, Senior Program Manager</td>
-		            <td>MSODS Core</td>
-		            <td>DirSync</td>
-		            <td>+0</td>
-                </tr>
-	            <tr>
-                    <td></td>
-                    <td>Ross Adams, Senior Program Manager</td>
-		            <td>MSODS Core</td>
-		            <td>Identity</td>
-		            <td>+0</td>
-                </tr>
-	            <tr>
-                    <td></td>
-                    <td>Vince Smith, Senior Program Manager</td>
-		            <td>MSODS Core</td>
-		            <td>Authorization</td>
-		            <td>+0</td>
-                </tr>
-            </table>
-        </td>
-		<td>
-            <table id="Column2">
-	            <tr>
-                    <td></td>
-                    <td>Abhishek Mathur, Lead Program Manager</td>
-		            <td>MSODS Programmability</td>
-		            <td>Graph</td>
-		            <td>+4</td>
-                </tr>
-	            <tr>
-                    <td></td>
-                    <td>Aanchal Saxena, Program Manager II</td>
-		            <td>MSODS Core</td>
-		            <td>BEC WS</td>
-		            <td>+0</td>
-                </tr>
-	            <tr>
-                    <td></td>
-                    <td>Chun Yong Chua, Senior Program Manager</td>
-		            <td>MSODS Core</td>
-		            <td>Sync Service</td>
-		            <td>+0</td>
-                </tr>
-	            <tr>
-                    <td></td>
-                    <td>Edward Wu, Senior Program Manager</td>
-		            <td>MSODS Core</td>
-		            <td>Graph</td>
-		            <td>+0</td>
-                </tr>
-	            <tr>
-                    <td></td>
-                    <td>Phillipe Signoret, Program Manager</td>
-		            <td>MSODS Core</td>
-		            <td>Fairfax</td>
-		            <td>+0</td>
-                </tr>
-            </table>
-        </td>
-		<td>
-            <table id="Column3">
-	            <tr>
-                    <td></td>
-                    <td>Dan Kershaw, Principal Program Manager</td>
-		            <td>MSODS Programmability</td>
-		            <td>App Model</td>
-		            <td>+0</td>
-                </tr>
-            </table>
-        </td>
-    </tr>
+            }
+        </table>
+    </td>
+}
 </table>
