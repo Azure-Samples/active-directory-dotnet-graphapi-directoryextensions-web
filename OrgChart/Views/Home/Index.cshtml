@@ -18,6 +18,8 @@
     </section>
 }
 
+<table id="Splitter"><tr>
+<td>
 <table id="ManagerList">
 	<tr>
 		<th>displayName</th>
@@ -27,7 +29,7 @@
     </tr>
 @foreach (AadUser user in ViewBag.ancestorsAndMainPerson)
 {
-	<tr>
+	<tr class="highlightable">
 		<td>@user.displayName</td>
 		<td>@user.mailNickname</td>
 		<td>@user.jobTitle</td>
@@ -44,7 +46,7 @@
         <table>
             @foreach (AadUser user in directList)
             {
-                <tr>
+                <tr class="highlightable">
 		            <td>@user.displayName</td>
 		            <td>@user.mailNickname</td>
 		            <td>@user.jobTitle</td>
@@ -55,3 +57,28 @@
     </td>
 }
 </table>
+</td>
+<td>
+	<form action="">
+        <fieldset> <legend>Editable Attributes</legend>
+			<div><label for="displayName">displayName</label> <input type="text" id="displayName" name="displayName"></div>
+			<div><label for="mailNickname">mailNickname</label> <input type="text" id="mailNickname" name="mailNickname"></div>
+			<div><label for="jobTitle">jobTitle</label> <input type="text" id="jobTitle" name="jobTitle"></div>
+			<div><label for="department">department</label> <input type="text" id="department" name="department"></div>
+			<div><label for="manager">manager</label> <input type="text" id="manager" name="manager"></div>
+		</fieldset>
+		<fieldset> <legend>Readonly Attributes</legend>
+			<div><label for="DLkeywords">DL keywords</label> <input type="text" id="DLkeywords" name="DLkeywords"></div>
+			<div><label for="OwnedDLs">Owned DLs</label> <input type="text" id="OwnedDLs" name="OwnedDLs"></div>
+			<div><label for="Schools">Schools</label> <input type="text" id="Schools" name="Schools"></div>
+			<div><label for="Employers">Employers</label> <input type="text" id="Employers" name="Employers"></div>
+        </fieldset>
+        <fieldset> <legend>Extension Attributes</legend>
+			<div><label for="Trio">Trio</label> <input type="text" id="Trio" name="Trio"></div>
+			<div><label for="LinkedInURL">LinkedIn URL</label> <input type="text" id="LinkedInURL" name="LinkedInURL"></div>
+		</fieldset>
+		<button type="submit" id="submit-go">Submit</button>
+	</form>
+</td>
+
+</tr></table>

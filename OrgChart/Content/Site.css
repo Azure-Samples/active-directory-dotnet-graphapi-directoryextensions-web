@@ -14,6 +14,10 @@ body {
     padding: 0;
 }
 
+div {
+    overflow: hidden;
+}
+
 a {
     color: #333;
     outline: none;
@@ -396,42 +400,24 @@ aside {
 
 /* forms */
 fieldset {
-    border: none;
     margin: 0;
     padding: 0;
 }
 
     fieldset legend {
-        display: none;
+        font-size: 1.5em;
     }
-
-    fieldset ol {
-        padding: 0;
-        list-style: none;
-    }
-
-        fieldset ol li {
-            padding-bottom: 5px;
-        }
-
-label {
-    display: block;
-    font-size: 1.2em;
-    font-weight: 600;
-}
-
-label.checkbox {
-    display: inline;
-}
 
 input, textarea {
+    float: right;
+    clear: both;
     border: 1px solid #e2e2e2;
     background: #fff;
     color: #333;
-    font-size: 1.2em;
     margin: 5px 0 6px 0;
     padding: 5px;
-    width: 300px;
+    width: 200px;
+    vertical-align: middle;
 }
 
 textarea {
@@ -589,6 +575,13 @@ tr.pager td {
     padding: 0 0.25em 0 0;
 }
 
+tr.highlighted {
+	background-color: #d0ecf7;
+}
+
+tr.highlightable:hover td {
+	background-color: #d0ecf7;
+}
 
 /********************
 *   Mobile Styles   *
@@ -712,14 +705,9 @@ tr.pager td {
         section.feature img {
             color: #999;
             content: attr(alt);
-            font-size: 1.5em;
+            font-size: 1.3em;
             font-weight: 600;
         }
-
-    /* forms */
-    input {
-        width: 90%;
-    }
 
     /* login page */
     #loginForm {
