@@ -15,8 +15,8 @@ namespace OrgChart
 
             routes.MapRoute(
                 name: "Default",
-                url: "{controller}/{action}/{id}",
-                defaults: new { controller = "Home", action = "Index", id = "cliffdi@msonline-setup.com" }
+                url: "{controller}/{action}/{upn}",
+                defaults: new { controller = "Home", action = "Index", upn = "satyan@msonline-setup.com" }
             );
         }
     }

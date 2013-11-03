@@ -22,20 +22,20 @@
 <td>
 <table id="ManagerList">
 	<tr>
-		<th>displayName</th>
-        <th>mailNickname</th>
-        <th>jobTitle</th>
-        <th>department</th>
+		<th>displayName (mailNickname)<br />jobTitle</th>
     </tr>
-@foreach (AadUser user in ViewBag.ancestorsAndMainPerson)
+@for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count-1; i++)
 {
 	<tr class="highlightable">
-		<td>@user.displayName</td>
-		<td>@user.mailNickname</td>
-		<td>@user.jobTitle</td>
-		<td>@user.department</td>
+		<td><a href="/?upn=@ViewBag.ancestorsAndMainPerson[i].userPrincipalName">@ViewBag.ancestorsAndMainPerson[i].displayName</a> (@ViewBag.ancestorsAndMainPerson[i].mailNickname)<br />@ViewBag.ancestorsAndMainPerson[i].jobTitle</td>
 	</tr>
 }
+</table>
+
+<table id="MainPerson">
+	<tr class="highlightable">
+		<td><a href="/?upn=@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].userPrincipalName">@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].displayName</a> (@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname)<br />@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].jobTitle</td>
+	</tr>
 </table>
 
 <table id="OrgColumns">
@@ -47,10 +47,7 @@
             @foreach (AadUser user in directList)
             {
                 <tr class="highlightable">
-		            <td>@user.displayName</td>
-		            <td>@user.mailNickname</td>
-		            <td>@user.jobTitle</td>
-		            <td>@user.department</td>
+            		<td><a href="/?upn=@user.userPrincipalName">@user.displayName</a> (@user.mailNickname)<br />@user.jobTitle</td>
                 </tr>
             }
         </table>
@@ -61,23 +58,25 @@
 <td>
 	<form action="">
         <fieldset> <legend>Editable Attributes</legend>
-			<div><label for="displayName">displayName</label> <input type="text" id="displayName" name="displayName"></div>
-			<div><label for="mailNickname">mailNickname</label> <input type="text" id="mailNickname" name="mailNickname"></div>
-			<div><label for="jobTitle">jobTitle</label> <input type="text" id="jobTitle" name="jobTitle"></div>
-			<div><label for="department">department</label> <input type="text" id="department" name="department"></div>
-			<div><label for="manager">manager</label> <input type="text" id="manager" name="manager"></div>
+			<div><label for="displayName"><pre>displayName: </pre></label> <input type="text" id="displayName" name="displayName"></div>
+			<div><label for="jobTitle"><pre>jobTitle: </pre></label> <input type="text" id="jobTitle" name="jobTitle"></div>
+			<div><label for="department"><pre>department: </pre></label> <input type="text" id="department" name="department"></div>
+			<div><label for="manager"><pre>manager: </pre></label> <input type="text" id="manager" name="manager"></div>
 		</fieldset>
 		<fieldset> <legend>Readonly Attributes</legend>
-			<div><label for="DLkeywords">DL keywords</label> <input type="text" id="DLkeywords" name="DLkeywords"></div>
-			<div><label for="OwnedDLs">Owned DLs</label> <input type="text" id="OwnedDLs" name="OwnedDLs"></div>
-			<div><label for="Schools">Schools</label> <input type="text" id="Schools" name="Schools"></div>
-			<div><label for="Employers">Employers</label> <input type="text" id="Employers" name="Employers"></div>
+			<div><label for="UPN"><pre>UPN: </pre></label> <input type="text" id="UPN" name="UPN"></div>
+			<div><label for="DLkeywords"><pre>DL keywords: </pre></label> <input type="text" id="DLkeywords" name="DLkeywords"></div>
+			<div><label for="OwnedDLs"><pre>Owned DLs: </pre></label> <input type="text" id="OwnedDLs" name="OwnedDLs"></div>
+			<div><label for="Schools"><pre>Schools: </pre></label> <input type="text" id="Schools" name="Schools"></div>
+			<div><label for="Employers"><pre>Employers: </pre></label> <input type="text" id="Employers" name="Employers"></div>
         </fieldset>
         <fieldset> <legend>Extension Attributes</legend>
-			<div><label for="Trio">Trio</label> <input type="text" id="Trio" name="Trio"></div>
-			<div><label for="LinkedInURL">LinkedIn URL</label> <input type="text" id="LinkedInURL" name="LinkedInURL"></div>
+			<div><label for="Trio"><pre>Trio: </pre></label> <input type="text" id="Trio" name="Trio"></div>
+			<div><label for="LinkedInURL"><pre>LinkedIn URL: </pre></label> <input type="text" id="LinkedInURL" name="LinkedInURL"></div>
 		</fieldset>
-		<button type="submit" id="submit-go">Submit</button>
+		<button type="submit" id="submit-go">Create</button>
+		<button type="submit" id="submit-go">Update</button>
+		<button type="submit" id="submit-go">Delete</button>
 	</form>
 </td>
 

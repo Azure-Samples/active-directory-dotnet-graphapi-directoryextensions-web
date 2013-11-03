@@ -14,6 +14,13 @@ namespace OrgChart
 
     public class MvcApplication : System.Web.HttpApplication
     {
+        // to allow @ in MVC URLs
+        //protected void Application_AcquireRequestState(Object sender, EventArgs e)
+        //{
+        //    var realUrl = Request.ServerVariables["HTTP_URL"];
+        //    Context.RewritePath(realUrl);
+        //}
+
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();

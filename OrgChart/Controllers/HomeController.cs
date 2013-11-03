@@ -7,6 +7,7 @@ using Microsoft.WindowsAzure.ActiveDirectory.GraphHelper;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Neo4jClient;
 using OrgChart.Models;
+using System.Collections.Specialized;
 
 namespace OrgChart.Controllers
 {
@@ -21,7 +22,7 @@ namespace OrgChart.Controllers
 
     public class HomeController : Controller
     {
-        public ActionResult Index()
+        public ActionResult Index(string upn = "satyan@msonline-setup.com")
         {
             // use ADAL library to connect to AAD tenant
             string baseGraphUri = StringConstants.baseGraphUri + StringConstants.tenant;
@@ -41,10 +42,15 @@ namespace OrgChart.Controllers
                 graphCall.aadAuthentication.aadAuthenticationResult = authenticationResult;
                 OrgChart.Models.Org org = new OrgChart.Models.Org(graphCall);
 
-                // initialize view data based on passed UPN
-                string strUPN = RouteData.Values["id"].ToString();
-                ViewBag.ancestorsAndMainPerson = org.getAncestorsAndMainPerson(strUPN);
-                ViewBag.directsOfDirects = org.getDirectsOfDirects(strUPN);
+                // initialize view data based on default or query string UPN
+                NameValueCollection queryValues = Request.QueryString;
+                string strUpn = queryValues["upn"];
+                if (strUpn == null)
+                {
+                    strUpn = upn;
+                }
+                ViewBag.ancestorsAndMainPerson = org.getAncestorsAndMainPerson(strUpn);
+                ViewBag.directsOfDirects = org.getDirectsOfDirects(strUpn);
             }
             else
             {

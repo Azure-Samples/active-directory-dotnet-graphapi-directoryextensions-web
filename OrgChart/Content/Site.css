@@ -16,6 +16,7 @@ body {
 
 div {
     overflow: hidden;
+    vertical-align: middle;
 }
 
 a {
@@ -404,11 +405,8 @@ fieldset {
     padding: 0;
 }
 
-    fieldset legend {
-        font-size: 1.5em;
-    }
-
 input, textarea {
+    display:inline-block;
     float: right;
     clear: both;
     border: 1px solid #e2e2e2;
@@ -416,8 +414,16 @@ input, textarea {
     color: #333;
     margin: 5px 0 6px 0;
     padding: 5px;
-    width: 200px;
+    width: 185px;
     vertical-align: middle;
+}
+
+label{
+    display:inline-block;
+    overflow: hidden;
+    vertical-align: middle;
+    text-align: right;
+    width: 115px;
 }
 
 textarea {
@@ -527,6 +533,7 @@ th {
     text-align: left;
     background-color: #e8eef4;
     border: solid 1px #e8eef4;
+    text-align: center;
 }
 
     th a {
@@ -569,6 +576,7 @@ td {
     padding: 5px;
     border: solid 1px #e8eef4;
     vertical-align: top;
+    text-align: center;
 }
 
 tr.pager td {

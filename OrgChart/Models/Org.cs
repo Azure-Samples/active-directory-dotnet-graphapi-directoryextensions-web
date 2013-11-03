@@ -32,14 +32,17 @@ namespace OrgChart.Models
         {
             List<List<AadUser>> returnedListOfLists = new List<List<AadUser>>();
             AadUsers directs = graphCall.getUsersDirectReports(strUPN);
-            foreach (AadUser directReport in directs.user)
+            if (directs != null)
             {
-                returnedListOfLists.Insert(0, new List<AadUser>());
-                returnedListOfLists.ElementAt(0).Insert(0, directReport);
-                AadUsers directsOfDirects = graphCall.getUsersDirectReports(directReport.userPrincipalName);
-                foreach (AadUser directOfDirect in directsOfDirects.user)
+                foreach (AadUser directReport in directs.user)
                 {
-                    returnedListOfLists.ElementAt(0).Add(directOfDirect);
+                    returnedListOfLists.Insert(0, new List<AadUser>());
+                    returnedListOfLists.ElementAt(0).Insert(0, directReport);
+                    AadUsers directsOfDirects = graphCall.getUsersDirectReports(directReport.userPrincipalName);
+                    foreach (AadUser directOfDirect in directsOfDirects.user)
+                    {
+                        returnedListOfLists.ElementAt(0).Add(directOfDirect);
+                    }
                 }
             }
             return returnedListOfLists;
