@@ -22,7 +22,7 @@ namespace OrgChart.Controllers
 
     public class HomeController : Controller
     {
-        public ActionResult Index(string upn = "satyan@msonline-setup.com")
+        public ActionResult Index()
         {
             // use ADAL library to connect to AAD tenant
             string baseGraphUri = StringConstants.baseGraphUri + StringConstants.tenant;
@@ -42,12 +42,38 @@ namespace OrgChart.Controllers
                 graphCall.aadAuthentication.aadAuthenticationResult = authenticationResult;
                 OrgChart.Models.Org org = new OrgChart.Models.Org(graphCall);
 
+                // process any form submission requests
+                string strFormAction = Request["submitButton"];
+                string strUpdateUPN = Request["updateUPN"];
+                string strUpdateDisplayName = Request["updateDisplayName"];
+                string strUpdateManagerUPN = Request["updateManagerUPN"];
+                string strCreateUPN = Request["createUPN"];
+                string strCreateMailNickname = Request["createMailNickname"];
+                string strCreateDisplayName = Request["createDisplayName"];
+                string strCreateManagerUPN = Request["createManagerUPN"];
+                switch (strFormAction)
+                {
+                    case "Update":
+                        // set display name and manager for given UPN
+                        org.setUser(strUpdateUPN, strUpdateDisplayName, strUpdateManagerUPN);
+                        break;
+                    case "Create":
+                        // create user with given display name, UPN, and manager
+                        org.createUser(strCreateUPN, strCreateMailNickname, strCreateDisplayName, strCreateManagerUPN);
+                        break;
+                    case "Delete":
+                        // delete user with given UPN
+                        org.deleteUser(strUpdateUPN);
+                        break;
+                }
+
                 // initialize view data based on default or query string UPN
                 NameValueCollection queryValues = Request.QueryString;
                 string strUpn = queryValues["upn"];
                 if (strUpn == null)
                 {
-                    strUpn = upn;
+                    // get the UPN of the first user
+                    strUpn = org.getFirstUpn();
                 }
                 ViewBag.ancestorsAndMainPerson = org.getAncestorsAndMainPerson(strUpn);
                 ViewBag.directsOfDirects = org.getDirectsOfDirects(strUpn);

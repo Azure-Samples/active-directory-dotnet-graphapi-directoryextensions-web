@@ -27,13 +27,15 @@
 @for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count-1; i++)
 {
 	<tr class="highlightable">
-		<td><a href="/?upn=@ViewBag.ancestorsAndMainPerson[i].userPrincipalName">@ViewBag.ancestorsAndMainPerson[i].displayName</a> (@ViewBag.ancestorsAndMainPerson[i].mailNickname)<br />@ViewBag.ancestorsAndMainPerson[i].jobTitle</td>
+		<td style="display:none">@ViewBag.ancestorsAndMainPerson[i].mailNickname</td>
+        <td><a href="/?upn=@ViewBag.ancestorsAndMainPerson[i].userPrincipalName">@ViewBag.ancestorsAndMainPerson[i].displayName</a> (@ViewBag.ancestorsAndMainPerson[i].mailNickname)<br />@ViewBag.ancestorsAndMainPerson[i].jobTitle</td>
 	</tr>
 }
 </table>
 
 <table id="MainPerson">
 	<tr class="highlightable">
+		<td style="display:none">@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname</td>
 		<td><a href="/?upn=@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].userPrincipalName">@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].displayName</a> (@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname)<br />@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].jobTitle</td>
 	</tr>
 </table>
@@ -47,6 +49,7 @@
             @foreach (AadUser user in directList)
             {
                 <tr class="highlightable">
+            		<td style="display:none">@user.mailNickname</td>
             		<td><a href="/?upn=@user.userPrincipalName">@user.displayName</a> (@user.mailNickname)<br />@user.jobTitle</td>
                 </tr>
             }
@@ -56,28 +59,108 @@
 </table>
 </td>
 <td>
-	<form action="">
-        <fieldset> <legend>Editable Attributes</legend>
-			<div><label for="displayName"><pre>displayName: </pre></label> <input type="text" id="displayName" name="displayName"></div>
-			<div><label for="jobTitle"><pre>jobTitle: </pre></label> <input type="text" id="jobTitle" name="jobTitle"></div>
-			<div><label for="department"><pre>department: </pre></label> <input type="text" id="department" name="department"></div>
-			<div><label for="manager"><pre>manager: </pre></label> <input type="text" id="manager" name="manager"></div>
+	<form id="MainForm" action="/" method="post">
+        <fieldset> <legend>Update/Delete A User</legend>
+			<div><label for="updateUPN"><pre>UPN: </pre></label> <input type="text" id="updateUPN" name="updateUPN"></div>
+			<div><label for="updateDisplayName"><pre>displayName: </pre></label> <input type="text" id="updateDisplayName" name="updateDisplayName"></div>
+			<div><label for="updateManagerUPN"><pre>manager: </pre></label> <input type="text" id="updateManagerUPN" name="updateManagerUPN"></div>
+			<div><label for="updateTrio"><pre>Trio: </pre></label> <input type="text" id="updateTrio" name="updateTrio"></div>
+			<div><label for="updateLinkedInURL"><pre>LinkedIn URL: </pre></label> <input type="text" id="updateLinkedInURL" name="updateLinkedInURL"></div>
+		    <button type="submit" id="submitUpdate" name="submitButton" value="Update">Update</button>
+		    <button type="submit" id="submitDelete" name="submitButton" value="Delete">Delete</button>
 		</fieldset>
-		<fieldset> <legend>Readonly Attributes</legend>
-			<div><label for="UPN"><pre>UPN: </pre></label> <input type="text" id="UPN" name="UPN"></div>
-			<div><label for="DLkeywords"><pre>DL keywords: </pre></label> <input type="text" id="DLkeywords" name="DLkeywords"></div>
-			<div><label for="OwnedDLs"><pre>Owned DLs: </pre></label> <input type="text" id="OwnedDLs" name="OwnedDLs"></div>
-			<div><label for="Schools"><pre>Schools: </pre></label> <input type="text" id="Schools" name="Schools"></div>
-			<div><label for="Employers"><pre>Employers: </pre></label> <input type="text" id="Employers" name="Employers"></div>
+		<fieldset> <legend>Create A User</legend>
+			<div><label for="createUPN"><pre>UPN: </pre></label> <input type="text" id="createUPN" name="createUPN"></div>
+			<div><label for="createMailNickname"><pre>mailNickname: </pre></label> <input type="text" id="createMailNickname" name="createMailNickname"></div>
+			<div><label for="createDisplayName"><pre>displayName: </pre></label> <input type="text" id="createDisplayName" name="createDisplayName"></div>
+			<div><label for="createManagerUPN"><pre>manager: </pre></label> <input type="text" id="createManagerUPN" name="createManagerUPN"></div>
+    		<button type="submit" id="submitCreate" name="submitButton" value="Create">Create</button>
         </fieldset>
-        <fieldset> <legend>Extension Attributes</legend>
-			<div><label for="Trio"><pre>Trio: </pre></label> <input type="text" id="Trio" name="Trio"></div>
-			<div><label for="LinkedInURL"><pre>LinkedIn URL: </pre></label> <input type="text" id="LinkedInURL" name="LinkedInURL"></div>
-		</fieldset>
-		<button type="submit" id="submit-go">Create</button>
-		<button type="submit" id="submit-go">Update</button>
-		<button type="submit" id="submit-go">Delete</button>
 	</form>
 </td>
 
 </tr></table>
+
+<script type="text/javascript">
+    var userMap = {
+        @{
+            string strMessage = "";
+            AadUser previousUser = null; 
+            for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count; i++)
+            {
+                if (strMessage != "") { strMessage += ","; }
+                strMessage += ViewBag.ancestorsAndMainPerson[i].mailNickname;
+                strMessage += ": { displayName: \"";
+                strMessage += ViewBag.ancestorsAndMainPerson[i].displayName;
+                strMessage += "\", userPrincipalName: \"";
+                strMessage += ViewBag.ancestorsAndMainPerson[i].userPrincipalName;
+                strMessage += "\", managerPrincipalName: \"";
+                if (previousUser != null)
+                {
+                    strMessage += previousUser.userPrincipalName;                    
+                }
+                else
+                {
+                    strMessage += "NO MANAGER";
+                }
+                strMessage += "\"}";
+                previousUser = ViewBag.ancestorsAndMainPerson[i];
+            }
+            foreach (List<AadUser> directList in ViewBag.directsOfDirects)
+            {
+                AadUser thisManager = null;
+                foreach (AadUser user in directList)
+                {
+                    string strManagerPrincipalName;
+                    if (thisManager == null) 
+                    {
+                        thisManager = user;
+                        strManagerPrincipalName = previousUser.userPrincipalName;
+                    }
+                    else
+                    {
+                        strManagerPrincipalName = thisManager.userPrincipalName;
+                    }
+                    if (strMessage != "") { strMessage += ","; }
+                    strMessage += user.mailNickname;
+                    strMessage += ": { displayName: \"";
+                    strMessage += user.displayName;
+                    strMessage += "\", userPrincipalName: \"";
+                    strMessage += user.userPrincipalName;
+                    strMessage += "\", managerPrincipalName: \"";
+                    strMessage += strManagerPrincipalName;
+                    strMessage += "\"}";
+                }
+            }
+        }
+        @MvcHtmlString.Create(strMessage)
+    };
+    function hoverOn(eventObject) {
+        var $td = $("td:first", this);
+        var alias = $td[0].textContent;
+        var mainFormAction = "/?upn=";
+        mainFormAction += userMap[alias].userPrincipalName;
+        $("#MainForm").attr("action", mainFormAction);
+        $("#updateUPN").val(userMap[alias].userPrincipalName);
+        $("#updateDisplayName").val(userMap[alias].displayName);
+        $("#updateManagerUPN").val(userMap[alias].managerPrincipalName);
+        $("#createManagerUPN").val(userMap[alias].userPrincipalName);
+    }
+    function hoverOut(eventObject) {
+        //leave text in input fields on losing focus
+    }
+    function setHoverActions() {
+        $("tr.highlightable").hover(hoverOn, hoverOut);
+    }
+    function setInputChange() {
+        $("#updateUPN").on("input", function () {
+            var mainFormAction = "/?upn=";
+            mainFormAction += this.value;
+            $("#MainForm").attr("action", mainFormAction);
+        });
+    }
+    window.document.body.onload = function () {
+        setHoverActions();
+        setInputChange();
+    }
+</script>

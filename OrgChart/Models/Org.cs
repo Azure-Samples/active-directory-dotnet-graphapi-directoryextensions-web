@@ -13,7 +13,28 @@ namespace OrgChart.Models
         {
             graphCall = gq;
         }
-
+        public AadUser createUser(string strCreateUPN, string strCreateMailNickname, string strCreateDisplayName, string strCreateManagerUPN)
+        {
+            AadUser user = new AadUser();
+            user.userPrincipalName = strCreateUPN;
+            user.displayName = strCreateDisplayName;
+            user.mailNickname = strCreateMailNickname;
+            user.passwordProfile = new passwordProfile();
+            user.passwordProfile.forceChangePasswordNextLogin = true;
+            user.passwordProfile.password = "P0rsche911";
+            AadUser newUser = graphCall.createUser(user);
+            if (newUser != null)
+            {
+                newUser = setUser(strCreateUPN, strCreateDisplayName, strCreateManagerUPN);
+            }
+            return newUser;
+        }
+        public void deleteUser(string strUpdateUPN)
+        {
+            // set new (or same) display name
+            AadUser user = graphCall.getUser(strUpdateUPN);
+            bool bPass = graphCall.modifyUser("DELETE", user);
+        }
         // list with main person as the last item in list
         public List<AadUser> getAncestorsAndMainPerson(string strUPN)
         {
@@ -47,9 +68,30 @@ namespace OrgChart.Models
             }
             return returnedListOfLists;
         }
-
-        //public AadUser setUser();// (set attributes, extended attributes, parent)
-		//public AadUser newUser(); // (set attributes, extended attributes, parent)
+        public string getFirstUpn()
+        {
+            string userPrincipalName = null;
+            AadUsers users = graphCall.getUsers();
+            if (users != null)
+            {
+                userPrincipalName = users.user[0].userPrincipalName;
+            }
+            return userPrincipalName;
+        }
+        public AadUser setUser(string strUpdateUPN, string strUpdateDisplayName, string strUpdateManagerUPN)
+        {
+            // set new (or same) display name
+            AadUser user = graphCall.getUser(strUpdateUPN);
+            user.displayName = strUpdateDisplayName;
+            bool bPass = graphCall.modifyUser("PATCH", user);
+            // get new (or same) manager
+            string updateManagerURI = graphCall.baseGraphUri + "/users/" + strUpdateUPN + "/$links/manager?" + graphCall.apiVersion;
+            AadUser manager = graphCall.getUser(strUpdateManagerUPN);
+            urlLink managerlink = new urlLink();
+            managerlink.url = graphCall.baseGraphUri + "/directoryObjects/" + manager.objectId;
+            bPass = (bPass && graphCall.updateLink(updateManagerURI, "PUT", managerlink));
+            return user;
+        }
         
         // TODO: figure out how to implement observer pattern - publish subscribe mechanism, for differential query
 		
