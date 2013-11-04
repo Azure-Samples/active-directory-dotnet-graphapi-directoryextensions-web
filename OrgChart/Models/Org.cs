@@ -84,12 +84,15 @@ namespace OrgChart.Models
             AadUser user = graphCall.getUser(strUpdateUPN);
             user.displayName = strUpdateDisplayName;
             bool bPass = graphCall.modifyUser("PATCH", user);
-            // get new (or same) manager
-            string updateManagerURI = graphCall.baseGraphUri + "/users/" + strUpdateUPN + "/$links/manager?" + graphCall.apiVersion;
-            AadUser manager = graphCall.getUser(strUpdateManagerUPN);
-            urlLink managerlink = new urlLink();
-            managerlink.url = graphCall.baseGraphUri + "/directoryObjects/" + manager.objectId;
-            bPass = (bPass && graphCall.updateLink(updateManagerURI, "PUT", managerlink));
+            // set new (or same) manager
+            if (strUpdateManagerUPN != "NO MANAGER")
+            {
+                string updateManagerURI = graphCall.baseGraphUri + "/users/" + strUpdateUPN + "/$links/manager?" + graphCall.apiVersion;
+                AadUser manager = graphCall.getUser(strUpdateManagerUPN);
+                urlLink managerlink = new urlLink();
+                managerlink.url = graphCall.baseGraphUri + "/directoryObjects/" + manager.objectId;
+                bPass = (bPass && graphCall.updateLink(updateManagerURI, "PUT", managerlink));
+            }
             return user;
         }
         
