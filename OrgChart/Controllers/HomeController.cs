@@ -11,6 +11,7 @@ using System.Collections.Specialized;
 
 namespace OrgChart.Controllers
 {
+    // for the neo4j graph database calls
     public class User
     {
         public String displayName {get; set; }
@@ -47,19 +48,21 @@ namespace OrgChart.Controllers
                 string strUpdateUPN = Request["updateUPN"];
                 string strUpdateDisplayName = Request["updateDisplayName"];
                 string strUpdateManagerUPN = Request["updateManagerUPN"];
+                string strUpdateJobTitle = Request["updateJobTitle"];
                 string strCreateUPN = Request["createUPN"];
                 string strCreateMailNickname = Request["createMailNickname"];
                 string strCreateDisplayName = Request["createDisplayName"];
                 string strCreateManagerUPN = Request["createManagerUPN"];
+                string strCreateJobTitle = Request["createJobTitle"];
                 switch (strFormAction)
                 {
                     case "Update":
                         // set display name and manager for given UPN
-                        org.setUser(strUpdateUPN, strUpdateDisplayName, strUpdateManagerUPN);
+                        org.setUser(strUpdateUPN, strUpdateDisplayName, strUpdateManagerUPN, strUpdateJobTitle);
                         break;
                     case "Create":
                         // create user with given display name, UPN, and manager
-                        org.createUser(strCreateUPN, strCreateMailNickname, strCreateDisplayName, strCreateManagerUPN);
+                        org.createUser(strCreateUPN, strCreateMailNickname, strCreateDisplayName, strCreateManagerUPN, strCreateJobTitle);
                         break;
                     case "Delete":
                         // delete user with given UPN

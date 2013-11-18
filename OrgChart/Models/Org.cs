@@ -13,19 +13,20 @@ namespace OrgChart.Models
         {
             graphCall = gq;
         }
-        public AadUser createUser(string strCreateUPN, string strCreateMailNickname, string strCreateDisplayName, string strCreateManagerUPN)
+        public AadUser createUser(string strCreateUPN, string strCreateMailNickname, string strCreateDisplayName, string strCreateManagerUPN, string strCreateJobTitle)
         {
             AadUser user = new AadUser();
             user.userPrincipalName = strCreateUPN;
             user.displayName = strCreateDisplayName;
             user.mailNickname = strCreateMailNickname;
+            user.jobTitle = strCreateJobTitle;
             user.passwordProfile = new passwordProfile();
             user.passwordProfile.forceChangePasswordNextLogin = true;
             user.passwordProfile.password = "P0rsche911";
             AadUser newUser = graphCall.createUser(user);
             if (newUser != null)
             {
-                newUser = setUser(strCreateUPN, strCreateDisplayName, strCreateManagerUPN);
+                newUser = setUser(strCreateUPN, strCreateDisplayName, strCreateManagerUPN, strCreateJobTitle);
             }
             return newUser;
         }
@@ -78,13 +79,14 @@ namespace OrgChart.Models
             }
             return userPrincipalName;
         }
-        public AadUser setUser(string strUpdateUPN, string strUpdateDisplayName, string strUpdateManagerUPN)
+        public AadUser setUser(string strUpdateUPN, string strUpdateDisplayName, string strUpdateManagerUPN, string strUpdateJobTitle)
         {
-            // set new (or same) display name
+            // set new (or same) display name and job title
             AadUser user = graphCall.getUser(strUpdateUPN);
             user.displayName = strUpdateDisplayName;
+            user.jobTitle = strUpdateJobTitle;
             bool bPass = graphCall.modifyUser("PATCH", user);
-            // set new (or same) manager
+            // set new (or same) manager if a valid manager
             if (strUpdateManagerUPN != "NO MANAGER")
             {
                 string updateManagerURI = graphCall.baseGraphUri + "/users/" + strUpdateUPN + "/$links/manager?" + graphCall.apiVersion;

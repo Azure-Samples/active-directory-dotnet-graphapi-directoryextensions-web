@@ -8,7 +8,7 @@
     <section class="featured">
         <div class="content-wrapper">
             <hgroup class="title">
-                <h1>@ViewBag.Title.</h1>
+                <h1>@ViewBag.Title</h1>
                 <h2>@ViewBag.Message</h2>
             </hgroup>
             <p>
@@ -22,12 +22,14 @@
 <td>
 <table id="ManagerList">
 	<tr>
-		<th>displayName (mailNickname)<br />jobTitle</th>
+		<th></th>
+        <th>displayName (mailNickname)<br />jobTitle</th>
     </tr>
 @for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count-1; i++)
 {
 	<tr class="highlightable">
 		<td style="display:none">@ViewBag.ancestorsAndMainPerson[i].mailNickname</td>
+        <td><img style="MAX-WIDTH: 32px; VERTICAL-ALIGN: bottom; MARGIN: 1px 4px 0px 0px; MAX-HEIGHT: 24px" src=@(String.Format("{0}{1}{2}", "http://who/photos/", @ViewBag.ancestorsAndMainPerson[i].mailNickname, ".jpg")) alt="@ViewBag.ancestorsAndMainPerson[i].mailNickname"/></td>
         <td><a href="/?upn=@ViewBag.ancestorsAndMainPerson[i].userPrincipalName">@ViewBag.ancestorsAndMainPerson[i].displayName</a> (@ViewBag.ancestorsAndMainPerson[i].mailNickname)<br />@ViewBag.ancestorsAndMainPerson[i].jobTitle</td>
 	</tr>
 }
@@ -36,12 +38,13 @@
 <table id="MainPerson">
 	<tr class="highlightable">
 		<td style="display:none">@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname</td>
+        <td><img style="MAX-WIDTH: 110px; VERTICAL-ALIGN: bottom; MARGIN: 8px 10px 8px 10px; MAX-HEIGHT: 100px" src=@(String.Format("{0}{1}{2}", "http://who/photos/", @ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname, ".jpg")) alt="@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname"/></td>
 		<td><a href="/?upn=@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].userPrincipalName">@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].displayName</a> (@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname)<br />@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].jobTitle</td>
 	</tr>
 </table>
 
 <table id="OrgColumns">
-	<tr>
+<tr>
 @foreach (List<AadUser> directList in ViewBag.directsOfDirects)
 {
     <td>
@@ -50,12 +53,14 @@
             {
                 <tr class="highlightable">
             		<td style="display:none">@user.mailNickname</td>
+                    <td><img style="MAX-WIDTH: 50px; VERTICAL-ALIGN: bottom; MARGIN: 4px 4px 4px 4px; MAX-HEIGHT: 52px" src=@(String.Format("{0}{1}{2}", "http://who/photos/", @user.mailNickname, ".jpg")) alt="@user.mailNickname"/></td>
             		<td><a href="/?upn=@user.userPrincipalName">@user.displayName</a> (@user.mailNickname)<br />@user.jobTitle</td>
                 </tr>
             }
         </table>
     </td>
 }
+</tr>
 </table>
 </td>
 <td>
@@ -64,6 +69,7 @@
 			<div><label for="updateUPN"><pre>UPN: </pre></label> <input type="text" id="updateUPN" name="updateUPN"></div>
 			<div><label for="updateDisplayName"><pre>displayName: </pre></label> <input type="text" id="updateDisplayName" name="updateDisplayName"></div>
 			<div><label for="updateManagerUPN"><pre>manager: </pre></label> <input type="text" id="updateManagerUPN" name="updateManagerUPN"></div>
+			<div><label for="updateJobTitle"><pre>title: </pre></label> <input type="text" id="updateJobTitle" name="updateJobTitle"></div>
 			<div><label for="updateTrio"><pre>Trio: </pre></label> <input type="text" id="updateTrio" name="updateTrio"></div>
 			<div><label for="updateLinkedInURL"><pre>LinkedIn URL: </pre></label> <input type="text" id="updateLinkedInURL" name="updateLinkedInURL"></div>
 		    <button type="submit" id="submitUpdate" name="submitButton" value="Update">Update</button>
@@ -74,36 +80,38 @@
 			<div><label for="createMailNickname"><pre>mailNickname: </pre></label> <input type="text" id="createMailNickname" name="createMailNickname"></div>
 			<div><label for="createDisplayName"><pre>displayName: </pre></label> <input type="text" id="createDisplayName" name="createDisplayName"></div>
 			<div><label for="createManagerUPN"><pre>manager: </pre></label> <input type="text" id="createManagerUPN" name="createManagerUPN"></div>
+			<div><label for="createJobTitle"><pre>title: </pre></label> <input type="text" id="createJobTitle" name="createJobTitle"></div>
     		<button type="submit" id="submitCreate" name="submitButton" value="Create">Create</button>
         </fieldset>
 	</form>
 </td>
-
 </tr></table>
 
 <script type="text/javascript">
     var userMap = {
         @{
-            string strMessage = "";
+            string strMap = "";
             AadUser previousUser = null; 
             for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count; i++)
             {
-                if (strMessage != "") { strMessage += ","; }
-                strMessage += ViewBag.ancestorsAndMainPerson[i].mailNickname;
-                strMessage += ": { displayName: \"";
-                strMessage += ViewBag.ancestorsAndMainPerson[i].displayName;
-                strMessage += "\", userPrincipalName: \"";
-                strMessage += ViewBag.ancestorsAndMainPerson[i].userPrincipalName;
-                strMessage += "\", managerPrincipalName: \"";
+                if (strMap != "") { strMap += ","; }
+                strMap += ViewBag.ancestorsAndMainPerson[i].mailNickname;
+                strMap += ": { displayName: \"";
+                strMap += ViewBag.ancestorsAndMainPerson[i].displayName;
+                strMap += "\", userPrincipalName: \"";
+                strMap += ViewBag.ancestorsAndMainPerson[i].userPrincipalName;
+                strMap += "\", managerPrincipalName: \"";
                 if (previousUser != null)
                 {
-                    strMessage += previousUser.userPrincipalName;                    
+                    strMap += previousUser.userPrincipalName;                    
                 }
                 else
                 {
-                    strMessage += "NO MANAGER";
+                    strMap += "NO MANAGER";
                 }
-                strMessage += "\"}";
+                strMap += "\", jobTitle: \"";
+                strMap += ViewBag.ancestorsAndMainPerson[i].jobTitle;
+                strMap += "\"}";
                 previousUser = ViewBag.ancestorsAndMainPerson[i];
             }
             foreach (List<AadUser> directList in ViewBag.directsOfDirects)
@@ -121,19 +129,21 @@
                     {
                         strManagerPrincipalName = thisManager.userPrincipalName;
                     }
-                    if (strMessage != "") { strMessage += ","; }
-                    strMessage += user.mailNickname;
-                    strMessage += ": { displayName: \"";
-                    strMessage += user.displayName;
-                    strMessage += "\", userPrincipalName: \"";
-                    strMessage += user.userPrincipalName;
-                    strMessage += "\", managerPrincipalName: \"";
-                    strMessage += strManagerPrincipalName;
-                    strMessage += "\"}";
+                    if (strMap != "") { strMap += ","; }
+                    strMap += user.mailNickname;
+                    strMap += ": { displayName: \"";
+                    strMap += user.displayName;
+                    strMap += "\", userPrincipalName: \"";
+                    strMap += user.userPrincipalName;
+                    strMap += "\", managerPrincipalName: \"";
+                    strMap += strManagerPrincipalName;
+                    strMap += "\", jobTitle: \"";
+                    strMap += user.jobTitle;
+                    strMap += "\"}";
                 }
             }
         }
-        @MvcHtmlString.Create(strMessage)
+        @MvcHtmlString.Create(strMap)
     };
     function hoverOn(eventObject) {
         var $td = $("td:first", this);
@@ -144,6 +154,7 @@
         $("#updateUPN").val(userMap[alias].userPrincipalName);
         $("#updateDisplayName").val(userMap[alias].displayName);
         $("#updateManagerUPN").val(userMap[alias].managerPrincipalName);
+        $("#updateJobTitle").val(userMap[alias].jobTitle);
         $("#createManagerUPN").val(userMap[alias].userPrincipalName);
     }
     function hoverOut(eventObject) {
@@ -153,10 +164,12 @@
         $("tr.highlightable").hover(hoverOn, hoverOut);
     }
     function setInputChange() {
-        $("#updateUPN").on("input", function () {
-            var mainFormAction = "/?upn=";
-            mainFormAction += this.value;
-            $("#MainForm").attr("action", mainFormAction);
+        $("#updateUPN, #createUPN").each(function () {
+            $(this).on("input", function () {
+                var mainFormAction = "/?upn=";
+                mainFormAction += this.value;
+                $("#MainForm").attr("action", mainFormAction);
+            });
         });
     }
     window.document.body.onload = function () {
