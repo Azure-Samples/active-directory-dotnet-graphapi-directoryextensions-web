@@ -588,6 +588,10 @@ td {
 .tdManagerDescription {
     background-color: #d0ecf7;
 }
+.tdFormBackground {
+    background: #e2e2e2;
+}
+
 tr.pager td {
     padding: 0 0.25em 0 0;
 }

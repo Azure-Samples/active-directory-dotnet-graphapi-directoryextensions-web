@@ -6,6 +6,50 @@ using Microsoft.WindowsAzure.ActiveDirectory.GraphHelper;
 
 namespace OrgChart.Models
 {
+
+    public class AadExtendedUser : AadUser
+    {
+        public AadExtendedUser(AadUser user)
+        {
+            accountEnabled = user.accountEnabled;
+            assignedLicenses = user.assignedLicenses;
+            //assignedPlans = user.assignedPlans; // no set provided
+            otherMails = user.otherMails;
+            passwordPolicies = user.passwordPolicies;
+            passwordProfile = user.passwordProfile;
+            preferredLanguage = user.preferredLanguage;
+            //provisionedPlans = user.provisionedPlans; // no set provided
+            usageLocation = user.usageLocation;
+            userPrincipalName = user.userPrincipalName;
+            city = user.city;
+            country = user.country;
+            department = user.department;
+            dirSyncEnabled = user.dirSyncEnabled;
+            displayName = user.displayName;
+            facsimileTelephoneNumber = user.facsimileTelephoneNumber;
+            givenName = user.givenName;
+            jobTitle = user.jobTitle;
+            lastDirSyncTime = user.lastDirSyncTime;
+            mail = user.mail;
+            mailNickname = user.mailNickname;
+            mobile = user.mobile;
+            objectId = user.objectId;
+            objectType = user.objectType;
+            ODataType = user.ODataType;
+            physicalDeliveryOfficeName = user.physicalDeliveryOfficeName;
+            postalCode = user.postalCode;
+            provisioningErrors = user.provisioningErrors;
+            //proxyAddresses = user.proxyAddresses; // no set provided
+            state = user.state;
+            streetAddress = user.streetAddress;
+            surname = user.surname;
+            telephoneNumber = user.telephoneNumber;
+        }
+        public string trioLed { get; set; }
+        public string linkedInURL { get; set; }
+        public bool isManager { get; set; }
+    }
+
     public class Org
     {
         private GraphQuery graphCall;
@@ -50,20 +94,25 @@ namespace OrgChart.Models
         }
 
         // list with ICs as single person lists and leads as multiple person lists
-        public List<List<AadUser>> getDirectsOfDirects(string strUPN)
+        public List<List<AadExtendedUser>> getDirectsOfDirects(string strUPN)
         {
-            List<List<AadUser>> returnedListOfLists = new List<List<AadUser>>();
+            List<List<AadExtendedUser>> returnedListOfLists = new List<List<AadExtendedUser>>();
             AadUsers directs = graphCall.getUsersDirectReports(strUPN);
             if (directs != null)
             {
                 foreach (AadUser directReport in directs.user)
                 {
-                    returnedListOfLists.Insert(0, new List<AadUser>());
-                    returnedListOfLists.ElementAt(0).Insert(0, directReport);
+                    // insert the direct report
+                    AadExtendedUser extendedDirectReport = new AadExtendedUser(directReport);
+                    returnedListOfLists.Insert(0, new List<AadExtendedUser>());
+                    returnedListOfLists.ElementAt(0).Insert(0, extendedDirectReport);
+                    // get direct reports of the direct report
                     AadUsers directsOfDirects = graphCall.getUsersDirectReports(directReport.userPrincipalName);
+                    extendedDirectReport.isManager = (directsOfDirects.user.Count > 0 ? true : false);
                     foreach (AadUser directOfDirect in directsOfDirects.user)
                     {
-                        returnedListOfLists.ElementAt(0).Add(directOfDirect);
+                        AadExtendedUser extendedDirectOfDirect = new AadExtendedUser(directOfDirect);
+                        returnedListOfLists.ElementAt(0).Add(extendedDirectOfDirect);
                     }
                 }
             }
