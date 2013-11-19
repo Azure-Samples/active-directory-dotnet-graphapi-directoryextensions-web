@@ -5,7 +5,7 @@
 }
 
 body {
-    background-color: #fff;
+    background-color: #333;
     border-top: solid 10px #000;
     color: #333;
     font-size: .85em;
@@ -403,6 +403,7 @@ aside {
 fieldset {
     margin: 0;
     padding: 0;
+    background: #e2e2e2;
 }
 
 input, textarea {
@@ -524,7 +525,7 @@ table {
     border-collapse: collapse;
     margin-left:auto; 
     margin-right:auto;
-    background: #fff;
+    background: #00066c;
     border-spacing: 0;
 }
 
@@ -578,7 +579,15 @@ td {
     vertical-align: top;
     text-align: center;
 }
-
+.tdPersonImage {
+    background-color: #001dc8;
+}
+.tdPersonDescription {
+    background-color: White;
+}
+.tdManagerDescription {
+    background-color: #d0ecf7;
+}
 tr.pager td {
     padding: 0 0.25em 0 0;
 }

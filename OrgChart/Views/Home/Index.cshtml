@@ -29,8 +29,16 @@
 {
 	<tr class="highlightable">
 		<td style="display:none">@ViewBag.ancestorsAndMainPerson[i].mailNickname</td>
-        <td><img style="MAX-WIDTH: 32px; VERTICAL-ALIGN: bottom; MARGIN: 1px 4px 0px 0px; MAX-HEIGHT: 24px" src=@(String.Format("{0}{1}{2}", "http://who/photos/", @ViewBag.ancestorsAndMainPerson[i].mailNickname, ".jpg")) alt="@ViewBag.ancestorsAndMainPerson[i].mailNickname"/></td>
-        <td><a href="/?upn=@ViewBag.ancestorsAndMainPerson[i].userPrincipalName">@ViewBag.ancestorsAndMainPerson[i].displayName</a> (@ViewBag.ancestorsAndMainPerson[i].mailNickname)<br />@ViewBag.ancestorsAndMainPerson[i].jobTitle</td>
+        <td class="tdPersonDescription">
+            <img style="MAX-WIDTH: 32px; VERTICAL-ALIGN: bottom; MARGIN: 1px 4px 0px 0px; MAX-HEIGHT: 24px" 
+                 src=@(String.Format("{0}{1}{2}", "http://who/photos/", @ViewBag.ancestorsAndMainPerson[i].mailNickname, ".jpg")) 
+                 alt="@ViewBag.ancestorsAndMainPerson[i].mailNickname"/>
+        </td>
+        <td class="tdPersonDescription">
+            <a href="/?upn=@ViewBag.ancestorsAndMainPerson[i].userPrincipalName">@ViewBag.ancestorsAndMainPerson[i].displayName</a> 
+            (@ViewBag.ancestorsAndMainPerson[i].mailNickname)<br />
+            @ViewBag.ancestorsAndMainPerson[i].jobTitle
+        </td>
 	</tr>
 }
 </table>
@@ -38,27 +46,51 @@
 <table id="MainPerson">
 	<tr class="highlightable">
 		<td style="display:none">@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname</td>
-        <td><img style="MAX-WIDTH: 110px; VERTICAL-ALIGN: bottom; MARGIN: 8px 10px 8px 10px; MAX-HEIGHT: 100px" src=@(String.Format("{0}{1}{2}", "http://who/photos/", @ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname, ".jpg")) alt="@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname"/></td>
-		<td><a href="/?upn=@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].userPrincipalName">@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].displayName</a> (@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname)<br />@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].jobTitle</td>
+		<td class="tdPersonImage">
+            <img style="MAX-WIDTH: 110px; VERTICAL-ALIGN: bottom; MARGIN: 8px 10px 8px 10px; MAX-HEIGHT: 100px" 
+			     src=@(String.Format("{0}{1}{2}", "http://who/photos/", @ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname, ".jpg")) 
+			     alt="@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname"/>
+		</td>
+		<td class="tdPersonDescription">
+            <a href="/?upn=@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].userPrincipalName">
+                @ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].displayName
+            </a> 
+            (@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname)<br />
+            @ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].jobTitle
+		</td>
 	</tr>
 </table>
 
 <table id="OrgColumns">
 <tr>
-@foreach (List<AadUser> directList in ViewBag.directsOfDirects)
-{
-    <td>
-        <table>
-            @foreach (AadUser user in directList)
-            {
-                <tr class="highlightable">
-            		<td style="display:none">@user.mailNickname</td>
-                    <td><img style="MAX-WIDTH: 50px; VERTICAL-ALIGN: bottom; MARGIN: 4px 4px 4px 4px; MAX-HEIGHT: 52px" src=@(String.Format("{0}{1}{2}", "http://who/photos/", @user.mailNickname, ".jpg")) alt="@user.mailNickname"/></td>
-            		<td><a href="/?upn=@user.userPrincipalName">@user.displayName</a> (@user.mailNickname)<br />@user.jobTitle</td>
-                </tr>
-            }
-        </table>
-    </td>
+@{
+    int j = 0;
+    foreach(List<AadUser> directList in ViewBag.directsOfDirects)
+    {
+        if ((j % 9) == 0)
+        {
+            @:</tr><tr>
+        }
+        <td>
+            <table>
+                @foreach (AadUser user in directList)
+                {
+                    <tr class="highlightable">
+            		    <td style="display:none">@user.mailNickname</td>
+                        <td class="tdPersonImage">
+                            <img style="MAX-WIDTH: 50px; VERTICAL-ALIGN: bottom; MARGIN: 4px 4px 4px 4px; MAX-HEIGHT: 52px" 
+                                 src=@(String.Format("{0}{1}{2}", "http://who/photos/", @user.mailNickname, ".jpg")) 
+                                 alt="@user.mailNickname"/>
+                        </td>
+            		    <td class = "tdManagerDescription">
+                            <a href="/?upn=@user.userPrincipalName">@user.displayName</a> (@user.mailNickname)<br />@user.jobTitle
+            		    </td>
+                    </tr>
+                }
+            </table>
+        </td>
+        j++;
+    }
 }
 </tr>
 </table>
