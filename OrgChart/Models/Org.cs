@@ -3,13 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using Microsoft.WindowsAzure.ActiveDirectory.GraphHelper;
+using Neo4jClient;
 
 namespace OrgChart.Models
 {
+    // for the neo4j graph database calls
+    public class User
+    {
+        public String mailNickname { get; set; }
+        public String trioLed { get; set; }
+        public String linkedInUrl { get; set; }
+    }
 
     public class AadExtendedUser : AadUser
     {
-        public AadExtendedUser(AadUser user)
+        public AadExtendedUser(AadUser user, String trio, String liurl)
         {
             accountEnabled = user.accountEnabled;
             assignedLicenses = user.assignedLicenses;
@@ -44,21 +52,28 @@ namespace OrgChart.Models
             streetAddress = user.streetAddress;
             surname = user.surname;
             telephoneNumber = user.telephoneNumber;
+            trioLed = trio;
+            linkedInUrl = liurl;
+            isManager = false;
         }
         public string trioLed { get; set; }
-        public string linkedInURL { get; set; }
+        public string linkedInUrl { get; set; }
         public bool isManager { get; set; }
     }
 
     public class Org
     {
         private GraphQuery graphCall;
-        public Org(GraphQuery gq)
+        private GraphClient neo4jClient;
+        public Org(GraphQuery gq, GraphClient gc)
         {
             graphCall = gq;
+            neo4jClient = gc;
         }
         public AadUser createUser(string strCreateUPN, string strCreateMailNickname, string strCreateDisplayName, string strCreateManagerUPN, string strCreateJobTitle)
         {
+            string strTrioLed = "";
+            string strLinkedInUrl = "";
             AadUser user = new AadUser();
             user.userPrincipalName = strCreateUPN;
             user.displayName = strCreateDisplayName;
@@ -70,7 +85,7 @@ namespace OrgChart.Models
             AadUser newUser = graphCall.createUser(user);
             if (newUser != null)
             {
-                newUser = setUser(strCreateUPN, strCreateDisplayName, strCreateManagerUPN, strCreateJobTitle);
+                newUser = setUser(strCreateUPN, strCreateDisplayName, strCreateManagerUPN, strCreateJobTitle, strTrioLed, strLinkedInUrl);
             }
             return newUser;
         }
@@ -81,18 +96,32 @@ namespace OrgChart.Models
             bool bPass = graphCall.modifyUser("DELETE", user);
         }
         // list with main person as the last item in list
-        public List<AadUser> getAncestorsAndMainPerson(string strUPN)
+        public List<AadExtendedUser> getAncestorsAndMainPerson(string strUPN)
         {
-            List<AadUser> returnedList = new List<AadUser>();
-            AadUser user = graphCall.getUser(strUPN);
-            while (user != null)
+            List<AadExtendedUser> returnedList = new List<AadExtendedUser>();
+            AadUser graphUser = graphCall.getUser(strUPN);
+            while (graphUser != null)
             {
-                returnedList.Insert(0, user);
-                user = graphCall.getUsersManager(user.userPrincipalName);
+                // retrieve corresponding neo4j object
+                var results = neo4jClient.Cypher
+                    .Match("(user:User)")
+                    .Where((User user) => user.mailNickname == graphUser.mailNickname)
+                    .Return(user => user.As<User>())
+                    .Results;
+                // retrieve trio and url from neo4j object
+                String trioLed = "", linkedInUrl = "";
+                foreach (User user in results)
+                {
+                    trioLed = user.trioLed;
+                    linkedInUrl = user.linkedInUrl;
+                }
+                // insert the direct report at front of a ancestor list
+                AadExtendedUser extendedUser = new AadExtendedUser(graphUser, trioLed, linkedInUrl);
+                returnedList.Insert(0, extendedUser);
+                graphUser = graphCall.getUsersManager(graphUser.userPrincipalName);
             }
             return returnedList;
         }
-
         // list with ICs as single person lists and leads as multiple person lists
         public List<List<AadExtendedUser>> getDirectsOfDirects(string strUPN)
         {
@@ -102,23 +131,50 @@ namespace OrgChart.Models
             {
                 foreach (AadUser directReport in directs.user)
                 {
-                    // insert the direct report
-                    AadExtendedUser extendedDirectReport = new AadExtendedUser(directReport);
+                    // retrieve corresponding neo4j object
+                    var results = neo4jClient.Cypher
+                        .Match("(user:User)")
+                        .Where((User user) => user.mailNickname == directReport.mailNickname)
+                        .Return(user => user.As<User>())
+                        .Results;
+                    // retrieve trio and url from neo4j object
+                    String trioLed = "", linkedInUrl = "";
+                    foreach (User user in results)
+                    {
+                        trioLed = user.trioLed;
+                        linkedInUrl = user.linkedInUrl;
+                    }
+                    // add a new list at start of list of lists
                     returnedListOfLists.Insert(0, new List<AadExtendedUser>());
+                    // insert the direct report at front of newly inserted list
+                    AadExtendedUser extendedDirectReport = new AadExtendedUser(directReport, trioLed, linkedInUrl);
                     returnedListOfLists.ElementAt(0).Insert(0, extendedDirectReport);
                     // get direct reports of the direct report
                     AadUsers directsOfDirects = graphCall.getUsersDirectReports(directReport.userPrincipalName);
                     extendedDirectReport.isManager = (directsOfDirects.user.Count > 0 ? true : false);
                     foreach (AadUser directOfDirect in directsOfDirects.user)
                     {
-                        AadExtendedUser extendedDirectOfDirect = new AadExtendedUser(directOfDirect);
+                        // retrieve corresponding neo4j object
+                        results = neo4jClient.Cypher
+                            .Match("(user:User)")
+                            .Where((User user) => user.mailNickname == directOfDirect.mailNickname)
+                            .Return(user => user.As<User>())
+                            .Results;
+                        // retrieve trio and url from neo4j object
+                        foreach (User user in results)
+                        {
+                            trioLed = user.trioLed;
+                            linkedInUrl = user.linkedInUrl;
+                        }
+                        // add each direct of direct to the list
+                        AadExtendedUser extendedDirectOfDirect = new AadExtendedUser(directOfDirect, trioLed, linkedInUrl);
                         returnedListOfLists.ElementAt(0).Add(extendedDirectOfDirect);
                     }
                 }
             }
             return returnedListOfLists;
         }
-        public string getFirstUpn()
+        public string getFirstUpn(bool bUpdateCache)
         {
             string userPrincipalName = null;
             AadUsers users = graphCall.getUsers();
@@ -126,15 +182,71 @@ namespace OrgChart.Models
             {
                 userPrincipalName = users.user[0].userPrincipalName;
             }
+            if (bUpdateCache) // called at app start and just got all the users...
+            {
+                // iterate over all users to load into neo4j
+                foreach (AadUser user in users.user)
+                {
+                    // declare new user object
+                    var newUser = new User { mailNickname = user.mailNickname, trioLed = "", linkedInUrl = ""};
+                    // MERGE doesn't support map properties, need to explicitly specify properties
+                    string strMerge = @"(user:User { mailNickname: {newUser}.mailNickname, 
+                                                     trioLed: {newUser}.trioLed, 
+                                                     linkedInUrl: {newUser}.linkedInUrl
+                                                   })";
+                    // neo4j call to store user
+                    neo4jClient.Cypher
+                            .Merge(strMerge)
+                            .WithParam("newUser", newUser)
+                            .ExecuteWithoutResults();
+                }
+                // iterate again to create :MANAGES links
+                foreach (AadUser user in users.user)
+                {
+                    //set WHERE string for this user
+                    String strWhere1 = "u.mailNickname = \"";
+                    strWhere1 += user.mailNickname;
+                    strWhere1 += "\"";
+                    String strMatch2;
+                    String strWhere2;
+                    String strLinkCreation;
+
+                    // graph call to get manager
+                    AadUser manager = graphCall.getUsersManager(user.userPrincipalName);
+
+                    // set strings for node that will point to this user
+                    if (manager != null)
+                    {
+                        strMatch2 = "(m:User)";
+                        strWhere2 = "m.mailNickname = \"";
+                        strWhere2 += manager.mailNickname;
+                        strWhere2 += "\"";
+                        strLinkCreation = "m-[:MANAGES]->u";
+                    }
+                    else
+                    {
+                        strMatch2 = "(m)";
+                        strWhere2 = "NOT (m:User)";
+                        strLinkCreation = "m-[:CONTAINS]->u";
+                    }
+                    // neo4j call to set :MANAGES or :CONTAINS link
+                    neo4jClient.Cypher
+                        .Match("(u:User)", strMatch2)
+                        .Where(strWhere1)
+                        .AndWhere(strWhere2)
+                        .CreateUnique(strLinkCreation)
+                        .ExecuteWithoutResults();
+                }
+            }
             return userPrincipalName;
         }
-        public AadUser setUser(string strUpdateUPN, string strUpdateDisplayName, string strUpdateManagerUPN, string strUpdateJobTitle)
+        public AadUser setUser(string strUpdateUPN, string strUpdateDisplayName, string strUpdateManagerUPN, string strUpdateJobTitle, string strUpdateTrioLed, string strUpdateLinkedInUrl)
         {
             // set new (or same) display name and job title
-            AadUser user = graphCall.getUser(strUpdateUPN);
-            user.displayName = strUpdateDisplayName;
-            user.jobTitle = strUpdateJobTitle;
-            bool bPass = graphCall.modifyUser("PATCH", user);
+            AadUser graphUser = graphCall.getUser(strUpdateUPN);
+            graphUser.displayName = strUpdateDisplayName;
+            graphUser.jobTitle = strUpdateJobTitle;
+            bool bPass = graphCall.modifyUser("PATCH", graphUser);
             // set new (or same) manager if a valid manager
             if (strUpdateManagerUPN != "NO MANAGER")
             {
@@ -144,7 +256,20 @@ namespace OrgChart.Models
                 managerlink.url = graphCall.baseGraphUri + "/directoryObjects/" + manager.objectId;
                 bPass = (bPass && graphCall.updateLink(updateManagerURI, "PUT", managerlink));
             }
-            return user;
+            // set extension data in neo4j
+            var neo4jUser = new User { mailNickname = graphUser.mailNickname, trioLed = strUpdateTrioLed, linkedInUrl = strUpdateLinkedInUrl };
+            // MERGE doesn't support map properties, need to explicitly specify properties
+            string strMerge = @"(user:User { mailNickname: {neo4jUser}.mailNickname, 
+                                                     trioLed: {neo4jUser}.trioLed, 
+                                                     linkedInUrl: {neo4jUser}.linkedInUrl
+                                                   })";
+            // neo4j call to store user
+            neo4jClient.Cypher
+                    .Merge(strMerge)
+                    .WithParam("neo4jUser", neo4jUser)
+                    .ExecuteWithoutResults();
+
+            return graphUser;
         }
         
         // TODO: figure out how to implement observer pattern - publish subscribe mechanism, for differential query
