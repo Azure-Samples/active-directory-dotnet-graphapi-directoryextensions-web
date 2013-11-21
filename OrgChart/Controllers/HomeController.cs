@@ -36,7 +36,6 @@ namespace OrgChart.Controllers
                 neo4jClient.Connect();
                 // configure appropriate model                
                 OrgChart.Models.Org org = new OrgChart.Models.Org(graphCall, neo4jClient);
-
                 // process any form submission requests
                 string strFormAction = Request["submitButton"];
                 string strUpdateUPN = Request["updateUPN"];
@@ -71,8 +70,8 @@ namespace OrgChart.Controllers
                 string strUpn = queryValues["upn"];
                 if (strUpn == null)
                 {
-                    // no UPN provided, get the UPN of the first user instead
-                    strUpn = org.getFirstUpn(false);
+                    // no UPN provided, get the UPN of the first user instead (optionally building neo4j from graph)
+                    strUpn = org.getFirstUpn(true);
                 }
                 ViewBag.ancestorsAndMainPerson = org.getAncestorsAndMainPerson(strUpn);
                 ViewBag.directsOfDirects = org.getDirectsOfDirects(strUpn);

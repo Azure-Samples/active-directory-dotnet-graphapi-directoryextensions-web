@@ -10,7 +10,7 @@ namespace OrgChart.Models
     // for the neo4j graph database calls
     public class User
     {
-        public String mailNickname { get; set; }
+        public String userPrincipalName { get; set; }
         public String trioLed { get; set; }
         public String linkedInUrl { get; set; }
     }
@@ -105,7 +105,7 @@ namespace OrgChart.Models
                 // retrieve corresponding neo4j object
                 var results = neo4jClient.Cypher
                     .Match("(user:User)")
-                    .Where((User user) => user.mailNickname == graphUser.mailNickname)
+                    .Where((User user) => user.userPrincipalName == graphUser.userPrincipalName)
                     .Return(user => user.As<User>())
                     .Results;
                 // retrieve trio and url from neo4j object
@@ -134,7 +134,7 @@ namespace OrgChart.Models
                     // retrieve corresponding neo4j object
                     var results = neo4jClient.Cypher
                         .Match("(user:User)")
-                        .Where((User user) => user.mailNickname == directReport.mailNickname)
+                        .Where((User user) => user.userPrincipalName == directReport.userPrincipalName)
                         .Return(user => user.As<User>())
                         .Results;
                     // retrieve trio and url from neo4j object
@@ -157,7 +157,7 @@ namespace OrgChart.Models
                         // retrieve corresponding neo4j object
                         results = neo4jClient.Cypher
                             .Match("(user:User)")
-                            .Where((User user) => user.mailNickname == directOfDirect.mailNickname)
+                            .Where((User user) => user.userPrincipalName == directOfDirect.userPrincipalName)
                             .Return(user => user.As<User>())
                             .Results;
                         // retrieve trio and url from neo4j object
@@ -188,9 +188,9 @@ namespace OrgChart.Models
                 foreach (AadUser user in users.user)
                 {
                     // declare new user object
-                    var newUser = new User { mailNickname = user.mailNickname, trioLed = "", linkedInUrl = ""};
+                    var newUser = new User { userPrincipalName = user.userPrincipalName, trioLed = "", linkedInUrl = "" };
                     // MERGE doesn't support map properties, need to explicitly specify properties
-                    string strMerge = @"(user:User { mailNickname: {newUser}.mailNickname, 
+                    string strMerge = @"(user:User { userPrincipalName: {newUser}.userPrincipalName, 
                                                      trioLed: {newUser}.trioLed, 
                                                      linkedInUrl: {newUser}.linkedInUrl
                                                    })";
@@ -204,8 +204,8 @@ namespace OrgChart.Models
                 foreach (AadUser user in users.user)
                 {
                     //set WHERE string for this user
-                    String strWhere1 = "u.mailNickname = \"";
-                    strWhere1 += user.mailNickname;
+                    String strWhere1 = "u.userPrincipalName = \"";
+                    strWhere1 += user.userPrincipalName;
                     strWhere1 += "\"";
                     String strMatch2;
                     String strWhere2;
@@ -218,8 +218,8 @@ namespace OrgChart.Models
                     if (manager != null)
                     {
                         strMatch2 = "(m:User)";
-                        strWhere2 = "m.mailNickname = \"";
-                        strWhere2 += manager.mailNickname;
+                        strWhere2 = "m.userPrincipalName = \"";
+                        strWhere2 += manager.userPrincipalName;
                         strWhere2 += "\"";
                         strLinkCreation = "m-[:MANAGES]->u";
                     }
@@ -257,17 +257,12 @@ namespace OrgChart.Models
                 bPass = (bPass && graphCall.updateLink(updateManagerURI, "PUT", managerlink));
             }
             // set extension data in neo4j
-            var neo4jUser = new User { mailNickname = graphUser.mailNickname, trioLed = strUpdateTrioLed, linkedInUrl = strUpdateLinkedInUrl };
-            // MERGE doesn't support map properties, need to explicitly specify properties
-            string strMerge = @"(user:User { mailNickname: {neo4jUser}.mailNickname, 
-                                                     trioLed: {neo4jUser}.trioLed, 
-                                                     linkedInUrl: {neo4jUser}.linkedInUrl
-                                                   })";
-            // neo4j call to store user
             neo4jClient.Cypher
-                    .Merge(strMerge)
-                    .WithParam("neo4jUser", neo4jUser)
-                    .ExecuteWithoutResults();
+                .Match("(user:User)")
+                .Where((User user) => user.userPrincipalName == graphUser.userPrincipalName)
+                .Set("user = {neo4jUser}")
+                .WithParam("neo4jUser", new User { userPrincipalName = graphUser.userPrincipalName, trioLed = strUpdateTrioLed, linkedInUrl = strUpdateLinkedInUrl })
+                .ExecuteWithoutResults();
 
             return graphUser;
         }
