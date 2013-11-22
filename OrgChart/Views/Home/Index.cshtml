@@ -32,7 +32,7 @@
 		<td style="display:none">@ViewBag.ancestorsAndMainPerson[i].mailNickname</td>
         <td class="tdPersonDescription">
             <img style="MAX-WIDTH: 32px; VERTICAL-ALIGN: bottom; MARGIN: 1px 4px 0px 0px; MAX-HEIGHT: 24px" 
-                 src=@(String.Format("{0}{1}{2}", "http://who/photos/", @ViewBag.ancestorsAndMainPerson[i].mailNickname, ".jpg")) 
+                 src=@(String.Format("_{0}{1}{2}", "http://who/photos/", @ViewBag.ancestorsAndMainPerson[i].mailNickname, ".jpg")) 
                  alt="@ViewBag.ancestorsAndMainPerson[i].mailNickname"/>
         </td>
         <td class="tdPersonDescription">
@@ -49,7 +49,7 @@
 		<td style="display:none">@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname</td>
 		<td class="tdPersonImage">
             <img style="MAX-WIDTH: 110px; VERTICAL-ALIGN: bottom; MARGIN: 8px 10px 8px 10px; MAX-HEIGHT: 100px" 
-			     src=@(String.Format("{0}{1}{2}", "http://who/photos/", @ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname, ".jpg")) 
+			     src=@(String.Format("_{0}{1}{2}", "http://who/photos/", @ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname, ".jpg")) 
 			     alt="@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname"/>
 		</td>
 		<td class="tdPersonDescription">
@@ -80,7 +80,7 @@
             		    <td style="display:none">@user.mailNickname</td>
                         <td class="tdPersonImage">
                             <img style="MAX-WIDTH: 50px; VERTICAL-ALIGN: bottom; MARGIN: 4px 4px 4px 4px; MAX-HEIGHT: 52px" 
-                                 src=@(String.Format("{0}{1}{2}", "http://who/photos/", @user.mailNickname, ".jpg")) 
+                                 src=@(String.Format("_{0}{1}{2}", "http://who/photos/", @user.mailNickname, ".jpg")) 
                                  alt="@user.mailNickname"/>
                         </td>
             		    <td class = @(user.isManager ? "tdManagerDescription" : "tdPersonDescription")>

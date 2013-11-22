@@ -96,58 +96,78 @@ namespace OrgChart.Models
             bool bPass = graphCall.modifyUser("DELETE", user);
         }
         // list with main person as the last item in list
-        public List<AadExtendedUser> getAncestorsAndMainPerson(string strUPN)
+        public List<AadExtendedUser> getAncestorsAndMainPerson(string strMainUserUPN)
         {
             List<AadExtendedUser> returnedList = new List<AadExtendedUser>();
-            AadUser graphUser = graphCall.getUser(strUPN);
-            while (graphUser != null)
+            
+            // retrieve neo4j nodes from main person to root
+            //START target=node(0)
+            //MATCH (source:User)
+            //WHERE source.userPrincipalName="bshah@msonline-setup.com"
+            //MATCH p = shortestPath(source-[*]-target)
+            //return NODES(p);
+            var neo4jResults = neo4jClient.Cypher
+                .Start(new { target = neo4jClient.RootNode } )
+                .Match("(source:User)")
+                .Where((User source) => source.userPrincipalName == strMainUserUPN)
+                .Match("p = shortestPath(source-[*]-target)")
+                .Return<IEnumerable<User>>("nodes(p)")
+                .Results;
+
+            // retrieve main person from graph
+            AadUser graphUser = graphCall.getUser(strMainUserUPN);
+
+            // enumerate neo4j and graph users from the main person to the root
+            foreach (IEnumerable<User> list in neo4jResults)
             {
-                // retrieve corresponding neo4j object
-                var results = neo4jClient.Cypher
-                    .Match("(user:User)")
-                    .Where((User user) => user.userPrincipalName == graphUser.userPrincipalName)
-                    .Return(user => user.As<User>())
-                    .Results;
-                // retrieve trio and url from neo4j object
-                String trioLed = "", linkedInUrl = "";
-                foreach (User user in results)
+                foreach (User neo4jUser in list)
                 {
-                    trioLed = user.trioLed;
-                    linkedInUrl = user.linkedInUrl;
+                    // bomb out if we are out of graph users
+                    if (graphUser == null) break;
+                    // create new extended user with info from graph and neo4j
+                    AadExtendedUser extendedUser = new AadExtendedUser(graphUser, neo4jUser.trioLed, neo4jUser.linkedInUrl);
+                    // insert the direct report at front of a ancestor list
+                    returnedList.Insert(0, extendedUser);
+                    // get next graph user
+                    graphUser = graphCall.getUsersManager(graphUser.userPrincipalName);
                 }
-                // insert the direct report at front of a ancestor list
-                AadExtendedUser extendedUser = new AadExtendedUser(graphUser, trioLed, linkedInUrl);
-                returnedList.Insert(0, extendedUser);
-                graphUser = graphCall.getUsersManager(graphUser.userPrincipalName);
             }
             return returnedList;
         }
         // list with ICs as single person lists and leads as multiple person lists
-        public List<List<AadExtendedUser>> getDirectsOfDirects(string strUPN)
+        public List<List<AadExtendedUser>> getDirectsOfDirects(string strMainUserUPN)
         {
             List<List<AadExtendedUser>> returnedListOfLists = new List<List<AadExtendedUser>>();
-            AadUsers directs = graphCall.getUsersDirectReports(strUPN);
+
+            // retrieve neo4j nodes from main person down two levels of management
+            //MATCH (manager:User)-[:MANAGES*1..2]->(subordinate:User)
+            //WHERE manager.userPrincipalName = "cliffdi@msonline-setup.com"
+            //RETURN subordinate
+            var neo4jResults = neo4jClient.Cypher
+                .Match("(manager:User)-[:MANAGES*1..2]->(subordinate:User)")
+                .Where((User manager) => manager.userPrincipalName == strMainUserUPN)
+                .Return<IEnumerable<User>>("collect(subordinate)")
+                .Results;
+            // enumerate neo4j users into map
+            Dictionary<string, User> neo4jUsers = new Dictionary<string, User>();
+            foreach (IEnumerable<User> list in neo4jResults)
+            {
+                foreach (User neo4jUser in list)
+                {
+                    neo4jUsers.Add(neo4jUser.userPrincipalName, neo4jUser);
+                }
+            }
+            AadUsers directs = graphCall.getUsersDirectReports(strMainUserUPN);
             if (directs != null)
             {
                 foreach (AadUser directReport in directs.user)
                 {
                     // retrieve corresponding neo4j object
-                    var results = neo4jClient.Cypher
-                        .Match("(user:User)")
-                        .Where((User user) => user.userPrincipalName == directReport.userPrincipalName)
-                        .Return(user => user.As<User>())
-                        .Results;
-                    // retrieve trio and url from neo4j object
-                    String trioLed = "", linkedInUrl = "";
-                    foreach (User user in results)
-                    {
-                        trioLed = user.trioLed;
-                        linkedInUrl = user.linkedInUrl;
-                    }
+                    User neo4jUser = neo4jUsers[directReport.userPrincipalName];
                     // add a new list at start of list of lists
                     returnedListOfLists.Insert(0, new List<AadExtendedUser>());
                     // insert the direct report at front of newly inserted list
-                    AadExtendedUser extendedDirectReport = new AadExtendedUser(directReport, trioLed, linkedInUrl);
+                    AadExtendedUser extendedDirectReport = new AadExtendedUser(directReport, neo4jUser.trioLed, neo4jUser.linkedInUrl);
                     returnedListOfLists.ElementAt(0).Insert(0, extendedDirectReport);
                     // get direct reports of the direct report
                     AadUsers directsOfDirects = graphCall.getUsersDirectReports(directReport.userPrincipalName);
@@ -155,19 +175,9 @@ namespace OrgChart.Models
                     foreach (AadUser directOfDirect in directsOfDirects.user)
                     {
                         // retrieve corresponding neo4j object
-                        results = neo4jClient.Cypher
-                            .Match("(user:User)")
-                            .Where((User user) => user.userPrincipalName == directOfDirect.userPrincipalName)
-                            .Return(user => user.As<User>())
-                            .Results;
-                        // retrieve trio and url from neo4j object
-                        foreach (User user in results)
-                        {
-                            trioLed = user.trioLed;
-                            linkedInUrl = user.linkedInUrl;
-                        }
+                        neo4jUser = neo4jUsers[directOfDirect.userPrincipalName];
                         // add each direct of direct to the list
-                        AadExtendedUser extendedDirectOfDirect = new AadExtendedUser(directOfDirect, trioLed, linkedInUrl);
+                        AadExtendedUser extendedDirectOfDirect = new AadExtendedUser(directOfDirect, neo4jUser.trioLed, neo4jUser.linkedInUrl);
                         returnedListOfLists.ElementAt(0).Add(extendedDirectOfDirect);
                     }
                 }
