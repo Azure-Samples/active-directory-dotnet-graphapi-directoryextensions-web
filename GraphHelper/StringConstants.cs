@@ -10,20 +10,24 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
     {
 
         //application principal id
-        public const string GraphPrincipalId = "https://graph.windows.net";
+        //public const string GraphPrincipalId = "https://graph.windows.net";
 
         // resource that is used to request a token for
         public const string resource = "https://graph.windows.net";
+        //public const string resource = "https://graph.27.MSODS.msol-nova.com";
 
         //this is the STS endpoint for Windows Azure AD
         public const string authenticationEndpoint = "https://login.windows.net/";
-
+        //public const string authenticationEndpoint = "https://27.login.ORGID.msol-nova.com/";
+        
         // The URL of Graph service endpoint 
         public const string baseGraphUri = "https://graph.windows.net/";
+        //public const string baseGraphUri = "https://graph.27.MSODS.msol-nova.com/";
 
         // Graph API version
         public const string apiVersion = "api-version=2013-04-05";
-
+        //public const string apiVersion = "api-version=1.21-preview";
+        
         // Graph API preview version
         public const string apiVersionPreview = "api-version=2013-04-10-preview";
 
@@ -31,6 +35,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         
         // Your tenant objectId or tenant domain name – this can be any of a tenant's verified domain 
         public const string tenant = "msonlinesetup.onmicrosoft.com";
+        //public const string tenant = "msonlinesetup.27.msods.msol-nova.com";
 
         // Config for OAuth client credentials (2-legged OAuth, S2S Authn flow)
         public const string clientId = "33b6cec1-7aa1-4574-9525-1f73a7c3b6e6";

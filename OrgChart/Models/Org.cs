@@ -138,7 +138,6 @@ namespace OrgChart.Models
         public List<List<AadExtendedUser>> getDirectsOfDirects(string strMainUserUPN)
         {
             List<List<AadExtendedUser>> returnedListOfLists = new List<List<AadExtendedUser>>();
-
             // retrieve neo4j nodes from main person down two levels of management
             //MATCH (manager:User)-[:MANAGES*1..2]->(subordinate:User)
             //WHERE manager.userPrincipalName = "cliffdi@msonline-setup.com"
@@ -181,6 +180,21 @@ namespace OrgChart.Models
                         returnedListOfLists.ElementAt(0).Add(extendedDirectOfDirect);
                     }
                 }
+                // sort the list of lists by trioled
+                //http://stackoverflow.com/questions/3309188/c-net-how-to-sort-a-list-t-by-a-property-in-the-object
+                returnedListOfLists.Sort(delegate(List<AadExtendedUser> x, List<AadExtendedUser> y)
+                {
+                    bool bxTrio = (x.ElementAt(0).trioLed != null && x.ElementAt(0).trioLed != "");
+                    bool byTrio = (y.ElementAt(0).trioLed != null && y.ElementAt(0).trioLed != "");
+                    // if neither has a trio, they are equal
+                    if (!bxTrio && !byTrio) return 0;
+                    // if only one has a trio, that one comes first
+                    else if(bxTrio && !byTrio) return -1;
+                    else if(!bxTrio && byTrio) return 1;
+                    // if both have trios, perform the comparison to determine which one comes first
+                    else if(bxTrio && byTrio) return x.ElementAt(0).trioLed.CompareTo(y.ElementAt(0).trioLed);
+                    else return 0;
+                });
             }
             return returnedListOfLists;
         }
