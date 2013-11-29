@@ -578,6 +578,9 @@ td {
     vertical-align: top;
     text-align: center;
 }
+.tdTrio {
+    color:white;
+}
 .tdPersonImage {
     background-color: #001dc8;
 }

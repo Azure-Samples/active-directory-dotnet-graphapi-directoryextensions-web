@@ -65,11 +65,58 @@
 <table id="OrgColumns">
 <tr>
 @{
-    int j = 0;
-    foreach(List<AadExtendedUser> directList in ViewBag.directsOfDirects)
+    int nextRowStart = 0;
+    for(int j = 0; j < ViewBag.directsOfDirects.Count; j++)
     {
-        if ((j % 9) == 0)
+        List<AadExtendedUser> directList = ViewBag.directsOfDirects[j];
+        // at each row start, read ahead to fill in trio row if necessary and determine next row start
+        if (j == nextRowStart)
         {
+            // insert a row break if we are at the natural start of a new row
+            if (j != 0)
+            {
+                @:</tr><tr>
+            }
+            // read ahead 9+1 directs to determine width and number of spanning trio columns to add
+            String previousTrio = null;
+            int colspan = 1;
+            int count = ViewBag.directsOfDirects.Count;
+            for (int k = j; k < count; k++)
+            {
+                // if we have now processed one more direct report than we want on a row, break out
+                if ((k - j) > 9)
+                {
+                    break;
+                }
+                List<AadExtendedUser> dirList = ViewBag.directsOfDirects[k];
+                String newTrio = dirList[0].trioLed;
+                if (previousTrio == null)
+                {
+                    // first pass, initialize previous trio
+                    previousTrio = newTrio;
+                }
+                else if (newTrio == previousTrio)
+                {
+                    // encountered repeat trio, increment colspan
+                    colspan++;
+                }
+                if (newTrio != previousTrio || (k == (count - 1) && (k - j) < 9))
+                {                        
+                    // trio terminated by new trio or end of list (without exceeding max row length)
+                    <td class="tdTrio" colspan ="@(colspan)">@previousTrio</td>
+                    // reset if terminated by new trio
+                    if(newTrio != previousTrio)
+                    {
+                        // reset colspan
+                        colspan = 1;
+                        // next row starts here unless next trio completes
+                        nextRowStart = k;
+                        // store new trio
+                        previousTrio = newTrio;
+                    }
+                }
+            }
+            // insert a row break to close out spanning header column
             @:</tr><tr>
         }
         <td>
@@ -90,7 +137,6 @@
                 }
             </table>
         </td>
-        j++;
     }
 }
 </tr>
@@ -124,7 +170,7 @@
     var userMap = {
         @{
             string strMap = "";
-            AadExtendedUser previousUser = null; 
+            AadExtendedUser previousUser = null;
             for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count; i++)
             {
                 if (strMap != "") { strMap += ","; }
@@ -136,7 +182,7 @@
                 strMap += "\", managerPrincipalName: \"";
                 if (previousUser != null)
                 {
-                    strMap += previousUser.userPrincipalName;                    
+                    strMap += previousUser.userPrincipalName;
                 }
                 else
                 {
@@ -157,7 +203,7 @@
                 foreach (AadExtendedUser user in directList)
                 {
                     string strManagerPrincipalName;
-                    if (thisManager == null) 
+                    if (thisManager == null)
                     {
                         thisManager = user;
                         strManagerPrincipalName = previousUser.userPrincipalName;
