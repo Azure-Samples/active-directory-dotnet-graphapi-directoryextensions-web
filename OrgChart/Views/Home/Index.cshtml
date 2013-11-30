@@ -72,7 +72,7 @@
         // at each row start, read ahead to fill in trio row if necessary and determine next row start
         if (j == nextRowStart)
         {
-            // insert a row break if we are at the natural start of a new row
+            // insert a row break if we are at the natural start of a new row (no row breaks if no natural starts?)
             if (j != 0)
             {
                 @:</tr><tr>
@@ -99,6 +99,12 @@
                 {
                     // encountered repeat trio, increment colspan
                     colspan++;
+                    // if current trio is blank, we can split row after 9th column
+                    if (newTrio == "" && ((k - j) >= 9))
+                    {
+                        nextRowStart = k;
+                        break;                        
+                    }
                 }
                 if (newTrio != previousTrio || (k == (count - 1) && (k - j) < 9))
                 {                        
