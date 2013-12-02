@@ -102,88 +102,57 @@ namespace OrgChart.Models
             
             // split comma delimited UPN list into UPNs
             string[] arrayUPN = strUPN.Split(',');
-            String strMainUPN = arrayUPN[0];
-
-            // retrieve neo4j nodes from main person to root
-            //START target=node(0)
-            //MATCH (source:User)
-            //WHERE source.userPrincipalName="bshah@msonline-setup.com" OR source.userPrincipalName="scottgu@msonline-setup.com"
-            //MATCH p = shortestPath(source-[*]-target)
-            //return NODES(p);
-            var neo4jResults = neo4jClient.Cypher
-                .Start(new { target = neo4jClient.RootNode } )
-                .Match("(source:User)")
-                .Where((User source) => source.userPrincipalName == strMainUPN)
-                .Match("p = shortestPath(source-[*]-target)")
-                .Return<IEnumerable<User>>("nodes(p)")
-                .Results;
-
-            /*
-            var neo4jResults = neo4jClient.Cypher
-                .Start(new { target = neo4jClient.RootNode })
-                .Match("(source:User)")
-                .Where((User source) => source.userPrincipalName == arrayUPN[0])
-                .OrWhere((User source) => source.userPrincipalName == arrayUPN[1])
-                .OrWhere((User source) => source.userPrincipalName == arrayUPN[2])
-                .Match("p = shortestPath(source-[*]-target)")
-                .Return<IEnumerable<User>>("nodes(p)")
-                .Results;
-            */
-
-            // retrieve main person from graph
-            AadUser graphUser = graphCall.getUser(strMainUPN);
-
-            // enumerate neo4j and graph users from the main person to the root
-            foreach (IEnumerable<User> list in neo4jResults)
+            for (int idxTrio = 0; idxTrio < arrayUPN.Length; idxTrio++)
             {
-                foreach (User neo4jUser in list)
+                String strMainUPN = arrayUPN[idxTrio];
+                // retrieve neo4j nodes from this person to root
+                //START target=node(0)
+                //MATCH (source:User)
+                //WHERE source.userPrincipalName="bshah@msonline-setup.com" OR source.userPrincipalName="scottgu@msonline-setup.com"
+                //MATCH p = shortestPath(source-[*]-target)
+                //return NODES(p);
+                var neo4jResults = neo4jClient.Cypher
+                    .Start(new { target = neo4jClient.RootNode })
+                    .Match("(source:User)")
+                    .Where((User source) => source.userPrincipalName == strMainUPN)
+                    .Match("p = shortestPath(source-[*]-target)")
+                    .Return<IEnumerable<User>>("nodes(p)")
+                    .Results;
+
+                // retrieve graph node for this person from graph
+                AadUser graphUser = graphCall.getUser(strMainUPN);
+
+                // enumerate neo4j and graph users from the main person to the root
+                int idxAncestorOrMain = 0;
+                foreach (IEnumerable<User> list in neo4jResults)
                 {
-                    // bomb out if we are out of graph users
-                    if (graphUser == null) break;
-                    // insert the direct report at front of a ancestor list
-                    returnedListOfLists.Insert(0, new List<AadExtendedUser>());
-                    // if trio mode and there is a trio, get the other members of this trio and add them to this list
-                    if (bTrio && neo4jUser.trioLed != "")
+                    foreach (User neo4jUser in list)
                     {
-                        //START target=node(0)
-                        //MATCH (source:User)
-                        //WHERE source.trioLed="Azure"
-                        //return NODES(p);
-                        var neo4jTrioLeaders = neo4jClient.Cypher
-                            .Start(new { target = neo4jClient.RootNode })
-                            .Match("(source:User)")
-                            .Where((User source) => source.trioLed == neo4jUser.trioLed)
-                            .Return<IEnumerable<User>>("collect(source)")
-                            .Results;
-                        // enumerate trio leaders from neo4j result set
-                        foreach (IEnumerable<User> trioList in neo4jTrioLeaders)
+                        // bomb out if we are out of graph users
+                        if (graphUser == null) break;
+                        // create a new AncestorOrMain trio list if processing non-trio member or first member of trio
+                        if (idxTrio == 0)
                         {
-                            foreach (User neo4jTrioLeader in trioList)
-                            {
-                                // get graph user if necessary
-                                AadUser graphTrioLeader = null;
-                                if (graphUser.userPrincipalName == neo4jTrioLeader.userPrincipalName)
-                                {
-                                    graphTrioLeader = graphUser;
-                                }
-                                else
-                                {
-                                    graphTrioLeader = graphCall.getUser(neo4jTrioLeader.userPrincipalName);
-                                }
-                                // create new extended user with info from graph and neo4j
-                                AadExtendedUser extendedUser = new AadExtendedUser(graphTrioLeader, neo4jTrioLeader.trioLed, neo4jTrioLeader.linkedInUrl);
-                                returnedListOfLists.ElementAt(0).Add(extendedUser);
-                            }
+                            returnedListOfLists.Insert(0, new List<AadExtendedUser>());
                         }
-                    }
-                    else
-                    {
                         // create new extended user with info from graph and neo4j
                         AadExtendedUser extendedUser = new AadExtendedUser(graphUser, neo4jUser.trioLed, neo4jUser.linkedInUrl);
-                        returnedListOfLists.ElementAt(0).Add(extendedUser);
+                        // insert new extended user at end of the correct AncestorOrMain trio list
+                        if (bTrio && neo4jUser.trioLed != "")
+                        {
+                            // if trio mode and there is a trio, add to list every time
+                            returnedListOfLists.ElementAt(returnedListOfLists.Count - idxAncestorOrMain - 1).Add(extendedUser);
+                        }
+                        else if (idxTrio == 0)
+                        {
+                            // otherwise, this user not part of a trio, just add once (the same pass that list is added)
+                            returnedListOfLists.ElementAt(returnedListOfLists.Count - idxAncestorOrMain - 1).Add(extendedUser);
+                        }
+                        // get next graph user
+                        graphUser = graphCall.getUsersManager(graphUser.userPrincipalName);
+                        // increment the ancestor level
+                        idxAncestorOrMain++;
                     }
-                    // get next graph user
-                    graphUser = graphCall.getUsersManager(graphUser.userPrincipalName);
                 }
             }
             return returnedListOfLists;
@@ -191,70 +160,72 @@ namespace OrgChart.Models
         // list with ICs as single person lists and leads as multiple person lists
         public List<List<AadExtendedUser>> getDirectsOfDirects(string strUPN, bool bTrio)
         {
-            // split comma delimited UPN list into UPNs
-            string[] arrayUPN = strUPN.Split(',');
-            String strMainUPN = arrayUPN[0];
-
             List<List<AadExtendedUser>> returnedListOfLists = new List<List<AadExtendedUser>>();
 
-            // retrieve neo4j nodes from main person down two levels of management
-            //MATCH (manager:User)-[:MANAGES*1..2]->(subordinate:User)
-            //WHERE manager.userPrincipalName = "cliffdi@msonline-setup.com"
-            //RETURN subordinate
-            var neo4jResults = neo4jClient.Cypher
-                .Match("(manager:User)-[:MANAGES*1..2]->(subordinate:User)")
-                .Where((User manager) => manager.userPrincipalName == strMainUPN)
-                .Return<IEnumerable<User>>("collect(subordinate)")
-                .Results;
-            // enumerate neo4j users into map
-            Dictionary<string, User> neo4jUsers = new Dictionary<string, User>();
-            foreach (IEnumerable<User> list in neo4jResults)
+            // split comma delimited UPN list into UPNs
+            string[] arrayUPN = strUPN.Split(',');
+            for (int i = 0; i < arrayUPN.Length; i++)
             {
-                foreach (User neo4jUser in list)
+                String strMainUPN = arrayUPN[i];
+                // retrieve neo4j nodes from main person down two levels of management
+                //MATCH (manager:User)-[:MANAGES*1..2]->(subordinate:User)
+                //WHERE manager.userPrincipalName = "cliffdi@msonline-setup.com"
+                //RETURN subordinate
+                var neo4jResults = neo4jClient.Cypher
+                    .Match("(manager:User)-[:MANAGES*1..2]->(subordinate:User)")
+                    .Where((User manager) => manager.userPrincipalName == strMainUPN)
+                    .Return<IEnumerable<User>>("collect(subordinate)")
+                    .Results;
+                // enumerate neo4j users into map
+                Dictionary<string, User> neo4jUsers = new Dictionary<string, User>();
+                foreach (IEnumerable<User> list in neo4jResults)
                 {
-                    neo4jUsers.Add(neo4jUser.userPrincipalName, neo4jUser);
-                }
-            }
-            AadUsers directs = graphCall.getUsersDirectReports(strMainUPN);
-            if (directs != null)
-            {
-                foreach (AadUser directReport in directs.user)
-                {
-                    // retrieve corresponding neo4j object
-                    User neo4jUser = neo4jUsers[directReport.userPrincipalName];
-                    // add a new list at start of list of lists
-                    returnedListOfLists.Insert(0, new List<AadExtendedUser>());
-                    // insert the direct report at front of newly inserted list
-                    AadExtendedUser extendedDirectReport = new AadExtendedUser(directReport, neo4jUser.trioLed, neo4jUser.linkedInUrl);
-                    returnedListOfLists.ElementAt(0).Insert(0, extendedDirectReport);
-                    // get direct reports of the direct report
-                    AadUsers directsOfDirects = graphCall.getUsersDirectReports(directReport.userPrincipalName);
-                    extendedDirectReport.isManager = (directsOfDirects.user.Count > 0 ? true : false);
-                    foreach (AadUser directOfDirect in directsOfDirects.user)
+                    foreach (User neo4jUser in list)
                     {
-                        // retrieve corresponding neo4j object
-                        neo4jUser = neo4jUsers[directOfDirect.userPrincipalName];
-                        // add each direct of direct to the list
-                        AadExtendedUser extendedDirectOfDirect = new AadExtendedUser(directOfDirect, neo4jUser.trioLed, neo4jUser.linkedInUrl);
-                        returnedListOfLists.ElementAt(0).Add(extendedDirectOfDirect);
+                        neo4jUsers.Add(neo4jUser.userPrincipalName, neo4jUser);
                     }
                 }
-                // sort the list of lists by trioled
-                //http://stackoverflow.com/questions/3309188/c-net-how-to-sort-a-list-t-by-a-property-in-the-object
-                returnedListOfLists.Sort(delegate(List<AadExtendedUser> x, List<AadExtendedUser> y)
+                AadUsers directs = graphCall.getUsersDirectReports(strMainUPN);
+                if (directs != null)
                 {
-                    bool bxTrio = (x.ElementAt(0).trioLed != null && x.ElementAt(0).trioLed != "");
-                    bool byTrio = (y.ElementAt(0).trioLed != null && y.ElementAt(0).trioLed != "");
-                    // if neither has a trio, they are equal
-                    if (!bxTrio && !byTrio) return 0;
-                    // if only one has a trio, that one comes first
-                    else if(bxTrio && !byTrio) return -1;
-                    else if(!bxTrio && byTrio) return 1;
-                    // if both have trios, perform the comparison to determine which one comes first
-                    else if(bxTrio && byTrio) return x.ElementAt(0).trioLed.CompareTo(y.ElementAt(0).trioLed);
-                    else return 0;
-                });
+                    foreach (AadUser directReport in directs.user)
+                    {
+                        // retrieve corresponding neo4j object
+                        User neo4jUser = neo4jUsers[directReport.userPrincipalName];
+                        // add a new list at front of list of lists
+                        returnedListOfLists.Insert(0, new List<AadExtendedUser>());
+                        // insert the direct report at front of newly inserted list
+                        AadExtendedUser extendedDirectReport = new AadExtendedUser(directReport, neo4jUser.trioLed, neo4jUser.linkedInUrl);
+                        returnedListOfLists.ElementAt(0).Insert(0, extendedDirectReport);
+                        // get direct reports of the direct report
+                        AadUsers directsOfDirects = graphCall.getUsersDirectReports(directReport.userPrincipalName);
+                        extendedDirectReport.isManager = (directsOfDirects.user.Count > 0 ? true : false);
+                        foreach (AadUser directOfDirect in directsOfDirects.user)
+                        {
+                            // retrieve corresponding neo4j object
+                            neo4jUser = neo4jUsers[directOfDirect.userPrincipalName];
+                            // add each direct of direct to the end of the list
+                            AadExtendedUser extendedDirectOfDirect = new AadExtendedUser(directOfDirect, neo4jUser.trioLed, neo4jUser.linkedInUrl);
+                            returnedListOfLists.ElementAt(0).Add(extendedDirectOfDirect);
+                        }
+                    }
+                }
             }
+            // sort the list of lists by trioled
+            //http://stackoverflow.com/questions/3309188/c-net-how-to-sort-a-list-t-by-a-property-in-the-object
+            returnedListOfLists.Sort(delegate(List<AadExtendedUser> x, List<AadExtendedUser> y)
+            {
+                bool bxTrio = (x.ElementAt(0).trioLed != null && x.ElementAt(0).trioLed != "");
+                bool byTrio = (y.ElementAt(0).trioLed != null && y.ElementAt(0).trioLed != "");
+                // if neither has a trio, they are equal
+                if (!bxTrio && !byTrio) return 0;
+                // if only one has a trio, that one comes first
+                else if (bxTrio && !byTrio) return -1;
+                else if (!bxTrio && byTrio) return 1;
+                // if both have trios, perform the comparison to determine which one comes first
+                else if (bxTrio && byTrio) return x.ElementAt(0).trioLed.CompareTo(y.ElementAt(0).trioLed);
+                else return 0;
+            });
             return returnedListOfLists;
         }
         public string getFirstUpn(bool bUpdateCache)
