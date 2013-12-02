@@ -19,6 +19,8 @@
     </section>
 }
 
+@if(ViewBag.ancestorsAndMainPerson != null)
+{
 <table id="Splitter"><tr>
 <td>
 <table id="ManagerList">
@@ -29,36 +31,42 @@
 @for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count-1; i++)
 {
 	<tr class="highlightable">
-		<td style="display:none">@ViewBag.ancestorsAndMainPerson[i].mailNickname</td>
+    @foreach(AadExtendedUser extendedUser in ViewBag.ancestorsAndMainPerson[i])
+    {
+		<td style="display:none">@extendedUser.mailNickname</td>
         <td class="tdPersonDescription">
             <img style="MAX-WIDTH: 32px; VERTICAL-ALIGN: bottom; MARGIN: 1px 4px 0px 0px; MAX-HEIGHT: 24px" 
-                 src=@(String.Format("{0}{1}{2}", "http://who/photos/", @ViewBag.ancestorsAndMainPerson[i].mailNickname, ".jpg")) 
-                 alt="@ViewBag.ancestorsAndMainPerson[i].mailNickname"/>
+                 src=@(String.Format("{0}{1}{2}", "http://who/photos/", @extendedUser.mailNickname, ".jpg")) 
+                 alt="@extendedUser.mailNickname"/>
         </td>
         <td class="tdPersonDescription">
-            <a href="/?upn=@ViewBag.ancestorsAndMainPerson[i].userPrincipalName">@ViewBag.ancestorsAndMainPerson[i].displayName</a> 
-            (@ViewBag.ancestorsAndMainPerson[i].mailNickname)<br />
-            @ViewBag.ancestorsAndMainPerson[i].jobTitle
+            <a href="/?upn=@extendedUser.userPrincipalName">@extendedUser.displayName</a> 
+            (@extendedUser.mailNickname)<br />
+            @extendedUser.jobTitle
         </td>
+    }
 	</tr>
 }
 </table>
 
 <table id="MainPerson">
 	<tr class="highlightable">
-		<td style="display:none">@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname</td>
+    @foreach(AadExtendedUser extendedUser in ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1])
+    {
+		<td style="display:none">@extendedUser.mailNickname</td>
 		<td class="tdPersonImage">
             <img style="MAX-WIDTH: 110px; VERTICAL-ALIGN: bottom; MARGIN: 8px 10px 8px 10px; MAX-HEIGHT: 100px" 
-			     src=@(String.Format("{0}{1}{2}", "http://who/photos/", @ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname, ".jpg")) 
-			     alt="@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname"/>
+			     src=@(String.Format("{0}{1}{2}", "http://who/photos/", @extendedUser.mailNickname, ".jpg")) 
+			     alt="@extendedUser.mailNickname"/>
 		</td>
 		<td class="tdPersonDescription">
-            <a href="/?upn=@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].userPrincipalName">
-                @ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].displayName
+            <a href="/?upn=@extendedUser.userPrincipalName">
+                @extendedUser.displayName
             </a> 
-            (@ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].mailNickname)<br />
-            @ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1].jobTitle
+            (@extendedUser.mailNickname)<br />
+            @extendedUser.jobTitle
 		</td>
+    }
 	</tr>
 </table>
 
@@ -72,13 +80,14 @@
         // at each row start, read ahead to fill in trio row if necessary and determine next row start
         if (j == nextRowStart)
         {
-            // insert a row break if we are at the natural start of a new row (no row breaks if no natural starts?)
+            // insert a row break if we are at the natural start of a new row
             if (j != 0)
             {
                 @:</tr><tr>
             }
             // read ahead 9+1 directs to determine width and number of spanning trio columns to add
             String previousTrio = null;
+            String previousUPN = null;
             int colspan = 1;
             int count = ViewBag.directsOfDirects.Count;
             for (int k = j; k < count; k++)
@@ -90,15 +99,19 @@
                 }
                 List<AadExtendedUser> dirList = ViewBag.directsOfDirects[k];
                 String newTrio = dirList[0].trioLed;
+                String newUPN = dirList[0].userPrincipalName;
                 if (previousTrio == null)
                 {
                     // first pass, initialize previous trio
                     previousTrio = newTrio;
+                    previousUPN = newUPN;
                 }
                 else if (newTrio == previousTrio)
                 {
-                    // encountered repeat trio, increment colspan
+                    // encountered repeat trio, increment colspan and add to UPN value
                     colspan++;
+                    previousUPN += ",";
+                    previousUPN += newUPN;
                     // if current trio is blank, we can split row after 9th column
                     if (newTrio == "" && ((k - j) >= 9))
                     {
@@ -109,7 +122,12 @@
                 if (newTrio != previousTrio || (k == (count - 1) && (k - j) < 9))
                 {                        
                     // trio terminated by new trio or end of list (without exceeding max row length)
-                    <td class="tdTrio" colspan ="@(colspan)">@previousTrio</td>
+                    if(previousTrio != "")
+                    {
+                        <td class="tdTrio" colspan ="@(colspan)">
+                        <a class="tdTrio" href="/?upn=@previousUPN&trio=true">@previousTrio</a>
+                        </td>
+                    }
                     // reset if terminated by new trio
                     if(newTrio != previousTrio)
                     {
@@ -119,6 +137,7 @@
                         nextRowStart = k;
                         // store new trio
                         previousTrio = newTrio;
+                        previousUPN = newUPN;
                     }
                 }
             }
@@ -171,7 +190,6 @@
 	</form>
 </td>
 </tr></table>
-
 <script type="text/javascript">
     var userMap = {
         @{
@@ -179,29 +197,32 @@
             AadExtendedUser previousUser = null;
             for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count; i++)
             {
-                if (strMap != "") { strMap += ","; }
-                strMap += ViewBag.ancestorsAndMainPerson[i].mailNickname;
-                strMap += ": { displayName: \"";
-                strMap += ViewBag.ancestorsAndMainPerson[i].displayName;
-                strMap += "\", userPrincipalName: \"";
-                strMap += ViewBag.ancestorsAndMainPerson[i].userPrincipalName;
-                strMap += "\", managerPrincipalName: \"";
-                if (previousUser != null)
-                {
-                    strMap += previousUser.userPrincipalName;
-                }
-                else
-                {
-                    strMap += "NO MANAGER";
-                }
-                strMap += "\", jobTitle: \"";
-                strMap += ViewBag.ancestorsAndMainPerson[i].jobTitle;
-                strMap += "\", trioLed: \"";
-                strMap += ViewBag.ancestorsAndMainPerson[i].trioLed;
-                strMap += "\", linkedInUrl: \"";
-                strMap += ViewBag.ancestorsAndMainPerson[i].linkedInUrl;
-                strMap += "\"}";
-                previousUser = ViewBag.ancestorsAndMainPerson[i];
+                    foreach (AadExtendedUser extendedUser in ViewBag.ancestorsAndMainPerson[i])
+                    {
+                        if (strMap != "") { strMap += ","; }
+                        strMap += extendedUser.mailNickname;
+                        strMap += ": { displayName: \"";
+                        strMap += extendedUser.displayName;
+                        strMap += "\", userPrincipalName: \"";
+                        strMap += extendedUser.userPrincipalName;
+                        strMap += "\", managerPrincipalName: \"";
+                        if (previousUser != null)
+                        {
+                            strMap += previousUser.userPrincipalName;
+                        }
+                        else
+                        {
+                            strMap += "NO MANAGER";
+                        }
+                        strMap += "\", jobTitle: \"";
+                        strMap += extendedUser.jobTitle;
+                        strMap += "\", trioLed: \"";
+                        strMap += extendedUser.trioLed;
+                        strMap += "\", linkedInUrl: \"";
+                        strMap += extendedUser.linkedInUrl;
+                        strMap += "\"}";
+                        previousUser = extendedUser;
+                    }
             }
             foreach (List<AadExtendedUser> directList in ViewBag.directsOfDirects)
             {
@@ -272,3 +293,4 @@
         setInputChange();
     }
 </script>
+}

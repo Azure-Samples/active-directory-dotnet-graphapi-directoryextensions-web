@@ -73,8 +73,10 @@ namespace OrgChart.Controllers
                     // no UPN provided, get the UPN of the first user instead (optionally building neo4j from graph)
                     strUpn = org.getFirstUpn(false);
                 }
-                ViewBag.ancestorsAndMainPerson = org.getAncestorsAndMainPerson(strUpn);
-                ViewBag.directsOfDirects = org.getDirectsOfDirects(strUpn);
+                string strTrio = queryValues["trio"];
+                bool bTrio = (strTrio != null && String.Equals(strTrio, "true", StringComparison.CurrentCultureIgnoreCase));
+                ViewBag.ancestorsAndMainPerson = org.getAncestorsAndMain(strUpn, bTrio);
+                ViewBag.directsOfDirects = org.getDirectsOfDirects(strUpn, bTrio);
             }
             else
             {

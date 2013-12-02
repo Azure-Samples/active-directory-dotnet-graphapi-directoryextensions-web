@@ -32,8 +32,13 @@ a {
         color: #333;
     }
 
+    a.tdTrio {
+        color:white;
+    }
+
     a:hover {
         background-color: #c7d1d6;
+        color: #333;
     }
 
 header, footer, hgroup,
