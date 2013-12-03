@@ -47,6 +47,7 @@ namespace OrgChart.Controllers
                 string strUpdateManagerUPN = Request["updateManagerUPN"];
                 string strUpdateJobTitle = Request["updateJobTitle"];
                 string strUpdateTrioLed = Request["updateTrioLed"];
+                string strUpdateSkypeContact = Request["updateSkypeContact"];
                 string strCreateUPN = Request["createUPN"];
                 string strCreateMailNickname = Request["createMailNickname"];
                 string strCreateDisplayName = Request["createDisplayName"];
@@ -56,7 +57,7 @@ namespace OrgChart.Controllers
                 {
                     case "Update":
                         // set display name and manager for given UPN
-                        org.setUser(strUpdateUPN, strUpdateDisplayName, strUpdateManagerUPN, strUpdateJobTitle, strUpdateTrioLed);
+                        org.setUser(strUpdateUPN, strUpdateDisplayName, strUpdateManagerUPN, strUpdateJobTitle, strUpdateTrioLed, strUpdateSkypeContact);
                         break;
                     case "Create":
                         // create user with given display name, UPN, and manager

@@ -75,6 +75,8 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         [DataMember] public string usageLocation { get; set; } //" Type="Edm.String" />
         [DataMember (Name = "6efdc23e73e548fa9d12a599308d821c-trio") ]
         public string trio { get; set; } //" Type="Edm.String" />
+        [DataMember(Name = "6efdc23e73e548fa9d12a599308d821c-skype")]
+        public string skype { get; set; } //" Type="Edm.String" />
     }
 
     [DataContract]

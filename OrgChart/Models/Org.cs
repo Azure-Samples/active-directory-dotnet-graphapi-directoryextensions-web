@@ -45,6 +45,7 @@ namespace OrgChart.Models
             surname = user.surname;
             telephoneNumber = user.telephoneNumber;
             trio = user.trio;
+            skype = user.skype;
 
             isManager = false;
         }
@@ -61,6 +62,7 @@ namespace OrgChart.Models
         public AadUser createUser(string strCreateUPN, string strCreateMailNickname, string strCreateDisplayName, string strCreateManagerUPN, string strCreateJobTitle)
         {
             string strTrioLed = "";
+            string strSkypeContact = "";
             AadUser user = new AadUser();
             user.userPrincipalName = strCreateUPN;
             user.displayName = strCreateDisplayName;
@@ -72,7 +74,7 @@ namespace OrgChart.Models
             AadUser newUser = graphCall.createUser(user);
             if (newUser != null)
             {
-                newUser = setUser(strCreateUPN, strCreateDisplayName, strCreateManagerUPN, strCreateJobTitle, strTrioLed);
+                newUser = setUser(strCreateUPN, strCreateDisplayName, strCreateManagerUPN, strCreateJobTitle, strTrioLed, strSkypeContact);
             }
             return newUser;
         }
@@ -184,13 +186,14 @@ namespace OrgChart.Models
             }
             return userPrincipalName;
         }
-        public AadUser setUser(string strUpdateUPN, string strUpdateDisplayName, string strUpdateManagerUPN, string strUpdateJobTitle, string strUpdateTrioLed)
+        public AadUser setUser(string strUpdateUPN, string strUpdateDisplayName, string strUpdateManagerUPN, string strUpdateJobTitle, string strUpdateTrioLed, string strSkypeContact)
         {
             // set new (or same) display name and job title
             AadUser graphUser = graphCall.getUser(strUpdateUPN);
             graphUser.displayName = strUpdateDisplayName;
             graphUser.jobTitle = strUpdateJobTitle;
             graphUser.trio = strUpdateTrioLed;
+            graphUser.skype = strSkypeContact;
             bool bPass = graphCall.modifyUser("PATCH", graphUser);
             // set new (or same) manager if a valid manager
             if (strUpdateManagerUPN != "NO MANAGER")
