@@ -31,11 +31,8 @@ namespace OrgChart.Controllers
                 // initialize graph
                 graphCall.aadAuthentication = aadAuthentication;
                 graphCall.aadAuthentication.aadAuthenticationResult = authenticationResult;
-                // connect to neo4j
-                GraphClient neo4jClient = new GraphClient(new Uri("http://OrgChart2:6IyKHclsfCHR6nOB9Eg5@OrgChart2.sb01.stations.graphenedb.com:24789/db/data/"));
-                neo4jClient.Connect();
                 // configure appropriate model                
-                OrgChart.Models.Org org = new OrgChart.Models.Org(graphCall, neo4jClient);
+                OrgChart.Models.Org org = new OrgChart.Models.Org(graphCall);
                 // process any form submission requests
                 string strFormAction = Request["submitButton"];
                 string strUpdateUPN = Request["updateUPN"];
@@ -70,8 +67,8 @@ namespace OrgChart.Controllers
                 string strUpn = queryValues["upn"];
                 if (strUpn == null)
                 {
-                    // no UPN provided, get the UPN of the first user instead (optionally building neo4j from graph)
-                    strUpn = org.getFirstUpn(false);
+                    // no UPN provided, get the UPN of the first user instead
+                    strUpn = org.getFirstUpn();
                 }
                 string strTrio = queryValues["trio"];
                 bool bTrio = (strTrio != null && String.Equals(strTrio, "true", StringComparison.CurrentCultureIgnoreCase));

@@ -113,10 +113,20 @@
                     previousUPN += ",";
                     previousUPN += newUPN;
                     // allow row to extend to end of terminating sequence of non-trio leaders
-                    if (newTrio == "" && ((k - j) >= 9 || k == (count-1)))
+                    if (newTrio == "")
                     {
-                        nextRowStart = k;
-                        break;                        
+                        if ((k - j) >= 9)
+                        {
+                            // processing one past last item on prior row, start new row here (even if last in list)
+                            nextRowStart = k;
+                            break;
+                        }
+                        if (k == (count - 1))
+                        {
+                            // processing last in list, don't start new line
+                            nextRowStart = k + 1;
+                            break;
+                        }
                     }
                 }
                 if (newTrio != previousTrio || (k == (count - 1) && (k - j) < 9))
