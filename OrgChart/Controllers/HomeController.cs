@@ -15,19 +15,26 @@ namespace OrgChart.Controllers
     {
         public ActionResult Index()
         {
-            // use ADAL library to connect to AAD tenant
-            string baseGraphUri = StringConstants.baseGraphUri + StringConstants.tenant;
+            // use ADAL library to connect to AAD tenant using fake parameters
+            string baseGraphUri = StringConstants.FAKEbaseGraphUri + StringConstants.FAKEtenant;
             GraphQuery graphCall = new GraphQuery();
-            graphCall.apiVersion = StringConstants.apiVersion;
+            graphCall.apiVersion = StringConstants.FAKEapiVersion;
             graphCall.baseGraphUri = baseGraphUri;
             // get token using OAuth Authorization Code
             AzureADAuthentication aadAuthentication = new AzureADAuthentication();
-            AuthenticationResult authenticationResult = aadAuthentication.GetAuthenticationResult(StringConstants.tenant,
+            AuthenticationResult authenticationResult = aadAuthentication.GetAuthenticationResult(StringConstants.FAKEtenant,
                                              StringConstants.clientId, StringConstants.clientSecret,
-                                             StringConstants.resource, StringConstants.authenticationEndpoint);
+                                             StringConstants.FAKEresource, StringConstants.FAKEauthenticationEndpoint);
+            // reset to NOVA endpoints
+            graphCall.apiVersion = StringConstants.apiVersion;
+            baseGraphUri = StringConstants.baseGraphUri + StringConstants.tenant;
+            graphCall.baseGraphUri = baseGraphUri;
             if (authenticationResult != null)
             {
                 ViewBag.Message = "Authentication succeeded!";
+                // initialize view data based on default or query string UPN
+                NameValueCollection queryValues = Request.QueryString;
+                string strUpn = queryValues["upn"];
                 // initialize graph
                 graphCall.aadAuthentication = aadAuthentication;
                 graphCall.aadAuthentication.aadAuthenticationResult = authenticationResult;
@@ -40,7 +47,6 @@ namespace OrgChart.Controllers
                 string strUpdateManagerUPN = Request["updateManagerUPN"];
                 string strUpdateJobTitle = Request["updateJobTitle"];
                 string strUpdateTrioLed = Request["updateTrioLed"];
-                string strUpdateLinkedInUrl = Request["updateLinkedInUrl"];
                 string strCreateUPN = Request["createUPN"];
                 string strCreateMailNickname = Request["createMailNickname"];
                 string strCreateDisplayName = Request["createDisplayName"];
@@ -50,21 +56,18 @@ namespace OrgChart.Controllers
                 {
                     case "Update":
                         // set display name and manager for given UPN
-                        org.setUser(strUpdateUPN, strUpdateDisplayName, strUpdateManagerUPN, strUpdateJobTitle, strUpdateTrioLed, strUpdateLinkedInUrl);
+                        org.setUser(strUpdateUPN, strUpdateDisplayName, strUpdateManagerUPN, strUpdateJobTitle, strUpdateTrioLed);
                         break;
                     case "Create":
                         // create user with given display name, UPN, and manager
                         org.createUser(strCreateUPN, strCreateMailNickname, strCreateDisplayName, strCreateManagerUPN, strCreateJobTitle);
+                        strUpn = strCreateUPN;
                         break;
                     case "Delete":
                         // delete user with given UPN
                         org.deleteUser(strUpdateUPN);
                         break;
                 }
-
-                // initialize view data based on default or query string UPN
-                NameValueCollection queryValues = Request.QueryString;
-                string strUpn = queryValues["upn"];
                 if (strUpn == null)
                 {
                     // no UPN provided, get the UPN of the first user instead

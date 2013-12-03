@@ -9,7 +9,7 @@ namespace OrgChart.Models
 {
     public class AadExtendedUser : AadUser
     {
-        public AadExtendedUser(AadUser user, String trio, String liurl)
+        public AadExtendedUser(AadUser user)
         {
             accountEnabled = user.accountEnabled;
             assignedLicenses = user.assignedLicenses;
@@ -44,12 +44,10 @@ namespace OrgChart.Models
             streetAddress = user.streetAddress;
             surname = user.surname;
             telephoneNumber = user.telephoneNumber;
-            trioLed = trio;
-            linkedInUrl = liurl;
+            trio = user.trio;
+
             isManager = false;
         }
-        public string trioLed { get; set; }
-        public string linkedInUrl { get; set; }
         public bool isManager { get; set; }
     }
 
@@ -63,7 +61,6 @@ namespace OrgChart.Models
         public AadUser createUser(string strCreateUPN, string strCreateMailNickname, string strCreateDisplayName, string strCreateManagerUPN, string strCreateJobTitle)
         {
             string strTrioLed = "";
-            string strLinkedInUrl = "";
             AadUser user = new AadUser();
             user.userPrincipalName = strCreateUPN;
             user.displayName = strCreateDisplayName;
@@ -75,7 +72,7 @@ namespace OrgChart.Models
             AadUser newUser = graphCall.createUser(user);
             if (newUser != null)
             {
-                newUser = setUser(strCreateUPN, strCreateDisplayName, strCreateManagerUPN, strCreateJobTitle, strTrioLed, strLinkedInUrl);
+                newUser = setUser(strCreateUPN, strCreateDisplayName, strCreateManagerUPN, strCreateJobTitle, strTrioLed);
             }
             return newUser;
         }
@@ -108,9 +105,9 @@ namespace OrgChart.Models
                         returnedListOfLists.Insert(0, new List<AadExtendedUser>());
                     }
                     // create new extended user with info from graph and neo4j
-                    AadExtendedUser extendedUser = new AadExtendedUser(graphUser, "", "");
+                    AadExtendedUser extendedUser = new AadExtendedUser(graphUser);
                     // insert new extended user at end of the correct AncestorOrMain trio list
-                    if (bTrio && false)
+                    if (bTrio && extendedUser.trio != null && extendedUser.trio != "")
                     {
                         // if trio mode and there is a trio, add to list every time
                         returnedListOfLists.ElementAt(returnedListOfLists.Count - idxAncestorOrMain - 1).Add(extendedUser);
@@ -146,7 +143,7 @@ namespace OrgChart.Models
                         // add a new list at front of list of lists
                         returnedListOfLists.Insert(0, new List<AadExtendedUser>());
                         // insert the direct report at front of newly inserted list
-                        AadExtendedUser extendedDirectReport = new AadExtendedUser(directReport, "", "");
+                        AadExtendedUser extendedDirectReport = new AadExtendedUser(directReport);
                         returnedListOfLists.ElementAt(0).Insert(0, extendedDirectReport);
                         // get direct reports of the direct report
                         AadUsers directsOfDirects = graphCall.getUsersDirectReports(directReport.userPrincipalName);
@@ -154,7 +151,7 @@ namespace OrgChart.Models
                         foreach (AadUser directOfDirect in directsOfDirects.user)
                         {
                             // add each direct of direct to the end of the list
-                            AadExtendedUser extendedDirectOfDirect = new AadExtendedUser(directOfDirect, "", "");
+                            AadExtendedUser extendedDirectOfDirect = new AadExtendedUser(directOfDirect);
                             returnedListOfLists.ElementAt(0).Add(extendedDirectOfDirect);
                         }
                     }
@@ -164,15 +161,15 @@ namespace OrgChart.Models
             //http://stackoverflow.com/questions/3309188/c-net-how-to-sort-a-list-t-by-a-property-in-the-object
             returnedListOfLists.Sort(delegate(List<AadExtendedUser> x, List<AadExtendedUser> y)
             {
-                bool bxTrio = (x.ElementAt(0).trioLed != null && x.ElementAt(0).trioLed != "");
-                bool byTrio = (y.ElementAt(0).trioLed != null && y.ElementAt(0).trioLed != "");
+                bool bxTrio = (x.ElementAt(0).trio != null && x.ElementAt(0).trio != "");
+                bool byTrio = (y.ElementAt(0).trio != null && y.ElementAt(0).trio != "");
                 // if neither has a trio, they are equal
                 if (!bxTrio && !byTrio) return 0;
                 // if only one has a trio, that one comes first
                 else if (bxTrio && !byTrio) return -1;
                 else if (!bxTrio && byTrio) return 1;
                 // if both have trios, perform the comparison to determine which one comes first
-                else if (bxTrio && byTrio) return x.ElementAt(0).trioLed.CompareTo(y.ElementAt(0).trioLed);
+                else if (bxTrio && byTrio) return x.ElementAt(0).trio.CompareTo(y.ElementAt(0).trio);
                 else return 0;
             });
             return returnedListOfLists;
@@ -187,12 +184,13 @@ namespace OrgChart.Models
             }
             return userPrincipalName;
         }
-        public AadUser setUser(string strUpdateUPN, string strUpdateDisplayName, string strUpdateManagerUPN, string strUpdateJobTitle, string strUpdateTrioLed, string strUpdateLinkedInUrl)
+        public AadUser setUser(string strUpdateUPN, string strUpdateDisplayName, string strUpdateManagerUPN, string strUpdateJobTitle, string strUpdateTrioLed)
         {
             // set new (or same) display name and job title
             AadUser graphUser = graphCall.getUser(strUpdateUPN);
             graphUser.displayName = strUpdateDisplayName;
             graphUser.jobTitle = strUpdateJobTitle;
+            graphUser.trio = strUpdateTrioLed;
             bool bPass = graphCall.modifyUser("PATCH", graphUser);
             // set new (or same) manager if a valid manager
             if (strUpdateManagerUPN != "NO MANAGER")

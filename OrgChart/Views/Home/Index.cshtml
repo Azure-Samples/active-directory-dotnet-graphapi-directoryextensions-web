@@ -51,7 +51,11 @@
 
 <table id="MainPerson">
 	<tr class="highlightable">
-    @foreach(AadExtendedUser extendedUser in ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1])
+@{
+    List<List<AadExtendedUser>> ancestorsAndMainPerson = ViewBag.ancestorsAndMainPerson;
+    if(ancestorsAndMainPerson.Count > 0)
+    {
+    foreach(AadExtendedUser extendedUser in ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1])
     {
 		<td style="display:none">@extendedUser.mailNickname</td>
 		<td class="tdPersonImage">
@@ -67,6 +71,9 @@
             @extendedUser.jobTitle
 		</td>
     }
+    }
+}
+    
 	</tr>
 </table>
 
@@ -86,7 +93,7 @@
             {
                 @:</tr><tr>
             }
-            // read ahead 9+1 directs to determine width and number of spanning trio columns to add
+            // read ahead 9+1 directs to emit the row of spanning trio columns
             String previousTrio = null;
             String previousUPN = null;
             int colspan = 1;
@@ -98,7 +105,7 @@
                     break;
                 }
                 List<AadExtendedUser> dirList = ViewBag.directsOfDirects[k];
-                String newTrio = dirList[0].trioLed;
+                String newTrio = dirList[0].trio != null ? dirList[0].trio : "";
                 String newUPN = dirList[0].userPrincipalName;
                 if (previousTrio == null)
                 {
@@ -132,10 +139,17 @@
                 if (newTrio != previousTrio || (k == (count - 1) && (k - j) < 9))
                 {                        
                     // trio terminated by new trio or end of list (without exceeding max row length)
-                    if (previousTrio != "")
+                    if (previousTrio != "")  // CAN WE REMOVE THIS? WHEN WOULD IT HAPPEN?
                     {
                         <td class="tdTrio" colspan ="@(colspan)">
                         <a class="tdTrio" href="/?upn=@previousUPN&trio=true">@previousTrio</a>
+                        </td>
+                    }
+                    // if we are last in the list and have a trio that is different from previous, we are 1 member trio and terminator above won't get hit
+                    if (k == (count - 1) && newTrio != "" && newTrio != previousTrio)
+                    {
+                        <td class="tdTrio" colspan = 1>
+                        <a class="tdTrio" href="/?upn=@newUPN&trio=true">@newTrio</a>
                         </td>
                     }
                     // reset if terminated by new trio
@@ -148,6 +162,11 @@
                         // store new trio
                         previousTrio = newTrio;
                         previousUPN = newUPN;
+                    }
+                    if (k == (count - 1) && (k - j) < 9)
+                    {
+                        // processing last in list, and the line isn't too long, don't start new line
+                        nextRowStart = k + 1;
                     }
                 }
             }
@@ -185,7 +204,6 @@
 			<div><label for="updateManagerUPN"><pre>manager: </pre></label> <input type="text" id="updateManagerUPN" name="updateManagerUPN"></div>
 			<div><label for="updateJobTitle"><pre>title: </pre></label> <input type="text" id="updateJobTitle" name="updateJobTitle"></div>
 			<div><label for="updateTrioLed"><pre>Trio: </pre></label> <input type="text" id="updateTrioLed" name="updateTrioLed"></div>
-			<div><label for="updateLinkedInUrl"><pre>LinkedIn URL: </pre></label> <input type="text" id="updateLinkedInUrl" name="updateLinkedInUrl"></div>
 		    <button type="submit" id="submitUpdate" name="submitButton" value="Update">Update</button>
 		    <button type="submit" id="submitDelete" name="submitButton" value="Delete">Delete</button>
 		</fieldset>
@@ -227,9 +245,7 @@
                         strMap += "\", jobTitle: \"";
                         strMap += extendedUser.jobTitle;
                         strMap += "\", trioLed: \"";
-                        strMap += extendedUser.trioLed;
-                        strMap += "\", linkedInUrl: \"";
-                        strMap += extendedUser.linkedInUrl;
+                        strMap += extendedUser.trio;
                         strMap += "\"}";
                         previousUser = extendedUser;
                     }
@@ -260,9 +276,7 @@
                     strMap += "\", jobTitle: \"";
                     strMap += user.jobTitle;
                     strMap += "\", trioLed: \"";
-                    strMap += user.trioLed;
-                    strMap += "\", linkedInUrl: \"";
-                    strMap += user.linkedInUrl;
+                    strMap += user.trio;
                     strMap += "\"}";
                 }
             }
@@ -280,7 +294,6 @@
         $("#updateManagerUPN").val(userMap[alias].managerPrincipalName);
         $("#updateJobTitle").val(userMap[alias].jobTitle);
         $("#updateTrioLed").val(userMap[alias].trioLed);
-        $("#updateLinkedInUrl").val(userMap[alias].linkedInUrl);
         $("#createManagerUPN").val(userMap[alias].userPrincipalName);
     }
     function hoverOut(eventObject) {

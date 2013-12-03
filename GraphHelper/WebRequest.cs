@@ -34,6 +34,21 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
         public AzureADAuthentication aadAuthentication;
 
+        public string getAuthHeader()
+        {
+            string strAuthHeader = "Authorization: ";
+            bool bHardcodedToNova = true;
+            if (bHardcodedToNova)
+            {
+                strAuthHeader += "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjBHUkJ0TVdGaG83Xy1xQmVNU0E1VlBVNXBjTSJ9.eyJhdWQiOiIwMDAwMDAwMi0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDAiLCJpc3MiOiIwMDAwMDAwMS0wMDAwLTAwMDAtYzAwMC0wMDAwMDAwMDAwMDBAMDg4NGVhMDYtYzAyNy00ZTM5LWJiYmMtMTVjZmE0M2ZmNTljIiwibmJmIjoiMTM4NTY3NjYxOSIsImV4cCI6IjEzODgyNjg2MTkiLCJvaWQiOiJmZDU4YTgxNy1mMzgwLTRmZmQtOTk3My00NzMzNTU3NGY0NGMiLCJ0aWQiOiIwODg0ZWEwNi1jMDI3LTRlMzktYmJiYy0xNWNmYTQzZmY1OWMifQ.DUU9gNhJ3_h5enHWW5ZL8APWDBuu1mUmoXFU8CvQcO2ytaMLk6KAGvFbPy-8mFdaak-MQ-yZ9jqoKYtAEDR2D_nqPwJGGQn32Krg3gtEwLIUCxSTX3-RShiTIWH9t0b4xwvn3Q8XjT1CQWrKvXhb_4kY3MNno4xeOt9EOlSEdynWgTdyKAmTSsoQMtmff0Jj6bUB-VbMM76WG04FlrAuFTc-6M09uPCaqp-qU8cYQFO5oyNHgfKRMpEjEZYauulECO_i3PHR4_K6EEQkBXG0kd9Zy_nJBFYYm3kiMaGPK8YKfYaTkT7hOyPVEwrr0FY1LODKODx3dsJkx874c5KgcQ";
+            }
+            else
+            {
+                strAuthHeader += this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            }
+            return strAuthHeader;
+        }
+
         public AadUser getUser(string userId)
         {
             // check if token is expired or about to expire in 2 minutes
@@ -41,9 +56,9 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
             //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
-            
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
-                       
+
+            string authnHeader = getAuthHeader();
+        
             string uri = this.baseGraphUri + "/users/" + userId + "?" + this.apiVersion;
 
             try
@@ -85,7 +100,8 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
+
             string uri = this.baseGraphUri + "/users/" + userId + "/manager" + "?" + this.apiVersion;
 
             try
@@ -125,7 +141,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/users/" + userId + "/directReports" + "?" + this.apiVersion;
 
@@ -166,7 +182,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/users/" + userId + "/memberOf" + "?" + this.apiVersion;
 
@@ -210,7 +226,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/users" + "?" + this.apiVersion;
 
@@ -264,7 +280,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/users" + "?$top=" + pageSize.ToString()
                          + "&$filter=" + filter.objectProperty + " " + filter.operand + " '" + filter.propertyValue + "'"
@@ -318,7 +334,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/users" + "?$top=" + pageSize.ToString() + "&" + this.apiVersion;
 
@@ -371,7 +387,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/" + nextLink + "&" + this.apiVersion;
 
@@ -425,7 +441,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/" + nextLink + "&$top=" + pageSize.ToString() + "&" + this.apiVersion;
 
@@ -480,7 +496,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = "";
             if (nextLink == "" || nextLink == null)
@@ -538,7 +554,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/users/" + userId + "/thumbnailPhoto" + "?" + this.apiVersion;
 
@@ -584,7 +600,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/users/" + userId + "/thumbnailPhoto" + "?" + this.apiVersion;
 
@@ -651,7 +667,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/groups/" + groupId + "?" + this.apiVersion;
 
@@ -694,7 +710,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/groups" + "?" + this.apiVersion;
 
@@ -746,7 +762,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/groups" + "?$top=" + pageSize.ToString() + "&" + this.apiVersion;
 
@@ -798,7 +814,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/" + nextLink + "&$top=" + pageSize.ToString() + "&" + this.apiVersion;
 
@@ -851,7 +867,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/contacts" + "?$top=" + pageSize.ToString() + "&" + this.apiVersion;
 
@@ -902,7 +918,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/" + nextLink + "&$top=" + pageSize.ToString() + "&" + this.apiVersion;
 
@@ -951,7 +967,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/contacts/" + contactId + "?" + this.apiVersion;
 
@@ -992,7 +1008,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/groups/" + groupId + "/members" + "?" + this.apiVersion;
 
@@ -1033,7 +1049,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             if (objectType.ToLower() == "group" || objectType.ToLower() == "groups")
                 objectType = "/groups";
@@ -1081,7 +1097,8 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+
+            string authnHeader = getAuthHeader();
 
             if (objectType.ToLower() == "group" || objectType.ToLower() == "groups")
                 objectType = "groups";
@@ -1134,7 +1151,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/roles" + "?" + this.apiVersion;
 
@@ -1186,7 +1203,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/roles/" + roleId + "?" + this.apiVersion;
 
@@ -1238,7 +1255,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/roles/" + roleId + "/members" + "?" + this.apiVersion;
 
@@ -1290,7 +1307,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/tenantDetails" + "?" + apiVersion;
 
@@ -1341,7 +1358,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/subscribedSkus" + "?" + apiVersion;
 
@@ -1394,7 +1411,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 return null;
 
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/users" + "?" + this.apiVersion;
 
@@ -1462,7 +1479,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 return false;
 
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
             string uri = "";
 
              if (method == "POST")
@@ -1536,7 +1553,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
             string uri = this.baseGraphUri + "/groups/" + group.objectId + "?" + this.apiVersion;
 
 
@@ -1611,7 +1628,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
             string uri = this.baseGraphUri + "/groups" + "?" + this.apiVersion;
             string method = "POST";
 
@@ -1700,7 +1717,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             string method = "POST";
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/users/" + user.userPrincipalName + "/assignLicense" + "?" + StringConstants.apiVersionPreview;
 
@@ -1849,7 +1866,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
        
             //Setup linked object
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -1917,7 +1934,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
             string uri = this.baseGraphUri + "/isMemberOf" + "?" + apiVersion;
 
             try
@@ -1987,7 +2004,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
             
                         
             string uri = this.baseGraphUri + "/users/" + memberId + "/checkMemberGroups" + "?" + apiVersion;
@@ -2060,7 +2077,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/users/" + memberId + "/getMemberGroups" + "?" + apiVersion;
 
@@ -2143,7 +2160,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 return null;
 
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/applications" + "?" + this.apiVersion;
 
@@ -2209,7 +2226,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
             string uri = this.baseGraphUri + "/applications/" + application.objectId + "?" + this.apiVersion;
 
 
@@ -2282,7 +2299,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/servicePrincipals/" + "?" + this.apiVersion;
 
@@ -2323,7 +2340,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/servicePrincipals/" + servicePrincipalObjectId + "?" + this.apiVersion;
 
@@ -2368,7 +2385,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 return null;
 
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/servicePrincipals" + "?" + this.apiVersion;
 
@@ -2435,7 +2452,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = getAuthHeader();
 
             string uri = this.baseGraphUri + "/servicePrincipals/" + servicePrincipal.objectId + "?" + this.apiVersion;
 
