@@ -58,6 +58,8 @@ namespace OrgChart.Controllers
                     case "Update":
                         // set display name and manager for given UPN
                         org.setUser(strUpdateUPN, strUpdateDisplayName, strUpdateManagerUPN, strUpdateJobTitle, strUpdateTrioLed, strUpdateSkypeContact);
+                        if (strUpdateTrioLed != "") strUpn = strUpdateManagerUPN;
+                        else if (strUpdateSkypeContact != "") strUpn = strUpdateUPN;
                         break;
                     case "Create":
                         // create user with given display name, UPN, and manager
