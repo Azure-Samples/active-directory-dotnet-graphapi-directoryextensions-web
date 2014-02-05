@@ -16,19 +16,15 @@ namespace OrgChart.Controllers
         public ActionResult Index()
         {
             // use ADAL library to connect to AAD tenant using fake parameters
-            string baseGraphUri = StringConstants.FAKEbaseGraphUri + StringConstants.FAKEtenant;
+            string baseGraphUri = StringConstants.baseGraphUri + StringConstants.tenant;
             GraphQuery graphCall = new GraphQuery();
-            graphCall.apiVersion = StringConstants.FAKEapiVersion;
+            graphCall.apiVersion = StringConstants.apiVersion;
             graphCall.baseGraphUri = baseGraphUri;
             // get token using OAuth Authorization Code
             AzureADAuthentication aadAuthentication = new AzureADAuthentication();
-            AuthenticationResult authenticationResult = aadAuthentication.GetAuthenticationResult(StringConstants.FAKEtenant,
+            AuthenticationResult authenticationResult = aadAuthentication.GetAuthenticationResult(StringConstants.tenant,
                                              StringConstants.clientId, StringConstants.clientSecret,
-                                             StringConstants.FAKEresource, StringConstants.FAKEauthenticationEndpoint);
-            // reset to NOVA endpoints
-            graphCall.apiVersion = StringConstants.apiVersion;
-            baseGraphUri = StringConstants.baseGraphUri + StringConstants.tenant;
-            graphCall.baseGraphUri = baseGraphUri;
+                                             StringConstants.resource, StringConstants.authenticationEndpoint);
             if (authenticationResult != null)
             {
                 ViewBag.Message = "Authentication succeeded!";

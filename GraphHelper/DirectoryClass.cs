@@ -73,6 +73,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         [DataMember] public string preferredLanguage { get; set; } //" Type="Edm.String" />
         [DataMember] public List<provisionedPlan> provisionedPlans { get; internal set; } //" Type="Collection(Microsoft.WindowsAzure.ActiveDirectory.ProvisionedPlan)" Nullable="false" />
         [DataMember] public string usageLocation { get; set; } //" Type="Edm.String" />
+        
         [DataMember (Name = "6efdc23e73e548fa9d12a599308d821c-trio") ]
         public string trio { get; set; } //" Type="Edm.String" />
         [DataMember(Name = "6efdc23e73e548fa9d12a599308d821c-skype")]
