@@ -73,10 +73,10 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         [DataMember] public string preferredLanguage { get; set; } //" Type="Edm.String" />
         [DataMember] public List<provisionedPlan> provisionedPlans { get; internal set; } //" Type="Collection(Microsoft.WindowsAzure.ActiveDirectory.ProvisionedPlan)" Nullable="false" />
         [DataMember] public string usageLocation { get; set; } //" Type="Edm.String" />
-        
-        [DataMember (Name = "6efdc23e73e548fa9d12a599308d821c-trio") ]
+
+        [DataMember(Name = "extension_33b6cec17aa1457495251f73a7c3b6e6_trio")]
         public string trio { get; set; } //" Type="Edm.String" />
-        [DataMember(Name = "6efdc23e73e548fa9d12a599308d821c-skype")]
+        [DataMember(Name = "extension_33b6cec17aa1457495251f73a7c3b6e6_skype")]
         public string skype { get; set; } //" Type="Edm.String" />
     }
 
