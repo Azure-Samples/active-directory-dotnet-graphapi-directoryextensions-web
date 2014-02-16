@@ -241,6 +241,7 @@
     AadExtendedUser previousUser = null;
     for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count; i++)
     {
+        // each level could consist of one or more (in case of trio) users
         foreach (AadExtendedUser extendedUser in ViewBag.ancestorsAndMainPerson[i])
         {
             if (strMap != "") { strMap += ","; }
@@ -250,14 +251,7 @@
             strMap += "\", userPrincipalName: \"";
             strMap += extendedUser.userPrincipalName;
             strMap += "\", managerPrincipalName: \"";
-            if (previousUser != null)
-            {
-                strMap += previousUser.userPrincipalName;
-            }
-            else
-            {
-                strMap += "NO MANAGER";
-            }
+            strMap += extendedUser.managerUserPrincipalName;
             strMap += "\", jobTitle: \"";
             strMap += extendedUser.jobTitle;
             strMap += "\", trioLed: \"";
@@ -270,19 +264,8 @@
     }
     foreach (List<AadExtendedUser> directList in ViewBag.directsOfDirects)
     {
-        AadExtendedUser thisManager = null;
         foreach (AadExtendedUser user in directList)
         {
-            string strManagerPrincipalName;
-            if (thisManager == null)
-            {
-                thisManager = user;
-                strManagerPrincipalName = previousUser.userPrincipalName;
-            }
-            else
-            {
-                strManagerPrincipalName = thisManager.userPrincipalName;
-            }
             if (strMap != "") { strMap += ","; }
             strMap += user.mailNickname;
             strMap += ": { displayName: \"";
@@ -290,7 +273,7 @@
             strMap += "\", userPrincipalName: \"";
             strMap += user.userPrincipalName;
             strMap += "\", managerPrincipalName: \"";
-            strMap += strManagerPrincipalName;
+            strMap += user.managerUserPrincipalName;
             strMap += "\", jobTitle: \"";
             strMap += user.jobTitle;
             strMap += "\", trioLed: \"";

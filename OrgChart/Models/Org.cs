@@ -9,7 +9,7 @@ namespace OrgChart.Models
 {
     public class AadExtendedUser : AadUser
     {
-        public AadExtendedUser(AadUser user)
+        public AadExtendedUser(AadUser user, string managerUPN)
         {
             accountEnabled = user.accountEnabled;
             assignedLicenses = user.assignedLicenses;
@@ -48,8 +48,11 @@ namespace OrgChart.Models
             skype = user.skype;
 
             isManager = false;
+            managerUserPrincipalName = managerUPN;
         }
         public bool isManager { get; set; }
+        public string managerUserPrincipalName { get; set; }
+
     }
 
     public class Org
@@ -84,7 +87,7 @@ namespace OrgChart.Models
             AadUser user = graphCall.getUser(strUpdateUPN);
             bool bPass = graphCall.modifyUser("DELETE", user);
         }
-        // list with main person as the last item in list
+        // list with main person (or main trio) as the last item in list
         public List<List<AadExtendedUser>> getAncestorsAndMain(String strUPN, bool bTrio)
         {
             List<List<AadExtendedUser>> returnedListOfLists = new List<List<AadExtendedUser>>();
@@ -93,11 +96,13 @@ namespace OrgChart.Models
             string[] arrayUPN = strUPN.Split(',');
             for (int idxTrio = 0; idxTrio < arrayUPN.Length; idxTrio++)
             {
-                // retrieve graph node for this person from graph
+                // retrieve graph node for this person (or for each trio member) from graph
                 String strMainUPN = arrayUPN[idxTrio];
                 AadUser graphUser = graphCall.getUser(strMainUPN);
 
-                // enumerate graph users from the main person to the root
+                // TODO: this logic is dependent on trios being properly filled in at each level of hierarchy
+
+                // enumerate graph users from the main person (or from each trio member) to the root
                 int idxAncestorOrMain = 0;
                 while (graphUser != null)
                 {
@@ -106,12 +111,14 @@ namespace OrgChart.Models
                     {
                         returnedListOfLists.Insert(0, new List<AadExtendedUser>());
                     }
-                    // create new extended user with info from graph and neo4j
-                    AadExtendedUser extendedUser = new AadExtendedUser(graphUser);
+                    // get next graph user
+                    AadUser graphUserParent = graphCall.getUsersManager(graphUser.userPrincipalName);
+                    // create new extended user with info from graph
+                    AadExtendedUser extendedUser = new AadExtendedUser(graphUser, (graphUserParent != null) ? graphUserParent.userPrincipalName : "NO MANAGER");
                     // insert new extended user at end of the correct AncestorOrMain trio list
                     if (bTrio && extendedUser.trio != null && extendedUser.trio != "")
                     {
-                        // if trio mode and there is a trio, add to list every time
+                        // trio mode and there is a trio, add to list every time
                         returnedListOfLists.ElementAt(returnedListOfLists.Count - idxAncestorOrMain - 1).Add(extendedUser);
                     }
                     else if (idxTrio == 0)
@@ -119,21 +126,26 @@ namespace OrgChart.Models
                         // otherwise, this user not part of a trio, just add once (the same pass that list is added)
                         returnedListOfLists.ElementAt(returnedListOfLists.Count - idxAncestorOrMain - 1).Add(extendedUser);
                     }
-                    // get next graph user
-                    graphUser = graphCall.getUsersManager(graphUser.userPrincipalName);
+                    // set next graph user
+                    graphUser = graphUserParent;
                     // increment the ancestor level
                     idxAncestorOrMain++;
                 }
             }
             return returnedListOfLists;
         }
-        // list with ICs as single person lists and leads as multiple person lists
+        // get subordinates list of lists with ICs as single person lists and leads as multiple person lists
         public List<List<AadExtendedUser>> getDirectsOfDirects(string strUPN, bool bTrio)
         {
             List<List<AadExtendedUser>> returnedListOfLists = new List<List<AadExtendedUser>>();
 
             // split comma delimited UPN list into UPNs
             string[] arrayUPN = strUPN.Split(',');
+
+            // TODO: if in trio mode and only one passed member, do filtered query for rest of trio
+            // TODO: more efficient to do this filtered query for rest of trio in getAncestorsAndMain
+
+            // now retrieve direct reports for single person or trio
             for (int i = 0; i < arrayUPN.Length; i++)
             {
                 String strMainUPN = arrayUPN[i];
@@ -145,21 +157,21 @@ namespace OrgChart.Models
                         // add a new list at front of list of lists
                         returnedListOfLists.Insert(0, new List<AadExtendedUser>());
                         // insert the direct report at front of newly inserted list
-                        AadExtendedUser extendedDirectReport = new AadExtendedUser(directReport);
+                        AadExtendedUser extendedDirectReport = new AadExtendedUser(directReport, strMainUPN);
                         returnedListOfLists.ElementAt(0).Insert(0, extendedDirectReport);
-                        // get direct reports of the direct report
+                        // get direct reports of the direct report (and get manager state to color code managers among the directs)
                         AadUsers directsOfDirects = graphCall.getUsersDirectReports(directReport.userPrincipalName);
                         extendedDirectReport.isManager = (directsOfDirects.user.Count > 0 ? true : false);
                         foreach (AadUser directOfDirect in directsOfDirects.user)
                         {
                             // add each direct of direct to the end of the list
-                            AadExtendedUser extendedDirectOfDirect = new AadExtendedUser(directOfDirect);
+                            AadExtendedUser extendedDirectOfDirect = new AadExtendedUser(directOfDirect, directReport.userPrincipalName);
                             returnedListOfLists.ElementAt(0).Add(extendedDirectOfDirect);
                         }
                     }
                 }
             }
-            // sort the list of lists by trioled
+            // sort the list of lists by trio
             //http://stackoverflow.com/questions/3309188/c-net-how-to-sort-a-list-t-by-a-property-in-the-object
             returnedListOfLists.Sort(delegate(List<AadExtendedUser> x, List<AadExtendedUser> y)
             {
