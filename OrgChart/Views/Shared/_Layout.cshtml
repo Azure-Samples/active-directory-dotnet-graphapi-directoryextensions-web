@@ -16,8 +16,15 @@
                 </div>
                 <div class="float-right">
                     <section id="login">
-                       Hello, <span class="username">@User.Identity.Name</span>!
-                    </section>
+                      @if (Request.IsAuthenticated)
+                      {  
+                        <text> <span class="username">Hello, @User.Identity.Name!</span>
+                        @Html.ActionLink("Signout","SignOut", "SignOut")</text>
+                      }
+                      else {
+                        <text><span class="username">You are not authenticated.</span> </text>
+                      }
+                    </section> 
                     <nav>
                         <ul id="menu">
                             <li>@Html.ActionLink("Home", "Index", "Home")</li>

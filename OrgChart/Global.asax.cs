@@ -6,6 +6,8 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using System.Configuration;
+using System.IdentityModel.Tokens;
 
 namespace OrgChart
 {
@@ -21,6 +23,14 @@ namespace OrgChart
         //    Context.RewritePath(realUrl);
         //}
 
+        protected void RefreshValidationSettings()
+        {
+            string configPath = AppDomain.CurrentDomain.BaseDirectory + "\\" + "Web.config";
+            string metadataAddress =
+                          ConfigurationManager.AppSettings["ida:FederationMetadataLocation"];
+            ValidatingIssuerNameRegistry.WriteToConfig(metadataAddress, configPath);
+        }
+
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
@@ -29,6 +39,7 @@ namespace OrgChart
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+            RefreshValidationSettings();
         }
     }
 }
