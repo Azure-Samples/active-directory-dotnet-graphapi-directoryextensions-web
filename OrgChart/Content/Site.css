@@ -170,8 +170,7 @@ footer {
         text-decoration: none;
     }
 
-    span.username {
-        color: white;
+    #login a.username {
         background: none;
         margin: 0;
         padding: 0;
