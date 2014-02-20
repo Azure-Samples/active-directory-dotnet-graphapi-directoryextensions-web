@@ -45,6 +45,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             string trioExtension = extensionPropertyPrefix;
             string strippedClientId = clientId.Replace("-", "");
             trioExtension += strippedClientId;
+            trioExtension += "_";
             trioExtension += strExtensionName;
             return trioExtension;
         }
