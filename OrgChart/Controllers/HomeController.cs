@@ -7,6 +7,8 @@ using Microsoft.WindowsAzure.ActiveDirectory.GraphHelper;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using OrgChart.Models;
 using System.Collections.Specialized;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 namespace OrgChart.Controllers
 {
@@ -35,14 +37,25 @@ namespace OrgChart.Controllers
                 graphCall.aadAuthentication.aadAuthenticationResult = authenticationResult;
                 // configure appropriate model                
                 OrgChart.Models.Org org = new OrgChart.Models.Org(graphCall);
+                // retrieve user containing all extensions
+                ViewBag.extensionRegistryUser = org.getUserJson(StringConstants.getExtensionRegistryUser());
                 // process any form submission requests
                 string strFormAction = Request["submitButton"];
-                string strUpdateUPN = Request["updateUPN"];
-                string strUpdateDisplayName = Request["updateDisplayName"];
-                string strUpdateManagerUPN = Request["updateManagerUPN"];
-                string strUpdateJobTitle = Request["updateJobTitle"];
-                string strUpdateTrioLed = Request["updateTrioLed"];
-                string strUpdateSkypeContact = Request["updateSkypeContact"];
+                // setup JObject for setuser
+                JObject graphUser = new JObject();
+                graphUser["userPrincipalName"] = Request["updateUPN"];
+                graphUser["displayName"] = Request["updateDisplayName"];
+                graphUser["managerUserPrincipalName"] = Request["updateManagerUPN"];
+                graphUser["jobTitle"] = Request["updateJobTitle"];
+                // enumerate extension attributes from JSON object
+                foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
+                {
+                    if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix))
+                    {
+                        graphUser[property.Name] = Request[property.Name];
+                    }
+                }
+                // setup variables for create user 
                 string strCreateUPN = Request["createUPN"];
                 string strCreateMailNickname = Request["createMailNickname"];
                 string strCreateDisplayName = Request["createDisplayName"];
@@ -52,9 +65,9 @@ namespace OrgChart.Controllers
                 {
                     case "Update":
                         // set display name, manager, job title, trio, skype for given UPN
-                        org.setUser(strUpdateUPN, strUpdateDisplayName, strUpdateManagerUPN, strUpdateJobTitle, strUpdateTrioLed, strUpdateSkypeContact);
-                        if (strUpdateTrioLed != "") strUpn = strUpdateManagerUPN; // if we just updated trio, show the manager
-                        else if (strUpdateSkypeContact != "") strUpn = strUpdateUPN; // if we just updated skype, show the user
+                        org.setUser(graphUser);
+                        if (graphUser[StringConstants.getExtension("trio")] != null) strUpn = Request["updateManagerUPN"]; // if we just updated trio, show the manager
+                        else if (graphUser[StringConstants.getExtension("skype")] != null) strUpn = Request["updateUPN"]; // if we just updated skype, show the user
                         break;
                     case "Create":
                         // create user with given display name, UPN, and manager
@@ -63,7 +76,7 @@ namespace OrgChart.Controllers
                         break;
                     case "Delete":
                         // delete user with given UPN
-                        org.deleteUser(strUpdateUPN);
+                        org.deleteUser(Request["updateUPN"]);
                         break;
                 }
                 if (strUpn == null)

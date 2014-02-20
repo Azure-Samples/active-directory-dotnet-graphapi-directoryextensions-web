@@ -21,19 +21,19 @@
     </section>
 }
 
-@if(ViewBag.ancestorsAndMainPerson != null)
+@if (ViewBag.ancestorsAndMainPerson != null)
 {
-<table id="Splitter"><tr>
-<td>
+<table id="Splitter">
+<tr>
 <table id="ManagerList">
 	<tr>
 		<th></th>
         <th>displayName (mailNickname)<br />jobTitle</th>
     </tr>
-@for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count-1; i++)
+@for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count - 1; i++)
 {
 	<tr class="highlightable">
-    @foreach(JObject user in ViewBag.ancestorsAndMainPerson[i])
+    @foreach (JObject user in ViewBag.ancestorsAndMainPerson[i])
     {
 		<td style="display:none">@user["mailNickname"]</td>
         <td class="tdPersonDescription">
@@ -54,10 +54,10 @@
 <table id="MainPerson">
 	<tr class="highlightable">
 @{
-    List<List<JObject>> ancestorsAndMainPerson = ViewBag.ancestorsAndMainPerson;
-    if(ancestorsAndMainPerson.Count > 0)
-    {
-    foreach(JObject user in ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1])
+List<List<JObject>> ancestorsAndMainPerson = ViewBag.ancestorsAndMainPerson;
+if (ancestorsAndMainPerson.Count > 0)
+{
+    foreach (JObject user in ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count - 1])
     {
 		<td style="display:none">@user["mailNickname"]</td>
 		<td class="tdPersonImage">
@@ -88,7 +88,7 @@
             }
 		</td>
     }
-    }
+}
 }
     
 	</tr>
@@ -97,98 +97,99 @@
 <table id="OrgColumns">
 <tr>
 @{
-    int nextRowStart = 0;
-    int count = ViewBag.directsOfDirects.Count;
-    for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
+int MAXROW = 9;
+int nextRowStart = 0;
+int count = ViewBag.directsOfDirects.Count;
+for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
+{
+    List<JObject> directList = ViewBag.directsOfDirects[j];
+    // at each row start, read ahead to fill in trio row if necessary and determine next row start
+    if (j == nextRowStart)
     {
-        List<JObject> directList = ViewBag.directsOfDirects[j];
-        // at each row start, read ahead to fill in trio row if necessary and determine next row start
-        if (j == nextRowStart)
+        // insert a row break if we are at the natural start of a new row
+        if (j != 0)
         {
-            // insert a row break if we are at the natural start of a new row
-            if (j != 0)
-            {
                 @:</tr><tr>
             }
-            // read ahead 9+1 directs to emit the row of spanning trio columns
-            String previousTrio = null;
-            String previousUPN = null;
-            int colspan = 1;
-            for (int k = j; k < count; k++)
+        // read ahead 9+1 directs to emit the row of spanning trio columns
+        String previousTrio = null;
+        String previousUPN = null;
+        int colspan = 1;
+        for (int k = j; k < count; k++)
+        {
+            // if we have now processed one more direct report than we want on a row, break out
+            if ((k - j) > MAXROW)
             {
-                // if we have now processed one more direct report than we want on a row, break out
-                if ((k - j) > 9)
+                break;
+            }
+
+            List<JObject> dirList = ViewBag.directsOfDirects[k];
+            String newTrio = (String)dirList[0][StringConstants.getExtension("trio")];
+            String newUPN = (String)dirList[0]["userPrincipalName"];
+            if (previousTrio == null)
+            {
+                // first pass, initialize previous trio
+                previousTrio = newTrio;
+                previousUPN = newUPN;
+            }
+            else if (newTrio == previousTrio)
+            {
+                // encountered repeat trio, increment colspan and add to UPN value
+                colspan++;
+                previousUPN += ",";
+                previousUPN += newUPN;
+                // allow row to extend to end of terminating sequence of non-trio leaders
+                if (newTrio == "")
                 {
-                    break;
-                }
-                
-                List<JObject> dirList = ViewBag.directsOfDirects[k];
-                String newTrio = (String)dirList[0][StringConstants.getExtension("trio")];
-                String newUPN = (String)dirList[0]["userPrincipalName"];
-                if (previousTrio == null)
-                {
-                    // first pass, initialize previous trio
-                    previousTrio = newTrio;
-                    previousUPN = newUPN;
-                }
-                else if (newTrio == previousTrio)
-                {
-                    // encountered repeat trio, increment colspan and add to UPN value
-                    colspan++;
-                    previousUPN += ",";
-                    previousUPN += newUPN;
-                    // allow row to extend to end of terminating sequence of non-trio leaders
-                    if (newTrio == "")
+                    if ((k - j) >= MAXROW)
                     {
-                        if ((k - j) >= 9)
-                        {
-                            // processing one past last item on prior row, start new row here (even if last in list)
-                            nextRowStart = k;
-                            break;
-                        }
-                        if (k == (count - 1))
-                        {
-                            // processing last in list, don't start new line
-                            nextRowStart = k + 1;
-                            break;
-                        }
+                        // processing one past last item on prior row, start new row here (even if last in list)
+                        nextRowStart = k;
+                        break;
+                    }
+                    if (k == (count - 1))
+                    {
+                        // processing last in list, don't start new line
+                        nextRowStart = k + 1;
+                        break;
                     }
                 }
-                if (newTrio != previousTrio || (k == (count - 1) && (k - j) < 9))
+            }
+            if (newTrio != previousTrio || (k == (count - 1) && (k - j) < MAXROW))
+            {
+                // trio terminated by new trio or end of list (without exceeding max row length)
+                if (previousTrio != "")  // CAN WE REMOVE THIS? WHEN WOULD IT HAPPEN?
                 {
-                    // trio terminated by new trio or end of list (without exceeding max row length)
-                    if (previousTrio != "")  // CAN WE REMOVE THIS? WHEN WOULD IT HAPPEN?
-                    {
                         <td class="tdTrio" colspan ="@(colspan)">
                         <a class="tdTrio" href="/?upn=@previousUPN&trio=true">@previousTrio</a>
                         </td>
-                    }
-                    // if we are last in the list and have a trio that is different from previous, we are 1 member trio and terminator above won't get hit
-                    if (k == (count - 1) && newTrio != "" && newTrio != previousTrio)
-                    {
+                }
+                // if we are last in the list and have a trio that is different from previous, we are 1 member trio and terminator above won't get hit
+                if (k == (count - 1) && newTrio != "" && newTrio != previousTrio)
+                {
                         <td class="tdTrio" colspan = 1>
                         <a class="tdTrio" href="/?upn=@newUPN&trio=true">@newTrio</a>
                         </td>
-                    }
-                    // reset if terminated by new trio
-                    if (newTrio != previousTrio)
-                    {
-                        // reset colspan
-                        colspan = 1;
-                        // next row starts here unless next trio completes before row termination
-                        nextRowStart = k;
-                        // store new trio
-                        previousTrio = newTrio;
-                        previousUPN = newUPN;
-                    }
-                    if (k == (count - 1) && (k - j) < 9)
-                    {
-                        // processing last in list, and the line isn't too long, don't start new line
-                        nextRowStart = k + 1;
-                    }
+                }
+                // reset if terminated by new trio
+                if (newTrio != previousTrio)
+                {
+                    // reset colspan
+                    colspan = 1;
+                    // next row starts here unless next trio completes before row termination
+                    nextRowStart = k;
+                    // store new trio
+                    previousTrio = newTrio;
+                    previousUPN = newUPN;
+                }
+                if (k == (count - 1) && (k - j) < MAXROW)
+                {
+                    // processing last in list, and the line isn't too long, don't start new line
+                    nextRowStart = k + 1;
                 }
             }
-            // insert a row break to close out spanning header column
+        }
+        // insert a row break to close out spanning header column
             @:</tr><tr>
         }
         <td>
@@ -209,21 +210,27 @@
                 }
             </table>
         </td>
-    }
+}
 }
 </tr>
 </table>
-</td>
+</tr>
+<tr>
 <td class="tdFormBackground">
 	<form id="MainForm" action="/" method="post">
         <fieldset> <legend>Update/Delete A User</legend>
-			<!-- TODO: enumerate attributes from JSON object to display vs. hardcoding -->
             <div><label for="updateUPN"><pre>UPN: </pre></label> <input type="text" id="updateUPN" name="updateUPN"></div>
 			<div><label for="updateDisplayName"><pre>displayName: </pre></label> <input type="text" id="updateDisplayName" name="updateDisplayName"></div>
 			<div><label for="updateManagerUPN"><pre>manager: </pre></label> <input type="text" id="updateManagerUPN" name="updateManagerUPN"></div>
 			<div><label for="updateJobTitle"><pre>title: </pre></label> <input type="text" id="updateJobTitle" name="updateJobTitle"></div>
-			<div><label for="updateTrioLed"><pre>trio: </pre></label> <input type="text" id="updateTrioLed" name="updateTrioLed"></div>
-			<div><label for="updateSkypeContact"><pre>Skype: </pre></label> <input type="text" id="updateSkypeContact" name="updateSkypeContact"></div>
+			<!-- enumerate extension attributes from JSON object -->
+            @foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
+            {
+                if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix))
+                {
+                    @:<div><label for="@property.Name"><pre>@property.Name: </pre></label> <input type="text" id="@property.Name" name="@property.Name"></div>
+                }
+            }			
             <button type="submit" id="submitUpdate" name="submitButton" value="Update">Update</button>
 		    <button type="submit" id="submitDelete" name="submitButton" value="Delete">Delete</button>
 		</fieldset>
@@ -237,54 +244,69 @@
         </fieldset>
 	</form>
 </td>
-</tr></table>
+</tr>
+</table>
 <script type="text/javascript">
     var userMap = {
         @{
-    string strMap = "";
-    for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count; i++)
-    {
-        // each level could consist of one or more (in case of trio) users
-        foreach (JObject user in ViewBag.ancestorsAndMainPerson[i])
-        {
-            if (strMap != "") { strMap += ","; }
-            strMap += user["mailNickname"];
-            strMap += ": { displayName: \"";
-            strMap += user["displayName"];
-            strMap += "\", userPrincipalName: \"";
-            strMap += user["userPrincipalName"];
-            strMap += "\", managerPrincipalName: \"";
-            strMap += user["managerUserPrincipalName"];
-            strMap += "\", jobTitle: \"";
-            strMap += user["jobTitle"];
-            strMap += "\", trioLed: \"";
-            strMap += user[StringConstants.getExtension("trio")];
-            strMap += "\", skypeContact: \"";
-            strMap += user[StringConstants.getExtension("skype")];
-            strMap += "\"}";
-        }
-    }
-    foreach (List<JObject> directList in ViewBag.directsOfDirects)
-    {
-        foreach (JObject user in directList)
-        {
-            if (strMap != "") { strMap += ","; }
-            strMap += user["mailNickname"];
-            strMap += ": { displayName: \"";
-            strMap += user["displayName"];
-            strMap += "\", userPrincipalName: \"";
-            strMap += user["userPrincipalName"];
-            strMap += "\", managerPrincipalName: \"";
-            strMap += user["managerUserPrincipalName"];
-            strMap += "\", jobTitle: \"";
-            strMap += user["jobTitle"];
-            strMap += "\", trioLed: \"";
-            strMap += user[StringConstants.getExtension("trio")];
-            strMap += "\", skypeContact: \"";
-            strMap += user[StringConstants.getExtension("skype")];
-            strMap += "\"}";
-        }
-    }
+            string strMap = "";
+            for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count; i++)
+            {
+                // each level could consist of one or more (in case of trio) users
+                foreach (JObject user in ViewBag.ancestorsAndMainPerson[i])
+                {
+                    if (strMap != "") { strMap += ","; }
+                    strMap += user["mailNickname"];
+                    strMap += ": { displayName: \"";
+                    strMap += user["displayName"];
+                    strMap += "\", userPrincipalName: \"";
+                    strMap += user["userPrincipalName"];
+                    strMap += "\", managerPrincipalName: \"";
+                    strMap += user["managerUserPrincipalName"];
+                    strMap += "\", jobTitle: \"";
+                    strMap += user["jobTitle"];
+                    // enumerate extension attributes from JSON object
+                    foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
+                    {
+                        if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix))
+                        {
+                            strMap += "\", ";
+                            strMap += property.Name;
+                            strMap += ": \"";
+                            strMap += user[property.Name];
+                        }
+                    }
+                    strMap += "\"}";
+                }
+            }
+            foreach (List<JObject> directList in ViewBag.directsOfDirects)
+            {
+                foreach (JObject user in directList)
+                {
+                    if (strMap != "") { strMap += ","; }
+                    strMap += user["mailNickname"];
+                    strMap += ": { displayName: \"";
+                    strMap += user["displayName"];
+                    strMap += "\", userPrincipalName: \"";
+                    strMap += user["userPrincipalName"];
+                    strMap += "\", managerPrincipalName: \"";
+                    strMap += user["managerUserPrincipalName"];
+                    strMap += "\", jobTitle: \"";
+                    strMap += user["jobTitle"];
+                    // enumerate extension attributes from JSON object
+                    foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
+                    {
+                        if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix))
+                        {
+                            strMap += "\", ";
+                            strMap += property.Name;
+                            strMap += ": \"";
+                            strMap += user[property.Name];
+                        }
+                    }
+                    strMap += "\"}";
+                }
+            }
         }
         @MvcHtmlString.Create(strMap)
     };
@@ -299,8 +321,14 @@
         $("#updateDisplayName").val(userMap[alias].displayName);
         $("#updateManagerUPN").val(userMap[alias].managerPrincipalName);
         $("#updateJobTitle").val(userMap[alias].jobTitle);
-        $("#updateTrioLed").val(userMap[alias].trioLed);
-        $("#updateSkypeContact").val(userMap[alias].skypeContact);
+        // enumerate extension attributes from JSON object
+        @foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
+        {
+            if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix))
+            {
+                @:$("#@property.Name").val(userMap[alias].@property.Name);
+            }
+        }
         $("#createManagerUPN").val(userMap[alias].userPrincipalName);
     }
     function hoverOut(eventObject) {

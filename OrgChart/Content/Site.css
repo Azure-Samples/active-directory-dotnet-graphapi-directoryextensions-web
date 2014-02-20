@@ -406,9 +406,10 @@ aside {
 
 /* forms */
 fieldset {
-    margin: 0;
+    margin: auto;
     padding: 0;
     background: #e2e2e2;
+    width: 750px;
 }
 
 input, textarea {
@@ -418,10 +419,10 @@ input, textarea {
     border: 1px solid #e2e2e2;
     background: #fff;
     color: #333;
-    margin: 5px 0 6px 0;
+    margin: 5px 5px 6px 6px;
     padding: 5px;
-    width: 185px;
     vertical-align: middle;
+    width: 250px;
 }
 
 label{
@@ -429,12 +430,10 @@ label{
     overflow: hidden;
     vertical-align: middle;
     text-align: right;
-    width: 115px;
 }
 
 textarea {
     font-family: inherit;
-    width: 500px;
 }
 
     input:focus, textarea:focus {

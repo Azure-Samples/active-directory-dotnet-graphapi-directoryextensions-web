@@ -106,7 +106,6 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                         {
                             payload = reader.ReadToEnd();
                         }
-
                         return JObject.Parse(payload);
                     }
                 }

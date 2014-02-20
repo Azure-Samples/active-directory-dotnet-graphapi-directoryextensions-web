@@ -39,7 +39,6 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public const string redirectUri = "https://localhost";
 
         public const string extensionPropertyPrefix = "extension_";
-        
         static public string getExtension(string strExtensionName)
         {
             string trioExtension = extensionPropertyPrefix;
@@ -48,6 +47,12 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             trioExtension += "_";
             trioExtension += strExtensionName;
             return trioExtension;
+        }
+        static public string getExtensionRegistryUser()
+        {
+            string strAdmin = "admin@";
+            strAdmin += StringConstants.tenant;
+            return strAdmin;
         }
     }
 }

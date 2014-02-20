@@ -8,56 +8,6 @@ using Newtonsoft.Json;
 
 namespace OrgChart.Models
 {
-    public class AadExtendedUser : AadUser
-    {
-        public AadExtendedUser(AadUser user, string managerUPN)
-        {
-            accountEnabled = user.accountEnabled;
-            assignedLicenses = user.assignedLicenses;
-            //assignedPlans = user.assignedPlans; // no set provided
-            otherMails = user.otherMails;
-            passwordPolicies = user.passwordPolicies;
-            passwordProfile = user.passwordProfile;
-            preferredLanguage = user.preferredLanguage;
-            //provisionedPlans = user.provisionedPlans; // no set provided
-            usageLocation = user.usageLocation;
-            userPrincipalName = user.userPrincipalName;
-            city = user.city;
-            country = user.country;
-            department = user.department;
-            dirSyncEnabled = user.dirSyncEnabled;
-            displayName = user.displayName;
-            facsimileTelephoneNumber = user.facsimileTelephoneNumber;
-            givenName = user.givenName;
-            jobTitle = user.jobTitle;
-            lastDirSyncTime = user.lastDirSyncTime;
-            mail = user.mail;
-            mailNickname = user.mailNickname;
-            mobile = user.mobile;
-            objectId = user.objectId;
-            objectType = user.objectType;
-            ODataType = user.ODataType;
-            physicalDeliveryOfficeName = user.physicalDeliveryOfficeName;
-            postalCode = user.postalCode;
-            provisioningErrors = user.provisioningErrors;
-            //proxyAddresses = user.proxyAddresses; // no set provided
-            state = user.state;
-            streetAddress = user.streetAddress;
-            surname = user.surname;
-            telephoneNumber = user.telephoneNumber;
-            
-            // these no longer exist and are only accessed by calling getUserJson
-            //trio = user.trio;
-            //skype = user.skype;
-
-            isManager = false;
-            managerUserPrincipalName = managerUPN;
-        }
-        public bool isManager { get; set; }
-        public string managerUserPrincipalName { get; set; }
-
-    }
-
     public class Org
     {
         private GraphQuery graphCall;
@@ -67,9 +17,6 @@ namespace OrgChart.Models
         }
         public JObject createUser(string strCreateUPN, string strCreateMailNickname, string strCreateDisplayName, string strCreateManagerUPN, string strCreateJobTitle)
         {
-            string strTrioLed = null;
-            string strSkypeContact = null;
-
             AadUser user = new AadUser();
             user.userPrincipalName = strCreateUPN;
             user.displayName = strCreateDisplayName;
@@ -79,10 +26,16 @@ namespace OrgChart.Models
             user.passwordProfile.forceChangePasswordNextLogin = true;
             user.passwordProfile.password = "P0rsche911";
             AadUser newUser = graphCall.createUser(user);
+            // set manager
             JObject extendedUser = null;
             if (newUser != null)
             {
-                extendedUser = setUser(strCreateUPN, strCreateDisplayName, strCreateManagerUPN, strCreateJobTitle, strTrioLed, strSkypeContact);
+                JObject graphUser = new JObject();
+                graphUser["userPrincipalName"] = strCreateUPN;
+                graphUser["displayName"] = strCreateDisplayName;
+                graphUser["managerUserPrincipalName"] = strCreateManagerUPN;
+                graphUser["jobTitle"] = strCreateJobTitle;
+                extendedUser = setUser(graphUser);
             }
             return extendedUser;
         }
@@ -210,24 +163,41 @@ namespace OrgChart.Models
             }
             return userPrincipalName;
         }
-        public JObject setUser(string strUpdateUPN, string strUpdateDisplayName, string strUpdateManagerUPN, string strUpdateJobTitle, string strUpdateTrioLed, string strSkypeContact)
+        public JObject getUserJson(string strUpn)
+        {
+            return graphCall.getUserJson(strUpn);
+        }
+        public JObject setUser(JObject user)
         {
             // set new (or same) display name and job title
-            JObject graphUser = graphCall.getUserJson(strUpdateUPN);
-            graphUser["displayName"] = strUpdateDisplayName;
-            graphUser["jobTitle"] = strUpdateJobTitle;
-            graphUser[StringConstants.getExtension("trio")] = strUpdateTrioLed;
-            graphUser[StringConstants.getExtension("skype")] = strSkypeContact;
-            bool bPass = graphCall.modifyUserJson("PATCH", graphUser);
-            // set new (or same) manager if a valid manager
-            if (strUpdateManagerUPN != "NO MANAGER")
+            JObject graphUser = graphCall.getUserJson((string)user["userPrincipalName"]);
+            graphUser["displayName"] = user["displayName"];
+            graphUser["jobTitle"] = user["jobTitle"];
+            // enumerate extension attributes from JSON object
+            foreach (JProperty property in user.Properties())
             {
-                string updateManagerURI = graphCall.baseGraphUri + "/users/" + strUpdateUPN + "/$links/manager?" + graphCall.apiVersion;
-                AadUser manager = graphCall.getUser(strUpdateManagerUPN);
-                urlLink managerlink = new urlLink();
+                if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix))
+                {
+                    graphUser[property.Name] = user[property.Name];
+                }
+            }            
+            bool bPass = graphCall.modifyUserJson("PATCH", graphUser);
+            // set/clear manager
+            string updateManagerURI = graphCall.baseGraphUri + "/users/" + (string)user["userPrincipalName"] + "/$links/manager?" + graphCall.apiVersion;
+            urlLink managerlink = new urlLink();
+            string method;
+            if ((string)user["managerUserPrincipalName"] != "NO MANAGER")
+            {
+                AadUser manager = graphCall.getUser((string)user["managerUserPrincipalName"]);
                 managerlink.url = graphCall.baseGraphUri + "/directoryObjects/" + manager.objectId;
-                bPass = (bPass && graphCall.updateLink(updateManagerURI, "PUT", managerlink));
+                method = "PUT";
             }
+            else
+            {
+                managerlink.url = null;
+                method = "DELETE";
+            }
+            bPass = (bPass && graphCall.updateLink(updateManagerURI, method, managerlink));
             return graphUser;
         }
         
