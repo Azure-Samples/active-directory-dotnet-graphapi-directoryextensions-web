@@ -12,12 +12,14 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.IdentityModel.Clients;
 using Newtonsoft.Json;
 using ExtensionMethods;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 {
 
     public class GraphQuery
     {
+
         // Graph API version
         public string apiVersion;
 
@@ -27,16 +29,11 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         // The Graph service endpoint for a tenant
         public string baseGraphUri;
 
+     //   public string token;
+
         public AuthenticationResult aadAuthenticationResult;
 
         public AzureADAuthentication aadAuthentication;
-
-        public string getAuthHeader()
-        {
-            string strAuthHeader = "Authorization: ";
-            strAuthHeader += this.aadAuthentication.aadAuthenticationResult.AccessToken;
-            return strAuthHeader;
-        }
 
         public AadUser getUser(string userId)
         {
@@ -45,9 +42,9 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
             //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
-
-            string authnHeader = getAuthHeader();
-        
+            
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+                       
             string uri = this.baseGraphUri + "/users/" + userId + "?" + this.apiVersion;
 
             try
@@ -81,6 +78,53 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
         }
 
+        public JObject getUserJson(string userId)
+        {
+            // check if token is expired or about to expire in 2 minutes
+            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
+                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+
+            string uri = this.baseGraphUri + "/users/" + userId + "?" + this.apiVersion;
+
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+                System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
+
+                request.Headers.Add(authnHeader);
+                request.Method = "GET";
+                using (var response = request.GetResponse())
+                {
+                    using (var stream = response.GetResponseStream())
+                    {
+                        string payload;
+                        using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
+                        {
+                            payload = reader.ReadToEnd();
+                        }
+
+                        return JObject.Parse(payload);
+                    }
+                }
+            }
+
+            catch (WebException webException)
+            {
+                Console.WriteLine("Error: " + webException.Message);
+
+                var errorStream = webException.Response.GetResponseStream();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
+                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
+                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                return null;
+            }
+
+        }
+
         public AadUser getUsersManager(string userId)
         {
             // check if token is expired or about to expire in 2 minutes
@@ -89,8 +133,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = getAuthHeader();
-
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             string uri = this.baseGraphUri + "/users/" + userId + "/manager" + "?" + this.apiVersion;
 
             try
@@ -122,6 +165,52 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
+        public JObject getUsersManagerJson(string userId)
+        {
+            // check if token is expired or about to expire in 2 minutes
+            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
+                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string uri = this.baseGraphUri + "/users/" + userId + "/manager" + "?" + this.apiVersion;
+
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+                System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
+
+                request.Headers.Add(authnHeader);
+                request.Method = "GET";
+                using (var response = request.GetResponse())
+                {
+                    using (var stream = response.GetResponseStream())
+                    {
+                        string payload;
+                        using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
+                        {
+                            payload = reader.ReadToEnd();
+                        }
+
+                        return JObject.Parse(payload);
+                    }
+                }
+            }
+
+            catch (WebException webException)
+            {
+                Console.WriteLine("Error: " + webException.Message);
+
+                var errorStream = webException.Response.GetResponseStream();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
+                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
+                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                return null;
+            }
+
+        }
+
         public AadUsers getUsersDirectReports(string userId)
         {
             // check if token is expired or about to expire in 2 minutes
@@ -130,7 +219,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/users/" + userId + "/directReports" + "?" + this.apiVersion;
 
@@ -163,6 +252,50 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
+        public JObjects getUsersDirectReportsJson(string userId)
+        {
+            // check if token is expired or about to expire in 2 minutes
+            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
+                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+
+            string uri = this.baseGraphUri + "/users/" + userId + "/directReports" + "?" + this.apiVersion;
+
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+                System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
+
+                request.Headers.Add(authnHeader);
+                request.Method = "GET";
+                using (var response = request.GetResponse())
+                {
+                    using (var stream = response.GetResponseStream())
+                    {
+                        string payload;
+                        using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
+                        {
+                            payload = reader.ReadToEnd();
+                        }
+                        return JObject.Parse(payload).ToObject<JObjects>();
+                    }
+                }
+            }
+
+            catch (WebException webException)
+            {
+                Console.WriteLine("Error: " + webException.Message);
+                var errorStream = webException.Response.GetResponseStream();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
+                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
+                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                return null;
+            }
+        }
+
         public AadGroups getUsersGroupMembership(string userId)
         {
             // check if token is expired or about to expire in 2 minutes
@@ -171,7 +304,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/users/" + userId + "/memberOf" + "?" + this.apiVersion;
 
@@ -215,7 +348,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/users" + "?" + this.apiVersion;
 
@@ -269,7 +402,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/users" + "?$top=" + pageSize.ToString()
                          + "&$filter=" + filter.objectProperty + " " + filter.operand + " '" + filter.propertyValue + "'"
@@ -323,7 +456,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/users" + "?$top=" + pageSize.ToString() + "&" + this.apiVersion;
 
@@ -376,7 +509,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/" + nextLink + "&" + this.apiVersion;
 
@@ -430,7 +563,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/" + nextLink + "&$top=" + pageSize.ToString() + "&" + this.apiVersion;
 
@@ -485,7 +618,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = "";
             if (nextLink == "" || nextLink == null)
@@ -543,7 +676,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/users/" + userId + "/thumbnailPhoto" + "?" + this.apiVersion;
 
@@ -589,7 +722,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/users/" + userId + "/thumbnailPhoto" + "?" + this.apiVersion;
 
@@ -656,7 +789,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/groups/" + groupId + "?" + this.apiVersion;
 
@@ -699,7 +832,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/groups" + "?" + this.apiVersion;
 
@@ -751,7 +884,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/groups" + "?$top=" + pageSize.ToString() + "&" + this.apiVersion;
 
@@ -803,7 +936,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/" + nextLink + "&$top=" + pageSize.ToString() + "&" + this.apiVersion;
 
@@ -856,7 +989,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/contacts" + "?$top=" + pageSize.ToString() + "&" + this.apiVersion;
 
@@ -907,7 +1040,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/" + nextLink + "&$top=" + pageSize.ToString() + "&" + this.apiVersion;
 
@@ -956,7 +1089,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/contacts/" + contactId + "?" + this.apiVersion;
 
@@ -997,7 +1130,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/groups/" + groupId + "/members" + "?" + this.apiVersion;
 
@@ -1038,7 +1171,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             if (objectType.ToLower() == "group" || objectType.ToLower() == "groups")
                 objectType = "/groups";
@@ -1086,8 +1219,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             if (objectType.ToLower() == "group" || objectType.ToLower() == "groups")
                 objectType = "groups";
@@ -1140,7 +1272,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/roles" + "?" + this.apiVersion;
 
@@ -1192,7 +1324,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/roles/" + roleId + "?" + this.apiVersion;
 
@@ -1244,7 +1376,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/roles/" + roleId + "/members" + "?" + this.apiVersion;
 
@@ -1296,7 +1428,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/tenantDetails" + "?" + apiVersion;
 
@@ -1347,7 +1479,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/subscribedSkus" + "?" + apiVersion;
 
@@ -1388,9 +1520,33 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
-        public AadUser createUser(AadUser user)
+        public JObject AddExtensionPropertiesToObject(object aadObject, IDictionary<string, object> extensionValues)
         {
+            JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
+            jsonSettings.NullValueHandling = NullValueHandling.Ignore;
+            jsonSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+            JsonSerializer serializer = JsonSerializer.CreateDefault(jsonSettings);
+            JObject extendedObject = JObject.FromObject(aadObject, serializer);
+            foreach (var kvpair in extensionValues)
+            {
+                string strValue = kvpair.Value as string;
+                if (strValue != null)
+                {
+                    extendedObject[kvpair.Key] = strValue;
+                }
 
+                byte[] byteValue = kvpair.Value as byte[];
+                if (byteValue != null)
+                {
+                    extendedObject[kvpair.Key] = Convert.ToBase64String(byteValue);
+                }
+            }
+
+            return extendedObject;
+        }
+
+        public JObject CreateUser(JObject user)
+        {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
@@ -1400,7 +1556,144 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 return null;
 
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+
+            string uri = this.baseGraphUri + "/users" + "?" + this.apiVersion;
+            JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
+            jsonSettings.NullValueHandling = NullValueHandling.Ignore;
+            jsonSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+            JsonSerializer serializer = JsonSerializer.CreateDefault(jsonSettings);
+            JObject user1 = JObject.FromObject(user, serializer);
+            string body = JsonConvert.SerializeObject(user1, Formatting.None, jsonSettings);
+
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+                System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
+
+                request.Headers.Add(authnHeader);
+                request.Method = "POST";
+                request.ContentType = "application/json";
+                byte[] data = encoding.GetBytes(body);
+                request.ContentLength = data.Length;
+                using (Stream stream = request.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                {
+                    if (response.StatusCode != HttpStatusCode.Created)
+                    {
+                        throw new Exception(String.Format(
+                        "Server error (HTTP {0}: {1}).",
+                        response.StatusCode,
+                        response.StatusDescription));
+                    }
+                    else
+                        using (var stream = response.GetResponseStream())
+                        {
+                            string payload;
+                            using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
+                            {
+                                payload = reader.ReadToEnd();
+                            }
+
+                            return JObject.Parse(payload);
+
+                        }
+                }
+            }
+
+            catch (WebException webException)
+            {
+                Console.WriteLine("Error: " + webException.Message);
+
+                var errorStream = webException.Response.GetResponseStream();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
+                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
+                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                return null;
+            }
+        }
+
+        public ExtensionDefinition createExtension(ExtensionDefinition extension)
+        {
+            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
+                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+
+            if (this.aadAuthentication.aadAuthenticationResult == null)
+                return null;
+
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+
+            string uri = this.baseGraphUri + "/applications/" + StringConstants.AppObjectId + "/extensionProperties" + "?" + this.apiVersion;
+
+            JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
+            jsonSettings.NullValueHandling = NullValueHandling.Ignore;
+            jsonSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+            JsonSerializer serializer = JsonSerializer.CreateDefault(jsonSettings);
+            string body = JsonConvert.SerializeObject(JObject.FromObject(extension, serializer), Formatting.None, jsonSettings);
+
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+                System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
+
+                request.Headers.Add(authnHeader);
+                request.Method = "POST";
+                request.ContentType = "application/json";
+                byte[] data = encoding.GetBytes(body);
+                request.ContentLength = data.Length;
+                using (Stream stream = request.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                {
+                    if (response.StatusCode != HttpStatusCode.Created)
+                    {
+                        throw new Exception(String.Format(
+                        "Server error (HTTP {0}: {1}).",
+                        response.StatusCode,
+                        response.StatusDescription));
+                    }
+                    else
+                        using (var stream = response.GetResponseStream())
+                        {
+                            string payload;
+                            using (System.IO.StreamReader reader = new System.IO.StreamReader(stream))
+                            {
+                                payload = reader.ReadToEnd();
+                            }
+
+                            return JObject.Parse(payload).ToObject<ExtensionDefinition>();
+                        }
+                }
+            }
+
+            catch (WebException webException)
+            {
+                Console.WriteLine("Error: " + webException.Message);
+
+                var errorStream = webException.Response.GetResponseStream();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
+                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
+                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                return null;
+            }
+        }
+
+        public AadUser createUser(AadUser user)
+        {
+            if (!this.ValidateAndRenewTokenIfRequired())
+            {
+                return null;
+            }
+
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/users" + "?" + this.apiVersion;
 
@@ -1468,7 +1761,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 return false;
 
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             string uri = "";
 
              if (method == "POST")
@@ -1477,6 +1770,82 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                uri = this.baseGraphUri + "/users/" + user.userPrincipalName + "?" + this.apiVersion;
 
             //Setup AadUser object
+            JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
+            jsonSettings.NullValueHandling = NullValueHandling.Ignore;
+            string body = "";
+            if (uri.Contains("/users"))
+                body = JsonConvert.SerializeObject(user, jsonSettings);
+
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+                System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
+
+                request.Headers.Add(authnHeader);
+                request.Method = method.ToUpper();
+
+                if (method == "POST" || method == "PATCH" || method == "PUT")
+                {
+                    byte[] data = encoding.GetBytes(body);
+                    request.Method = method;
+                    request.ContentType = "application/json";
+                    request.ContentLength = data.Length;
+                    using (Stream stream = request.GetRequestStream())
+                    {
+                        stream.Write(data, 0, data.Length);
+                    }
+                }
+
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                {
+                    if ((method == "GET" && response.StatusCode != HttpStatusCode.OK) ||
+                        (method == "POST" && response.StatusCode != HttpStatusCode.Created) ||
+                        (method == "PATCH" && response.StatusCode != HttpStatusCode.NoContent) ||
+                        (method == "DELETE" && response.StatusCode != HttpStatusCode.NoContent))
+                    {
+                        throw new Exception(String.Format(
+                        "Server error (HTTP {0}: {1}).",
+                        response.StatusCode,
+                        response.StatusDescription));
+                    }
+                    else
+                        return true;
+                }
+            }
+
+            catch (WebException webException)
+            {
+                Console.WriteLine("Error: " + webException.Message);
+
+                var errorStream = webException.Response.GetResponseStream();
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
+                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
+                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                return false;
+            }
+        }
+
+        public bool modifyUserJson(string method, JObject user)
+        {
+
+            // check if token is expired or about to expire in 2 minutes
+            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
+                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+
+            if (this.aadAuthentication.aadAuthenticationResult == null)
+                return false;
+
+
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string uri = "";
+
+            if (method == "POST")
+                uri = this.baseGraphUri + "/users" + "?" + this.apiVersion;
+            else
+                uri = this.baseGraphUri + "/users/" + user["userPrincipalName"] + "?" + this.apiVersion;
+
+            //Setup user object
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
             jsonSettings.NullValueHandling = NullValueHandling.Ignore;
             string body = "";
@@ -1542,7 +1911,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             string uri = this.baseGraphUri + "/groups/" + group.objectId + "?" + this.apiVersion;
 
 
@@ -1617,7 +1986,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             string uri = this.baseGraphUri + "/groups" + "?" + this.apiVersion;
             string method = "POST";
 
@@ -1706,7 +2075,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             string method = "POST";
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/users/" + user.userPrincipalName + "/assignLicense" + "?" + StringConstants.apiVersionPreview;
 
@@ -1855,7 +2224,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
        
             //Setup linked object
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -1923,7 +2292,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             string uri = this.baseGraphUri + "/isMemberOf" + "?" + apiVersion;
 
             try
@@ -1993,7 +2362,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             
                         
             string uri = this.baseGraphUri + "/users/" + memberId + "/checkMemberGroups" + "?" + apiVersion;
@@ -2066,7 +2435,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/users/" + memberId + "/getMemberGroups" + "?" + apiVersion;
 
@@ -2149,7 +2518,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 return null;
 
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/applications" + "?" + this.apiVersion;
 
@@ -2215,7 +2584,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             string uri = this.baseGraphUri + "/applications/" + application.objectId + "?" + this.apiVersion;
 
 
@@ -2288,7 +2657,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/servicePrincipals/" + "?" + this.apiVersion;
 
@@ -2329,7 +2698,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
                 this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/servicePrincipals/" + servicePrincipalObjectId + "?" + this.apiVersion;
 
@@ -2374,7 +2743,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 return null;
 
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/servicePrincipals" + "?" + this.apiVersion;
 
@@ -2441,7 +2810,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = getAuthHeader();
+            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
             string uri = this.baseGraphUri + "/servicePrincipals/" + servicePrincipal.objectId + "?" + this.apiVersion;
 
@@ -2497,6 +2866,19 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
                 return null;
             }
+        }
+
+        private bool ValidateAndRenewTokenIfRequired()
+        {
+            // check if token is expired or about to expire in 2 minutes
+            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
+                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+
+            if (this.aadAuthentication.aadAuthenticationResult == null)
+                return false;
+
+            return true;
         }
 
     }

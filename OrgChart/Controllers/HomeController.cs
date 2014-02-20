@@ -7,7 +7,6 @@ using Microsoft.WindowsAzure.ActiveDirectory.GraphHelper;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using OrgChart.Models;
 using System.Collections.Specialized;
-using Neo4jClient;
 
 namespace OrgChart.Controllers
 {
@@ -52,10 +51,10 @@ namespace OrgChart.Controllers
                 switch (strFormAction)
                 {
                     case "Update":
-                        // set display name and manager for given UPN
+                        // set display name, manager, job title, trio, skype for given UPN
                         org.setUser(strUpdateUPN, strUpdateDisplayName, strUpdateManagerUPN, strUpdateJobTitle, strUpdateTrioLed, strUpdateSkypeContact);
-                        if (strUpdateTrioLed != "") strUpn = strUpdateManagerUPN;
-                        else if (strUpdateSkypeContact != "") strUpn = strUpdateUPN;
+                        if (strUpdateTrioLed != "") strUpn = strUpdateManagerUPN; // if we just updated trio, show the manager
+                        else if (strUpdateSkypeContact != "") strUpn = strUpdateUPN; // if we just updated skype, show the user
                         break;
                     case "Create":
                         // create user with given display name, UPN, and manager
@@ -72,10 +71,13 @@ namespace OrgChart.Controllers
                     // no UPN provided, get the UPN of the first user instead
                     strUpn = org.getFirstUpn();
                 }
-                string strTrio = queryValues["trio"];
-                bool bTrio = (strTrio != null && String.Equals(strTrio, "true", StringComparison.CurrentCultureIgnoreCase));
-                ViewBag.ancestorsAndMainPerson = org.getAncestorsAndMain(strUpn, bTrio);
-                ViewBag.directsOfDirects = org.getDirectsOfDirects(strUpn, bTrio);
+                if (strUpn != null)
+                {
+                    string strTrio = queryValues["trio"];
+                    bool bTrio = (strTrio != null && String.Equals(strTrio, "true", StringComparison.CurrentCultureIgnoreCase));
+                    ViewBag.ancestorsAndMainPerson = org.getAncestorsAndMain(strUpn, bTrio);
+                    ViewBag.directsOfDirects = org.getDirectsOfDirects(strUpn, bTrio);
+                }
             }
             else
             {

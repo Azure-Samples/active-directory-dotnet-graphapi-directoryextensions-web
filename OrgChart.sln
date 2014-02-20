@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrgChart", "OrgChart\OrgChart.csproj", "{C4990074-A5B5-4BC9-894C-8D824FBDE80C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9312BA81-F180-4A04-AF24-6D9848F4A9B6} = {9312BA81-F180-4A04-AF24-6D9848F4A9B6}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrgChart.Tests", "OrgChart.Tests\OrgChart.Tests.csproj", "{FA964900-4D62-46AE-96BA-51BD757D0722}"
 EndProject

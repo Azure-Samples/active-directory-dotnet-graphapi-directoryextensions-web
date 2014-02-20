@@ -1,5 +1,7 @@
 ﻿@using Microsoft.WindowsAzure.ActiveDirectory.GraphHelper;
 @using OrgChart.Models;
+@using Newtonsoft.Json.Linq;
+@using Newtonsoft.Json;
 
 @{
     ViewBag.Title = "Home Page";
@@ -31,18 +33,18 @@
 @for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count-1; i++)
 {
 	<tr class="highlightable">
-    @foreach(AadExtendedUser extendedUser in ViewBag.ancestorsAndMainPerson[i])
+    @foreach(JObject user in ViewBag.ancestorsAndMainPerson[i])
     {
-		<td style="display:none">@extendedUser.mailNickname</td>
+		<td style="display:none">@user["mailNickname"]</td>
         <td class="tdPersonDescription">
             <img style="MAX-WIDTH: 32px; VERTICAL-ALIGN: bottom; MARGIN: 1px 4px 0px 0px; MAX-HEIGHT: 24px" 
-                 src=@(String.Format("{0}{1}{2}", "http://who/photos/", @extendedUser.mailNickname, ".jpg")) 
-                 alt="@extendedUser.mailNickname"/>
+                 src=@(String.Format("{0}{1}{2}", "http://who/photos/", @user["mailNickname"], ".jpg")) 
+                 alt="@user["mailNickname"]"/>
         </td>
         <td class="tdPersonDescription">
-            <a href="/?upn=@extendedUser.userPrincipalName">@extendedUser.displayName</a> 
-            (@extendedUser.mailNickname)<br />
-            @extendedUser.jobTitle
+            <a href="/?upn=@user["userPrincipalName"]">@user["displayName"]</a> 
+            (@user["mailNickname"])<br />
+            @user["jobTitle"]
         </td>
     }
 	</tr>
@@ -52,24 +54,24 @@
 <table id="MainPerson">
 	<tr class="highlightable">
 @{
-    List<List<AadExtendedUser>> ancestorsAndMainPerson = ViewBag.ancestorsAndMainPerson;
+    List<List<JObject>> ancestorsAndMainPerson = ViewBag.ancestorsAndMainPerson;
     if(ancestorsAndMainPerson.Count > 0)
     {
-    foreach(AadExtendedUser extendedUser in ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1])
+    foreach(JObject user in ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count-1])
     {
-		<td style="display:none">@extendedUser.mailNickname</td>
+		<td style="display:none">@user["mailNickname"]</td>
 		<td class="tdPersonImage">
             <img style="MAX-WIDTH: 110px; VERTICAL-ALIGN: bottom; MARGIN: 8px 10px 8px 10px; MAX-HEIGHT: 100px" 
-			     src=@(String.Format("{0}{1}{2}", "http://who/photos/", @extendedUser.mailNickname, ".jpg")) 
-			     alt="@extendedUser.mailNickname"/>
+			     src=@(String.Format("{0}{1}{2}", "http://who/photos/", @user["mailNickname"], ".jpg")) 
+			     alt="@user["mailNickname"]"/>
 		</td>
 		<td class="tdPersonDescription">
-            <a href="/?upn=@extendedUser.userPrincipalName">
-                @extendedUser.displayName
+            <a href="/?upn=@user["userPrincipalName"]">
+                @user["displayName"]
             </a> 
-            (@extendedUser.mailNickname)<br />
-            @extendedUser.jobTitle
-            @if(extendedUser.skype != null && extendedUser.skype != "")
+            (@user["mailNickname"])<br />
+            @user["jobTitle"]
+            @if (user[StringConstants.getExtension("skype")] != null)
             {
                 <br />
                 <script type="text/javascript" src="http://www.skypeassets.com/i/scom/js/skype-uri.js"></script>
@@ -78,7 +80,7 @@
                     Skype.ui({
                         "name": "call",
                         "element": "SkypeButton_Call_mailmongoose_1",
-                        "participants": ["@extendedUser.skype"],
+                        "participants": ["@user[StringConstants.getExtension("skype")]"],
                         "imageSize": 32
                     });
                 </script>
@@ -99,7 +101,7 @@
     int count = ViewBag.directsOfDirects.Count;
     for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
     {
-        List<AadExtendedUser> directList = ViewBag.directsOfDirects[j];
+        List<JObject> directList = ViewBag.directsOfDirects[j];
         // at each row start, read ahead to fill in trio row if necessary and determine next row start
         if (j == nextRowStart)
         {
@@ -119,9 +121,11 @@
                 {
                     break;
                 }
-                List<AadExtendedUser> dirList = ViewBag.directsOfDirects[k];
-                String newTrio = dirList[0].trio != null ? dirList[0].trio : "";
-                String newUPN = dirList[0].userPrincipalName;
+                
+                
+                List<JObject> dirList = ViewBag.directsOfDirects[k];
+                String newTrio = (String)dirList[0][StringConstants.getExtension("trio")] ?? "";
+                String newUPN = (String)dirList[0]["userPrincipalName"];
                 if (previousTrio == null)
                 {
                     // first pass, initialize previous trio
@@ -190,17 +194,17 @@
         }
         <td>
             <table>
-                @foreach (AadExtendedUser user in directList)
+                @foreach (JObject user in directList)
                 {
                     <tr class="highlightable">
-            		    <td style="display:none">@user.mailNickname</td>
+            		    <td style="display:none">@user["mailNickname"]</td>
                         <td class="tdPersonImage">
                             <img style="MAX-WIDTH: 50px; VERTICAL-ALIGN: bottom; MARGIN: 4px 4px 4px 4px; MAX-HEIGHT: 52px" 
-                                 src=@(String.Format("{0}{1}{2}", "http://who/photos/", @user.mailNickname, ".jpg")) 
-                                 alt="@user.mailNickname"/>
+                                 src=@(String.Format("{0}{1}{2}", "http://who/photos/", @user["mailNickname"], ".jpg")) 
+                                 alt="@user["mailNickname"]"/>
                         </td>
-            		    <td class = @(user.isManager ? "tdManagerDescription" : "tdPersonDescription")>
-                            <a href="/?upn=@user.userPrincipalName">@user.displayName</a> (@user.mailNickname)<br />@user.jobTitle
+            		    <td class = @((bool)user["isManager"] ? "tdManagerDescription" : "tdPersonDescription")>
+                            <a href="/?upn=@user["userPrincipalName"]">@user["displayName"]</a> (@user["mailNickname"])<br />@user["jobTitle"]
             		    </td>
                     </tr>
                 }
@@ -214,13 +218,14 @@
 <td class="tdFormBackground">
 	<form id="MainForm" action="/" method="post">
         <fieldset> <legend>Update/Delete A User</legend>
-			<div><label for="updateUPN"><pre>UPN: </pre></label> <input type="text" id="updateUPN" name="updateUPN"></div>
+			<!-- TODO: enumerate attributes from JSON object to display vs. hardcoding -->
+            <div><label for="updateUPN"><pre>UPN: </pre></label> <input type="text" id="updateUPN" name="updateUPN"></div>
 			<div><label for="updateDisplayName"><pre>displayName: </pre></label> <input type="text" id="updateDisplayName" name="updateDisplayName"></div>
 			<div><label for="updateManagerUPN"><pre>manager: </pre></label> <input type="text" id="updateManagerUPN" name="updateManagerUPN"></div>
 			<div><label for="updateJobTitle"><pre>title: </pre></label> <input type="text" id="updateJobTitle" name="updateJobTitle"></div>
 			<div><label for="updateTrioLed"><pre>trio: </pre></label> <input type="text" id="updateTrioLed" name="updateTrioLed"></div>
 			<div><label for="updateSkypeContact"><pre>Skype: </pre></label> <input type="text" id="updateSkypeContact" name="updateSkypeContact"></div>
-		    <button type="submit" id="submitUpdate" name="submitButton" value="Update">Update</button>
+            <button type="submit" id="submitUpdate" name="submitButton" value="Update">Update</button>
 		    <button type="submit" id="submitDelete" name="submitButton" value="Delete">Delete</button>
 		</fieldset>
 		<fieldset> <legend>Create A User</legend>
@@ -238,48 +243,46 @@
     var userMap = {
         @{
     string strMap = "";
-    AadExtendedUser previousUser = null;
     for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count; i++)
     {
         // each level could consist of one or more (in case of trio) users
-        foreach (AadExtendedUser extendedUser in ViewBag.ancestorsAndMainPerson[i])
+        foreach (JObject user in ViewBag.ancestorsAndMainPerson[i])
         {
             if (strMap != "") { strMap += ","; }
-            strMap += extendedUser.mailNickname;
+            strMap += user["mailNickname"];
             strMap += ": { displayName: \"";
-            strMap += extendedUser.displayName;
+            strMap += user["displayName"];
             strMap += "\", userPrincipalName: \"";
-            strMap += extendedUser.userPrincipalName;
+            strMap += user["userPrincipalName"];
             strMap += "\", managerPrincipalName: \"";
-            strMap += extendedUser.managerUserPrincipalName;
+            strMap += user["managerUserPrincipalName"];
             strMap += "\", jobTitle: \"";
-            strMap += extendedUser.jobTitle;
+            strMap += user["jobTitle"];
             strMap += "\", trioLed: \"";
-            strMap += extendedUser.trio;
+            strMap += user[StringConstants.getExtension("trio")];
             strMap += "\", skypeContact: \"";
-            strMap += extendedUser.skype;
+            strMap += user[StringConstants.getExtension("skype")];
             strMap += "\"}";
-            previousUser = extendedUser;
         }
     }
-    foreach (List<AadExtendedUser> directList in ViewBag.directsOfDirects)
+    foreach (List<JObject> directList in ViewBag.directsOfDirects)
     {
-        foreach (AadExtendedUser user in directList)
+        foreach (JObject user in directList)
         {
             if (strMap != "") { strMap += ","; }
-            strMap += user.mailNickname;
+            strMap += user["mailNickname"];
             strMap += ": { displayName: \"";
-            strMap += user.displayName;
+            strMap += user["displayName"];
             strMap += "\", userPrincipalName: \"";
-            strMap += user.userPrincipalName;
+            strMap += user["userPrincipalName"];
             strMap += "\", managerPrincipalName: \"";
-            strMap += user.managerUserPrincipalName;
+            strMap += user["managerUserPrincipalName"];
             strMap += "\", jobTitle: \"";
-            strMap += user.jobTitle;
+            strMap += user["jobTitle"];
             strMap += "\", trioLed: \"";
-            strMap += user.trio;
+            strMap += user[StringConstants.getExtension("trio")];
             strMap += "\", skypeContact: \"";
-            strMap += user.skype;
+            strMap += user[StringConstants.getExtension("skype")];
             strMap += "\"}";
         }
     }
@@ -292,6 +295,7 @@
         var mainFormAction = "/?upn=";
         mainFormAction += userMap[alias].userPrincipalName;
         $("#MainForm").attr("action", mainFormAction);
+        // enumerate attributes to set vs. hardcoding
         $("#updateUPN").val(userMap[alias].userPrincipalName);
         $("#updateDisplayName").val(userMap[alias].displayName);
         $("#updateManagerUPN").val(userMap[alias].managerPrincipalName);

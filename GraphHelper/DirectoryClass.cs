@@ -9,6 +9,8 @@ using System.Net;
 using System.Web;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 
 // for Graph API version 1.0, api-version=2013-04-05
 
@@ -24,8 +26,8 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
     }
 
     [DataContract]
-    public class AadContact 
-    {     
+    public class AadContact
+    {
         [DataMember(Name = "odata.type")]  public string ODataType { get; set; }
         [DataMember] public string objectId { get; set; }
         [DataMember] public string objectType { get; set; }
@@ -50,14 +52,24 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         [DataMember] public string surname { get; set; } //" Type="Edm.String" />
         [DataMember] public string telephoneNumber { get; set; } //" Type="Edm.String" />
     }
-    
-    
+
     [DataContract]
-    public class AadUsers 
+    public class AadUsers
     {
         [DataMember(Name="odata.metadata")] public string ODataMetadata  { get; set; }
         [DataMember(Name="value")] public List<AadUser> user { get; set; } //collection
         [DataMember(Name="odata.nextLink")] public string ODataNextLink { get; set; } 
+    }
+
+    [DataContract]
+    public class JObjects
+    {
+        [DataMember(Name = "odata.metadata")]
+        public string ODataMetadata { get; set; }
+        [DataMember(Name = "value")]
+        public List<JObject> users { get; set; } //collection
+        [DataMember(Name = "odata.nextLink")]
+        public string ODataNextLink { get; set; }
     }
 
     [DataContract]
@@ -73,11 +85,6 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         [DataMember] public string preferredLanguage { get; set; } //" Type="Edm.String" />
         [DataMember] public List<provisionedPlan> provisionedPlans { get; internal set; } //" Type="Collection(Microsoft.WindowsAzure.ActiveDirectory.ProvisionedPlan)" Nullable="false" />
         [DataMember] public string usageLocation { get; set; } //" Type="Edm.String" />
-
-        [DataMember(Name = "extension_33b6cec17aa1457495251f73a7c3b6e6_trio")]
-        public string trio { get; set; } //" Type="Edm.String" />
-        [DataMember(Name = "extension_33b6cec17aa1457495251f73a7c3b6e6_skype")]
-        public string skype { get; set; } //" Type="Edm.String" />
     }
 
     [DataContract]
@@ -95,11 +102,11 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         [DataMember] public string description { get; set; }
         [DataMember] public bool securityEnabled { get; set; }
         [DataMember] public bool mailEnabled { get; set; }
-  
+
     }
 
     [DataContract]
-    public class AadObjects 
+    public class AadObjects
     {
         [DataMember(Name = "odata.metadata")] public string ODataMetadata { get; set; }
         [DataMember(Name = "value")] public List<AadObject> aadObject { get; set; } //collection
@@ -138,7 +145,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         [DataMember]  public bool roleDisabled { get; set; }
     }
 
-    
+
 
 
     [DataContract]
@@ -156,7 +163,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public List<addLicense> addLicenses { get; set; }
         [DataMember]
         public string[] removeLicenses { get; set; }
-       // public List<removeLicense> removeLicenses { get; set; }
+        // public List<removeLicense> removeLicenses { get; set; }
     }
 
     [DataContract]
@@ -184,7 +191,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         [DataMember] public Guid servicePlanId { get; set; }
 
     }
-     
+
     [DataContract]
     public class provisionedPlan
     {
@@ -220,7 +227,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
     [DataContract]
     public class AadTenantDetail
-        {
+    {
             [DataMember(Name = "odata.type")] public string ODataType { get; set; }
             [DataMember] public string objectId { get; set; }
             [DataMember] public string objectType { get; set; }
@@ -242,7 +249,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             [DataMember] public string[] marketingNotificationEmails { get; set; }
             [DataMember] public string[] technicalNotificationMails { get; set; }
             [DataMember] public List<verifiedDomain> verifiedDomains { get; set; }
-        }
+    }
 
     [DataContract]
     public class verifiedDomain
@@ -262,7 +269,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         [DataMember(Name = "value")]
         public List<AadSubscribedSku> subscribedSku { get; set; } //collection
     }
-        
+
     [DataContract]
     public class AadSubscribedSku
     {
@@ -293,7 +300,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
     public class urlLink
     {
         public string url { get; set; }
-        
+
     }
 
     public class isMemberOfResult
@@ -303,10 +310,10 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
     [DataContract]
     public class MemberGroupsData
-    { 
+    {
     [DataMember(Name="odata.metadata")] public string ODataMetadata  { get; set; }
     [DataMember(Name = "value")]
-    public string[] value { get; set ; } //collection
+        public string[] value { get; set; } //collection
     }
 
     [DataContract]
@@ -383,7 +390,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
     [DataContract]
     public class KeyCredential
     {
-        
+
         [DataMember] public string customKeyIdentifier {get;set;} // Type="Edm.Binary" />
         [DataMember] public string endDate {get;set;} // Type="Edm.DateTime" />
         [DataMember] public string keyId {get;set;} // Type="Edm.Guid" />
@@ -401,14 +408,28 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             [DataMember] public string keyId {get;set;} // Type="Edm.Guid" />
             [DataMember] public string startDate {get;set;} // Type="Edm.DateTime" />
             [DataMember] public string value {get;set;} // Type="Edm.String" />
-     }
+    }
+
+    public class ExtensionDefinition
+    {
+        public string name { get; set; }
+        public string dataType { get; set; }
+        private IList<string> targetClasses = new List<string>();
+        public IList<string> targetObjects
+        {
+            get
+            {
+                return targetClasses;
+            }
+        }
+    }
 
     [DataContract]
     public class ODataError
     {
         [DataMember(Name = "odata.error")] public Error error { get; set; }
     }
-   
+
     [DataContract]
     public class Error
     {
