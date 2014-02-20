@@ -54,5 +54,6 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             strAdmin += StringConstants.tenant;
             return strAdmin;
         }
+        static public string[] standardAttributes = { "displayName", "jobTitle", "userPrincipalName", "mailNickname", "managerUserPrincipalName" };
     }
 }

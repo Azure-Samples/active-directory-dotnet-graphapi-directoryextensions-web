@@ -15,29 +15,48 @@ namespace OrgChart.Models
         {
             graphCall = gq;
         }
-        public JObject createUser(string strCreateUPN, string strCreateMailNickname, string strCreateDisplayName, string strCreateManagerUPN, string strCreateJobTitle)
+        public JObject createUser(JObject user)
         {
-            AadUser user = new AadUser();
-            user.userPrincipalName = strCreateUPN;
-            user.displayName = strCreateDisplayName;
-            user.mailNickname = strCreateMailNickname;
-            user.jobTitle = strCreateJobTitle;
-            user.passwordProfile = new passwordProfile();
-            user.passwordProfile.forceChangePasswordNextLogin = true;
-            user.passwordProfile.password = "P0rsche911";
-            AadUser newUser = graphCall.createUser(user);
-            // set manager
-            JObject extendedUser = null;
-            if (newUser != null)
+            // setup AadUser with standard attributes, accountEnabled, and password profile
+            AadUser aadUser = new AadUser();
+            aadUser.userPrincipalName = (string)user["userPrincipalName"];
+            aadUser.displayName = (string)user["displayName"];
+            aadUser.mailNickname = (string)user["mailNickname"];
+            aadUser.jobTitle = (string)user["jobTitle"];
+            aadUser.passwordProfile = new passwordProfile();
+            aadUser.accountEnabled = true;
+            aadUser.passwordProfile.forceChangePasswordNextLogin = true;
+            aadUser.passwordProfile.password = "P0rsche911";
+
+            // convert to JObject
+            JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
+            jsonSettings.NullValueHandling = NullValueHandling.Ignore;
+            jsonSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+            JsonSerializer serializer = JsonSerializer.CreateDefault(jsonSettings);
+            JObject newUser = JObject.FromObject(aadUser, serializer);
+
+            // add supported extension values
+            foreach(JProperty property in user.Properties())
             {
-                JObject graphUser = new JObject();
-                graphUser["userPrincipalName"] = strCreateUPN;
-                graphUser["displayName"] = strCreateDisplayName;
-                graphUser["managerUserPrincipalName"] = strCreateManagerUPN;
-                graphUser["jobTitle"] = strCreateJobTitle;
-                extendedUser = setUser(graphUser);
+                // exclude unsupported attributes added by my application logic
+                if (property.Name == "isManager" || property.Name == "managerUserPrincipalName")
+                {
+                    // skip
+                }
+                else if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix))
+                {
+                    newUser[property.Name] = property.Value;
+                }
             }
-            return extendedUser;
+            
+            // create user
+            newUser = graphCall.CreateUser(newUser);
+
+            // set manager
+            newUser["managerUserPrincipalName"] = user["managerUserPrincipalName"];
+            newUser = setUser(newUser);
+
+            return newUser;
         }
         public void deleteUser(string strUpdateUPN)
         {

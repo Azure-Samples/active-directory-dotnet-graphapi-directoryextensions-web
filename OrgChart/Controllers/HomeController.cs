@@ -37,46 +37,37 @@ namespace OrgChart.Controllers
                 graphCall.aadAuthentication.aadAuthenticationResult = authenticationResult;
                 // configure appropriate model                
                 OrgChart.Models.Org org = new OrgChart.Models.Org(graphCall);
-                // retrieve user containing all extensions
+                // retrieve user containing all extensions (and add manager UPN)
                 ViewBag.extensionRegistryUser = org.getUserJson(StringConstants.getExtensionRegistryUser());
-                // process any form submission requests
-                string strFormAction = Request["submitButton"];
-                // setup JObject for setuser
+                ViewBag.extensionRegistryUser["managerUserPrincipalName"] = "asuthar@msonline-setup.com";
+                // setup JObject for setuser by enumerating registry user
                 JObject graphUser = new JObject();
-                graphUser["userPrincipalName"] = Request["updateUPN"];
-                graphUser["displayName"] = Request["updateDisplayName"];
-                graphUser["managerUserPrincipalName"] = Request["updateManagerUPN"];
-                graphUser["jobTitle"] = Request["updateJobTitle"];
-                // enumerate extension attributes from JSON object
                 foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
                 {
-                    if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix))
+                    if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || StringConstants.standardAttributes.Contains(property.Name))
                     {
                         graphUser[property.Name] = Request[property.Name];
                     }
                 }
-                // setup variables for create user 
-                string strCreateUPN = Request["createUPN"];
-                string strCreateMailNickname = Request["createMailNickname"];
-                string strCreateDisplayName = Request["createDisplayName"];
-                string strCreateManagerUPN = Request["createManagerUPN"];
-                string strCreateJobTitle = Request["createJobTitle"];
+                // process any form submission requests
+                string strFormAction = Request["submitButton"];
                 switch (strFormAction)
                 {
                     case "Update":
                         // set display name, manager, job title, trio, skype for given UPN
                         org.setUser(graphUser);
-                        if (graphUser[StringConstants.getExtension("trio")] != null) strUpn = Request["updateManagerUPN"]; // if we just updated trio, show the manager
-                        else if (graphUser[StringConstants.getExtension("skype")] != null) strUpn = Request["updateUPN"]; // if we just updated skype, show the user
+                        // show the user, unless trio is set, then show the manager
+                        strUpn = Request["userPrincipalName"];
+                        if ((string)graphUser[StringConstants.getExtension("trio")] != "") strUpn = Request["managerUserPrincipalName"];
                         break;
                     case "Create":
                         // create user with given display name, UPN, and manager
-                        org.createUser(strCreateUPN, strCreateMailNickname, strCreateDisplayName, strCreateManagerUPN, strCreateJobTitle);
-                        strUpn = strCreateUPN;
+                        org.createUser(graphUser);
+                        strUpn = (string)graphUser["userPrincipalName"];
                         break;
                     case "Delete":
                         // delete user with given UPN
-                        org.deleteUser(Request["updateUPN"]);
+                        org.deleteUser((string)graphUser["userPrincipalName"]);
                         break;
                 }
                 if (strUpn == null)
