@@ -122,9 +122,8 @@
                     break;
                 }
                 
-                
                 List<JObject> dirList = ViewBag.directsOfDirects[k];
-                String newTrio = (String)dirList[0][StringConstants.getExtension("trio")] ?? "";
+                String newTrio = (String)dirList[0][StringConstants.getExtension("trio")];
                 String newUPN = (String)dirList[0]["userPrincipalName"];
                 if (previousTrio == null)
                 {

@@ -187,14 +187,14 @@ namespace OrgChart.Models
                     JToken tokenTrioX = null;
                     bool bxTrio = x.ElementAt(0).TryGetValue(StringConstants.getExtension("trio"), out tokenTrioX);
                     JToken tokenTrioY = null;
-                    bool byTrio = x.ElementAt(0).TryGetValue(StringConstants.getExtension("trio"), out tokenTrioY);
+                    bool byTrio = y.ElementAt(0).TryGetValue(StringConstants.getExtension("trio"), out tokenTrioY);
                     // if neither has a trio, they are equal
                     if (!bxTrio && !byTrio) return 0;
                     // if only one has a trio, that one comes first
                     else if (bxTrio && !byTrio) return -1;
                     else if (!bxTrio && byTrio) return 1;
                     // if both have trios, perform the comparison to determine which one comes first
-                    else if (bxTrio && byTrio) return ((string)tokenTrioX).CompareTo((string)tokenTrioX);
+                    else if (bxTrio && byTrio) return ((string)tokenTrioX).CompareTo((string)tokenTrioY);
                     else return 0;
                 }
             );
