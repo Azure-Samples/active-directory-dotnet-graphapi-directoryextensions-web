@@ -128,7 +128,7 @@ namespace OrgChart.Models
             {
                 String strMainUPN = arrayUPN[i];
                 JObjects directs = graphCall.getUsersDirectReportsJson(strMainUPN);
-                if (directs.users != null)
+                if (directs != null && directs.users != null)
                 {
                     foreach (JObject directReport in directs.users)
                     {
@@ -185,6 +185,22 @@ namespace OrgChart.Models
         public JObject getUserJson(string strUpn)
         {
             return graphCall.getUserJson(strUpn);
+        }
+        public bool registerExtension(string strExtension)
+        {
+            // setup the extension definition
+            ExtensionDefinition extension = new ExtensionDefinition();
+            extension.name = strExtension;
+            extension.dataType = "String";
+            extension.targetObjects.Add("User");
+
+            // Execute the POST to create new extension
+            ExtensionDefinition returnedExtension = graphCall.createExtension(extension);
+            if(returnedExtension != null)
+            {
+                return true;
+            }
+            return false;
         }
         public JObject setUser(JObject user)
         {

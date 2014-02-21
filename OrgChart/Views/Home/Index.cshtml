@@ -217,8 +217,8 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
 </tr>
 <tr>
 <td class="tdFormBackground">
-	<form id="MainForm" action="/" method="post">
-        <fieldset> <legend>Update/Delete/Create A User</legend>
+	<form id="UserForm" action="/" method="post">
+        <fieldset> <legend>Update/Delete/Create a User</legend>
 			<!-- enumerate extension attributes from JSON object -->
             @foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
             {
@@ -227,9 +227,28 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
                     @:<div><label for="@property.Name"><pre>@property.Name: </pre></label> <input type="text" id="@property.Name" name="@property.Name"></div>
                 }
             }			
-            <button type="submit" id="submitUpdate" name="submitButton" value="Update">Update</button>
-		    <button type="submit" id="submitDelete" name="submitButton" value="Delete">Delete</button>
-    		<button type="submit" id="submitCreate" name="submitButton" value="Create">Create</button>
+            <button type="submit" id="userUpdate" name="submitButton" value="userUpdate">Update</button>
+		    <button type="submit" id="userDelete" name="submitButton" value="userDelete">Delete</button>
+    		<button type="submit" id="userCreate" name="submitButton" value="userCreate">Create</button>
+		</fieldset>
+	</form>
+</td>
+<td class="tdFormBackground">
+	<form id="ExtensionForm" action="/" method="post">
+        <fieldset> <legend>Create a String Extension Attribute on Users</legend>
+            <div><label for="Extension"><pre>Extension: </pre></label> <input type="text" id="Extension" name="Extension"></div>
+    		<button type="submit" id="extensionCreate" name="submitButton" value="extensionCreate">Create</button>
+		</fieldset>
+	</form>
+</td>
+<td class="tdFormBackground">
+	<form id="ApplicationForm" action="/" method="post">
+        <fieldset> <legend>Update Application Credentials</legend>
+            <div><label for="AppId"><pre>AppId: </pre></label> <input type="text" id="AppId" name="AppId"></div>
+            <div><label for="AppSecret"><pre>AppSecret: </pre></label> <input type="text" id="AppSecret" name="AppSecret"></div>
+            <div><label for="AppObjectId"><pre>AppObjectId: </pre></label> <input type="text" id="AppObjectId" name="AppObjectId"></div>
+            <div><label for="AppTenant"><pre>AppTenant: </pre></label> <input type="text" id="AppTenant" name="AppTenant"></div>
+            <button type="submit" id="applicationUpdate" name="submitButton" value="applicationUpdate">Update</button>
 		</fieldset>
 	</form>
 </td>
@@ -237,60 +256,44 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
 </table>
 <script type="text/javascript">
     var userMap = {
+        @functions {
+            static public void GenerateMap(ref string map, List<JObject> list, JObject registryUser)
+            {
+                foreach (JObject user in list)
+                {
+                    // first two attributes are special cases (variable name and first field)
+                    if (map != "") { map += ","; }
+                    map += user["mailNickname"];
+                    map += ": { displayName: \"";
+                    map += user["displayName"];
+                    // enumerate remaining attributes from JSON object
+                    foreach (JProperty property in registryUser.Properties())
+                    {
+                        if (property.Name == "mailNickname" || property.Name == "displayName")
+                        {
+                            // skip special cases
+                        }
+                        else if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || StringConstants.standardAttributes.Contains(property.Name))
+                        {
+                            map += "\", ";
+                            map += property.Name;
+                            map += ": \"";
+                            map += user[property.Name];
+                        }
+                    }
+                    map += "\"}";
+                }
+            }
+        }
         @{
             string strMap = "";
             for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count; i++)
             {
-                // each level could consist of one or more (in case of trio) users
-                foreach (JObject user in ViewBag.ancestorsAndMainPerson[i])
-                {
-                    if (strMap != "") { strMap += ","; }
-                    strMap += user["mailNickname"];
-                    strMap += ": { displayName: \"";
-                    strMap += user["displayName"];
-                    // enumerate remaining attributes from JSON object
-                    foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
-                    {
-                        if (property.Name == "mailNickname" || property.Name == "displayName")
-                        {
-                            // skip
-                        }
-                        else if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || StringConstants.standardAttributes.Contains(property.Name))
-                        {
-                            strMap += "\", ";
-                            strMap += property.Name;
-                            strMap += ": \"";
-                            strMap += user[property.Name];
-                        }
-                    }
-                    strMap += "\"}";
-                }
+                GenerateMap(ref strMap, ViewBag.ancestorsAndMainPerson[i], ViewBag.extensionRegistryUser);
             }
             foreach (List<JObject> directList in ViewBag.directsOfDirects)
             {
-                foreach (JObject user in directList)
-                {
-                    if (strMap != "") { strMap += ","; }
-                    strMap += user["mailNickname"];
-                    strMap += ": { displayName: \"";
-                    strMap += user["displayName"];
-                    // enumerate remaining attributes from JSON object
-                    foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
-                    {
-                        if (property.Name == "mailNickname" || property.Name == "displayName")
-                        {
-                            // skip
-                        }
-                        else if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || StringConstants.standardAttributes.Contains(property.Name))
-                        {
-                            strMap += "\", ";
-                            strMap += property.Name;
-                            strMap += ": \"";
-                            strMap += user[property.Name];
-                        }
-                    }
-                    strMap += "\"}";
-                }
+                GenerateMap(ref strMap, directList, ViewBag.extensionRegistryUser);
             }
         }
         @MvcHtmlString.Create(strMap)
@@ -298,16 +301,16 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
     function hoverOn(eventObject) {
         var $td = $("td:first", this);
         var alias = $td[0].textContent;
-        var mainFormAction = "/?upn=";
-        mainFormAction += userMap[alias].userPrincipalName;
-        $("#MainForm").attr("action", mainFormAction);
-        // enumerate attributes to set vs. hardcoding
+        var userFormAction = "/?upn=";
+        userFormAction += userMap[alias].userPrincipalName;
+        $("#UserForm").attr("action", userFormAction);
+        // variable name is special case, enumerate variable attributes to update remaining fields
         $("#mailNickname").val(alias);
         @foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
         {
             if (property.Name == "mailNickname")
             {
-                // skip
+                // skip special case
             }
             else if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || StringConstants.standardAttributes.Contains(property.Name))
             {
@@ -324,9 +327,9 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
     function setInputChange() {
         $("#userPrincipalName").each(function () {
             $(this).on("input", function () {
-                var mainFormAction = "/?upn=";
-                mainFormAction += this.value;
-                $("#MainForm").attr("action", mainFormAction);
+                var userFormAction = "/?upn=";
+                userFormAction += this.value;
+                $("#UserForm").attr("action", userFormAction);
             });
         });
     }

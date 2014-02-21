@@ -46,35 +46,52 @@ namespace OrgChart.Controllers
                 {
                     if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || StringConstants.standardAttributes.Contains(property.Name))
                     {
-                        graphUser[property.Name] = Request[property.Name];
+                        string value = Request[property.Name];
+                        graphUser[property.Name] = (value == "") ? null : value;
                     }
                 }
                 // process any form submission requests
                 string strFormAction = Request["submitButton"];
                 switch (strFormAction)
                 {
-                    case "Update":
+                    case "userUpdate":
                         // set display name, manager, job title, trio, skype for given UPN
                         org.setUser(graphUser);
                         // show the user, unless trio is set, then show the manager
                         strUpn = Request["userPrincipalName"];
                         if ((string)graphUser[StringConstants.getExtension("trio")] != "") strUpn = Request["managerUserPrincipalName"];
                         break;
-                    case "Create":
+                    case "userCreate":
                         // create user with given display name, UPN, and manager
                         org.createUser(graphUser);
                         strUpn = (string)graphUser["userPrincipalName"];
                         break;
-                    case "Delete":
+                    case "userDelete":
                         // delete user with given UPN
                         org.deleteUser((string)graphUser["userPrincipalName"]);
                         break;
+                    case "extensionCreate":
+                        // register the passed extension
+                        {
+                            string strExtension = Request["Extension"];
+                            if (org.registerExtension(strExtension))
+                            {
+                                // set this extension value to registered on the "registry" object
+                                ViewBag.extensionRegistryUser[StringConstants.getExtension(strExtension)] = "reserved";
+                                org.setUser(ViewBag.extensionRegistryUser);
+                            }
+                        }
+                        break;
                 }
+                // we may have just null'd out, created, or set one or more extension attributes, re-retrieve user containing extensions (and add manager UPN)
+                ViewBag.extensionRegistryUser = org.getUserJson(StringConstants.getExtensionRegistryUser());
+                ViewBag.extensionRegistryUser["managerUserPrincipalName"] = "asuthar@msonline-setup.com";
+                // no UPN provided, get the UPN of the first user instead
                 if (strUpn == null)
                 {
-                    // no UPN provided, get the UPN of the first user instead
                     strUpn = org.getFirstUpn();
                 }
+                // initialize the ViewBag if we have a UPN
                 if (strUpn != null)
                 {
                     string strTrio = queryValues["trio"];
