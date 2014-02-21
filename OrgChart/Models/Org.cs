@@ -10,6 +10,14 @@ namespace OrgChart.Models
 {
     public class Org
     {
+        static public string getExtensionRegistryUser()
+        {
+            string strAdmin = "admin@";
+            strAdmin += StringConstants.tenant;
+            return strAdmin;
+        }
+        static public string[] standardAttributes = { "displayName", "jobTitle", "userPrincipalName", "mailNickname", "managerUserPrincipalName" };
+
         private GraphQuery graphCall;
         public Org(GraphQuery gq)
         {
@@ -185,6 +193,11 @@ namespace OrgChart.Models
         public JObject getUserJson(string strUpn)
         {
             return graphCall.getUserJson(strUpn);
+        }
+        public string getUsersManager(string strUpn)
+        {
+            AadUser manager = graphCall.getUsersManager(strUpn);
+            return manager.userPrincipalName;
         }
         public bool registerExtension(string strExtension)
         {

@@ -27,12 +27,12 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         // Next section is tenant and application specific configuraiton.
 
         // Your tenant objectId or tenant domain name – this can be any of a tenant's verified domain
-        public const string tenant = "msonlinesetup.onmicrosoft.com";
+        public static string tenant = "dxtest.onmicrosoft.com";
 
         // Config for OAuth client credentials (2-legged OAuth, S2S Authn flow)
-        public const string clientId = "33b6cec1-7aa1-4574-9525-1f73a7c3b6e6";
-        public const string AppObjectId = "821bdbf5-6927-4544-ab5e-e0506b456029";
-        public const string clientSecret = "Kl/CdYAC32EmFxnC7Ek+hJHepi1hx9D9kHqxG5b0xVM=";
+        public static string clientId = "eeed6b47-a902-4c40-94ae-76d30e26a5ef";
+        public static string AppObjectId = "a4eff3a2-2a90-494a-9db4-497958a0319f";
+        public static string clientSecret = "WzeIRPCwE54thByEV1a8+uambXJkuCRB1xH/fcGhOmM=";
 
         // FIXTHIS: Config for OAuth Authorization Code grant flow (3-legged OAuth Auth flow - includes user authentication)
         //public const string clientIdForUserAuthn = "7318ca25-0f32-4d77-8843-2c4bc2a44326";  //for user_impersonation
@@ -48,12 +48,5 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             trioExtension += strExtensionName;
             return trioExtension;
         }
-        static public string getExtensionRegistryUser()
-        {
-            string strAdmin = "admin@";
-            strAdmin += StringConstants.tenant;
-            return strAdmin;
-        }
-        static public string[] standardAttributes = { "displayName", "jobTitle", "userPrincipalName", "mailNickname", "managerUserPrincipalName" };
     }
 }

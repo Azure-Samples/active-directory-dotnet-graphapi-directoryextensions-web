@@ -21,6 +21,57 @@
     </section>
 }
 
+@functions {
+    public void GenerateMap(ref string map, List<JObject> list, JObject registryUser)
+    {
+        foreach (JObject user in list)
+        {
+            // first two attributes are special cases (variable name and first field)
+            if (map != "") { map += ","; }
+            map += user["mailNickname"];
+            map += ": { displayName: \"";
+            map += user["displayName"];
+            // enumerate remaining attributes from JSON object
+            foreach (JProperty property in registryUser.Properties())
+            {
+                if (property.Name == "mailNickname" || property.Name == "displayName")
+                {
+                    // skip special cases
+                }
+                else if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || Org.standardAttributes.Contains(property.Name))
+                {
+                    map += "\", ";
+                    map += property.Name;
+                    map += ": \"";
+                    map += user[property.Name];
+                }
+            }
+            map += "\"}";
+        }
+    }
+    public string GeneratePhotoLink(JObject user)
+    {
+        string strPhotoLink = null;
+        string strUPN = (string)user["userPrincipalName"];
+        // if msonlinesetup, use internal photos
+        if(strUPN.Contains("msonline"))
+        {
+            strPhotoLink = String.Format("{0}{1}{2}", "http://who/photos/", user["mailNickname"], ".jpg");
+        }
+        // if dxtest, use externally visible photos
+        else if (strUPN.Contains("dxtest") && !strUPN.Contains("admin"))
+        {
+            strPhotoLink = String.Format("{0}{1}{2}", "http://www.microsoft.com/global/en-us/news/publishingimages/exec/", user["mailNickname"], "_thumb.png");
+        }
+        // otherwise, use generic microsoft icon
+        else
+        {
+            strPhotoLink = "http://www.microsoft.com/global/en-us/news/PublishingImages/HomePage/mobile_new.png";
+        }
+        return strPhotoLink;
+    }
+}
+
 @if (ViewBag.ancestorsAndMainPerson != null)
 {
 <table id="Splitter">
@@ -38,7 +89,7 @@
 		<td style="display:none">@user["mailNickname"]</td>
         <td class="tdPersonDescription">
             <img style="MAX-WIDTH: 32px; VERTICAL-ALIGN: bottom; MARGIN: 1px 4px 0px 0px; MAX-HEIGHT: 24px" 
-                 src=@(String.Format("{0}{1}{2}", "http://who/photos/", @user["mailNickname"], ".jpg")) 
+                 src=@GeneratePhotoLink(user) 
                  alt="@user["mailNickname"]"/>
         </td>
         <td class="tdPersonDescription">
@@ -62,7 +113,7 @@ if (ancestorsAndMainPerson.Count > 0)
 		<td style="display:none">@user["mailNickname"]</td>
 		<td class="tdPersonImage">
             <img style="MAX-WIDTH: 110px; VERTICAL-ALIGN: bottom; MARGIN: 8px 10px 8px 10px; MAX-HEIGHT: 100px" 
-			     src=@(String.Format("{0}{1}{2}", "http://who/photos/", @user["mailNickname"], ".jpg")) 
+			     src=@GeneratePhotoLink(user) 
 			     alt="@user["mailNickname"]"/>
 		</td>
 		<td class="tdPersonDescription">
@@ -200,7 +251,7 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
             		    <td style="display:none">@user["mailNickname"]</td>
                         <td class="tdPersonImage">
                             <img style="MAX-WIDTH: 50px; VERTICAL-ALIGN: bottom; MARGIN: 4px 4px 4px 4px; MAX-HEIGHT: 52px" 
-                                 src=@(String.Format("{0}{1}{2}", "http://who/photos/", @user["mailNickname"], ".jpg")) 
+                                 src=@GeneratePhotoLink(user) 
                                  alt="@user["mailNickname"]"/>
                         </td>
             		    <td class = @((bool)user["isManager"] ? "tdManagerDescription" : "tdPersonDescription")>
@@ -222,7 +273,7 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
 			<!-- enumerate extension attributes from JSON object -->
             @foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
             {
-                if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || StringConstants.standardAttributes.Contains(property.Name))
+                if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || Org.standardAttributes.Contains(property.Name))
                 {
                     @:<div><label for="@property.Name"><pre>@property.Name: </pre></label> <input type="text" id="@property.Name" name="@property.Name"></div>
                 }
@@ -244,10 +295,10 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
 <td class="tdFormBackground">
 	<form id="ApplicationForm" action="/" method="post">
         <fieldset> <legend>Update Application Credentials</legend>
-            <div><label for="AppId"><pre>AppId: </pre></label> <input type="text" id="AppId" name="AppId"></div>
-            <div><label for="AppSecret"><pre>AppSecret: </pre></label> <input type="text" id="AppSecret" name="AppSecret"></div>
-            <div><label for="AppObjectId"><pre>AppObjectId: </pre></label> <input type="text" id="AppObjectId" name="AppObjectId"></div>
-            <div><label for="AppTenant"><pre>AppTenant: </pre></label> <input type="text" id="AppTenant" name="AppTenant"></div>
+            <div><label for="AppId"><pre>AppId: </pre></label> <input type="text" id="AppId" name="AppId" value="@StringConstants.clientId"></div>
+            <div><label for="AppSecret"><pre>AppSecret: </pre></label> <input type="text" id="AppSecret" name="AppSecret" value="@StringConstants.clientSecret"></div>
+            <div><label for="AppObjectId"><pre>AppObjectId: </pre></label> <input type="text" id="AppObjectId" name="AppObjectId" value="@StringConstants.AppObjectId"></div>
+            <div><label for="AppTenant"><pre>AppTenant: </pre></label> <input type="text" id="AppTenant" name="AppTenant" value="@StringConstants.tenant"></div>
             <button type="submit" id="applicationUpdate" name="submitButton" value="applicationUpdate">Update</button>
 		</fieldset>
 	</form>
@@ -256,35 +307,6 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
 </table>
 <script type="text/javascript">
     var userMap = {
-        @functions {
-            static public void GenerateMap(ref string map, List<JObject> list, JObject registryUser)
-            {
-                foreach (JObject user in list)
-                {
-                    // first two attributes are special cases (variable name and first field)
-                    if (map != "") { map += ","; }
-                    map += user["mailNickname"];
-                    map += ": { displayName: \"";
-                    map += user["displayName"];
-                    // enumerate remaining attributes from JSON object
-                    foreach (JProperty property in registryUser.Properties())
-                    {
-                        if (property.Name == "mailNickname" || property.Name == "displayName")
-                        {
-                            // skip special cases
-                        }
-                        else if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || StringConstants.standardAttributes.Contains(property.Name))
-                        {
-                            map += "\", ";
-                            map += property.Name;
-                            map += ": \"";
-                            map += user[property.Name];
-                        }
-                    }
-                    map += "\"}";
-                }
-            }
-        }
         @{
             string strMap = "";
             for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count; i++)
@@ -312,7 +334,7 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
             {
                 // skip special case
             }
-            else if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || StringConstants.standardAttributes.Contains(property.Name))
+            else if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || Org.standardAttributes.Contains(property.Name))
             {
                 @:$("#@property.Name").val(userMap[alias].@property.Name);
             }

@@ -16,6 +16,16 @@ namespace OrgChart.Controllers
     {
         public ActionResult Index()
         {
+            // check if we have changed the app credentials as that affects how we authenticate
+            string strFormAction = Request["submitButton"];
+            if(strFormAction == "applicationUpdate")
+            {
+                StringConstants.clientId = Request["AppId"];
+                StringConstants.clientSecret = Request["AppSecret"];
+                StringConstants.AppObjectId = Request["AppObjectId"];
+                StringConstants.tenant = Request["AppTenant"];
+            }
+
             // use ADAL library to connect to AAD tenant using fake parameters
             string baseGraphUri = StringConstants.baseGraphUri + StringConstants.tenant;
             GraphQuery graphCall = new GraphQuery();
@@ -38,20 +48,19 @@ namespace OrgChart.Controllers
                 // configure appropriate model                
                 OrgChart.Models.Org org = new OrgChart.Models.Org(graphCall);
                 // retrieve user containing all extensions (and add manager UPN)
-                ViewBag.extensionRegistryUser = org.getUserJson(StringConstants.getExtensionRegistryUser());
-                ViewBag.extensionRegistryUser["managerUserPrincipalName"] = "asuthar@msonline-setup.com";
+                ViewBag.extensionRegistryUser = org.getUserJson(Org.getExtensionRegistryUser());
+                ViewBag.extensionRegistryUser["managerUserPrincipalName"] = org.getUsersManager(Org.getExtensionRegistryUser());
                 // setup JObject for setuser by enumerating registry user
                 JObject graphUser = new JObject();
                 foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
                 {
-                    if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || StringConstants.standardAttributes.Contains(property.Name))
+                    if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || Org.standardAttributes.Contains(property.Name))
                     {
                         string value = Request[property.Name];
                         graphUser[property.Name] = (value == "") ? null : value;
                     }
                 }
-                // process any form submission requests
-                string strFormAction = Request["submitButton"];
+                // process any (non-app credential impacting) form submission requests
                 switch (strFormAction)
                 {
                     case "userUpdate":
@@ -71,8 +80,8 @@ namespace OrgChart.Controllers
                         org.deleteUser((string)graphUser["userPrincipalName"]);
                         break;
                     case "extensionCreate":
-                        // register the passed extension
                         {
+                            // register the passed extension
                             string strExtension = Request["Extension"];
                             if (org.registerExtension(strExtension))
                             {
@@ -83,9 +92,9 @@ namespace OrgChart.Controllers
                         }
                         break;
                 }
-                // we may have just null'd out, created, or set one or more extension attributes, re-retrieve user containing extensions (and add manager UPN)
-                ViewBag.extensionRegistryUser = org.getUserJson(StringConstants.getExtensionRegistryUser());
-                ViewBag.extensionRegistryUser["managerUserPrincipalName"] = "asuthar@msonline-setup.com";
+                // may have changed attributes, extension values, extension registration, or tenant credentials, re-retrieve extension registry user
+                ViewBag.extensionRegistryUser = org.getUserJson(Org.getExtensionRegistryUser());
+                ViewBag.extensionRegistryUser["managerUserPrincipalName"] = org.getUsersManager(Org.getExtensionRegistryUser());
                 // no UPN provided, get the UPN of the first user instead
                 if (strUpn == null)
                 {
