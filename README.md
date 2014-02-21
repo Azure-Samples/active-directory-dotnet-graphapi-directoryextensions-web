@@ -1,2 +1,2 @@
-WindowsAzureAD-GraphAPI-Sample-OrgChartt
-========================================
+WindowsAzureAD-GraphAPI-Sample-OrgChart
+=======================================
