@@ -35,7 +35,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
         public AzureADAuthentication aadAuthentication;
 
-        public AadUser getUser(string userId)
+        public AadUser getUser(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() || 
@@ -67,13 +67,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                
            catch (WebException webException)
            {
-                Console.WriteLine("Error: " + webException.Message);
+               Console.WriteLine("Error: " + webException.Message);
 
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
-                return null;
+               var errorStream = webException.Response.GetResponseStream();
+               DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
+               ODataError getError = (ODataError)(ser.ReadObject(errorStream));
+               Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+               strErrors += getError.error.message.value;
+               return null;
            }
 
         }
@@ -1748,7 +1749,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
-        public bool modifyUser(string method, AadUser user)
+        public bool modifyUser(string method, AadUser user, ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
@@ -1820,11 +1821,12 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
                 ODataError getError = (ODataError)(ser.ReadObject(errorStream));
                 Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                strErrors += getError.error.message.value;
                 return false;
             }
         }
 
-        public bool modifyUserJson(string method, JObject user)
+        public bool modifyUserJson(string method, JObject user, ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
@@ -1896,6 +1898,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
                 ODataError getError = (ODataError)(ser.ReadObject(errorStream));
                 Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                strErrors += getError.error.message.value;
                 return false;
             }
         }

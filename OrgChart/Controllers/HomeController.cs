@@ -16,6 +16,7 @@ namespace OrgChart.Controllers
     {
         public ActionResult Index()
         {
+            string strErrors = "";
             // check if we have changed the app credentials as that affects how we authenticate
             string strFormAction = Request["submitButton"];
             if(strFormAction == "applicationUpdate")
@@ -65,19 +66,19 @@ namespace OrgChart.Controllers
                 {
                     case "userUpdate":
                         // set display name, manager, job title, trio, skype for given UPN
-                        org.setUser(graphUser);
+                        org.setUser(graphUser, ref strErrors);
                         // show the user, unless trio is set, then show the manager
                         strUpn = Request["userPrincipalName"];
                         if ((string)graphUser[StringConstants.getExtension("trio")] != "") strUpn = Request["managerUserPrincipalName"];
                         break;
                     case "userCreate":
                         // create user with given display name, UPN, and manager
-                        org.createUser(graphUser);
+                        org.createUser(graphUser, ref strErrors);
                         strUpn = (string)graphUser["userPrincipalName"];
                         break;
                     case "userDelete":
                         // delete user with given UPN
-                        org.deleteUser((string)graphUser["userPrincipalName"]);
+                        org.deleteUser((string)graphUser["userPrincipalName"], ref strErrors);
                         break;
                     case "extensionCreate":
                         {
@@ -87,7 +88,7 @@ namespace OrgChart.Controllers
                             {
                                 // set this extension value to registered on the "registry" object
                                 ViewBag.extensionRegistryUser[StringConstants.getExtension(strExtension)] = "reserved";
-                                org.setUser(ViewBag.extensionRegistryUser);
+                                org.setUser(ViewBag.extensionRegistryUser, ref strErrors);
                             }
                         }
                         break;
@@ -105,8 +106,9 @@ namespace OrgChart.Controllers
                 {
                     string strTrio = queryValues["trio"];
                     bool bTrio = (strTrio != null && String.Equals(strTrio, "true", StringComparison.CurrentCultureIgnoreCase));
-                    ViewBag.ancestorsAndMainPerson = org.getAncestorsAndMain(strUpn, bTrio);
-                    ViewBag.directsOfDirects = org.getDirectsOfDirects(strUpn, bTrio);
+                    ViewBag.ancestorsAndMainPerson = org.getAncestorsAndMain(strUpn, bTrio, ref strErrors);
+                    ViewBag.directsOfDirects = org.getDirectsOfDirects(strUpn, bTrio, ref strErrors);
+                    ViewBag.strErrors = strErrors;
                 }
             }
             else

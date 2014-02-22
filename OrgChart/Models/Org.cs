@@ -23,7 +23,7 @@ namespace OrgChart.Models
         {
             graphCall = gq;
         }
-        public JObject createUser(JObject user)
+        public JObject createUser(JObject user, ref string strErrors)
         {
             // setup AadUser with standard attributes, accountEnabled, and password profile
             AadUser aadUser = new AadUser();
@@ -62,18 +62,17 @@ namespace OrgChart.Models
 
             // set manager
             newUser["managerUserPrincipalName"] = user["managerUserPrincipalName"];
-            newUser = setUser(newUser);
-
+            newUser = setUser(newUser, ref strErrors);
             return newUser;
         }
-        public void deleteUser(string strUpdateUPN)
+        public void deleteUser(string strUpdateUPN, ref string strErrors)
         {
             // set new (or same) display name
-            AadUser user = graphCall.getUser(strUpdateUPN);
-            bool bPass = graphCall.modifyUser("DELETE", user);
+            AadUser user = graphCall.getUser(strUpdateUPN, ref strErrors);
+            bool bPass = graphCall.modifyUser("DELETE", user, ref strErrors);
         }
         // list with main person (or main trio) as the last item in list
-        public List<List<JObject>> getAncestorsAndMain(String strUPN, bool bTrio)
+        public List<List<JObject>> getAncestorsAndMain(String strUPN, bool bTrio, ref string strErrors)
         {
             List<List<JObject>> returnedListOfLists = new List<List<JObject>>();
             
@@ -112,6 +111,12 @@ namespace OrgChart.Models
                         // otherwise, this user not part of a trio, just add the first time through
                         returnedListOfLists.ElementAt(returnedListOfLists.Count - idxAncestorOrMain - 1).Add(graphUser);
                     }
+                    // detect infinite loop: user is own manager, skip, notify and allow user to fix
+                    if ((graphUserParent != null) && ((string)graphUserParent["userPrincipalName"] == (string)graphUser["userPrincipalName"]))
+                    {
+                        strErrors += ((string)graphUser["userPrincipalName"] + " has itself as manager. Please resolve.\n");
+                        break;
+                    }
                     // set next graph user
                     graphUser = graphUserParent;
                     // increment the ancestor level
@@ -121,7 +126,7 @@ namespace OrgChart.Models
             return returnedListOfLists;
         }
         // get subordinates list of lists with ICs as single person lists and leads as multiple person lists
-        public List<List<JObject>> getDirectsOfDirects(string strUPN, bool bTrio)
+        public List<List<JObject>> getDirectsOfDirects(string strUPN, bool bTrio, ref string strErrors)
         {
             List<List<JObject>> returnedListOfLists = new List<List<JObject>>();
 
@@ -197,7 +202,14 @@ namespace OrgChart.Models
         public string getUsersManager(string strUpn)
         {
             AadUser manager = graphCall.getUsersManager(strUpn);
-            return manager.userPrincipalName;
+            if (manager != null)
+            {
+                return manager.userPrincipalName;
+            }
+            else
+            {
+                return "NO MANAGER";
+            }
         }
         public bool registerExtension(string strExtension)
         {
@@ -215,7 +227,7 @@ namespace OrgChart.Models
             }
             return false;
         }
-        public JObject setUser(JObject user)
+        public JObject setUser(JObject user, ref string strErrors)
         {
             // set new (or same) display name and job title
             JObject graphUser = graphCall.getUserJson((string)user["userPrincipalName"]);
@@ -229,14 +241,22 @@ namespace OrgChart.Models
                     graphUser[property.Name] = user[property.Name];
                 }
             }            
-            bool bPass = graphCall.modifyUserJson("PATCH", graphUser);
+            bool bPass = graphCall.modifyUserJson("PATCH", graphUser, ref strErrors);
+            if (!bPass)
+            {
+                return null;
+            }
             // set/clear manager
             string updateManagerURI = graphCall.baseGraphUri + "/users/" + (string)user["userPrincipalName"] + "/$links/manager?" + graphCall.apiVersion;
             urlLink managerlink = new urlLink();
             string method;
             if ((string)user["managerUserPrincipalName"] != "NO MANAGER")
             {
-                AadUser manager = graphCall.getUser((string)user["managerUserPrincipalName"]);
+                AadUser manager = graphCall.getUser((string)user["managerUserPrincipalName"], ref strErrors);
+                if (manager == null)
+                {
+                    return null;
+                }
                 managerlink.url = graphCall.baseGraphUri + "/directoryObjects/" + manager.objectId;
                 method = "PUT";
             }

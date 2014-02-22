@@ -160,8 +160,8 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
         // insert a row break if we are at the natural start of a new row
         if (j != 0)
         {
-                @:</tr><tr>
-            }
+            @:</tr><tr>
+        }
         // read ahead 9+1 directs to emit the row of spanning trio columns
         String previousTrio = null;
         String previousUPN = null;
@@ -173,7 +173,6 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
             {
                 break;
             }
-
             List<JObject> dirList = ViewBag.directsOfDirects[k];
             String newTrio = (String)dirList[0][StringConstants.getExtension("trio")];
             String newUPN = (String)dirList[0]["userPrincipalName"];
@@ -211,16 +210,16 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
                 // trio terminated by new trio or end of list (without exceeding max row length)
                 if (previousTrio != "")  // CAN WE REMOVE THIS? WHEN WOULD IT HAPPEN?
                 {
-                        <td class="tdTrio" colspan ="@(colspan)">
-                        <a class="tdTrio" href="/?upn=@previousUPN&trio=true">@previousTrio</a>
-                        </td>
+                    <td class="tdTrio" colspan ="@(colspan)">
+                    <a class="tdTrio" href="/?upn=@previousUPN&trio=true">@previousTrio</a>
+                    </td>
                 }
                 // if we are last in the list and have a trio that is different from previous, we are 1 member trio and terminator above won't get hit
                 if (k == (count - 1) && newTrio != "" && newTrio != previousTrio)
                 {
-                        <td class="tdTrio" colspan = 1>
-                        <a class="tdTrio" href="/?upn=@newUPN&trio=true">@newTrio</a>
-                        </td>
+                    <td class="tdTrio" colspan = 1>
+                    <a class="tdTrio" href="/?upn=@newUPN&trio=true">@newTrio</a>
+                    </td>
                 }
                 // reset if terminated by new trio
                 if (newTrio != previousTrio)
@@ -241,32 +240,39 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
             }
         }
         // insert a row break to close out spanning header column
-            @:</tr><tr>
+        @:</tr><tr>
+    }
+    <td>
+        <table>
+        @foreach (JObject user in directList)
+        {
+            <tr class="highlightable">
+            	<td style="display:none">@user["mailNickname"]</td>
+                <td class="tdPersonImage">
+                    <img style="MAX-WIDTH: 50px; VERTICAL-ALIGN: bottom; MARGIN: 4px 4px 4px 4px; MAX-HEIGHT: 52px" 
+                            src=@GeneratePhotoLink(user) 
+                            alt="@user["mailNickname"]"/>
+                </td>
+            	<td class = @((bool)user["isManager"] ? "tdManagerDescription" : "tdPersonDescription")>
+                    <a href="/?upn=@user["userPrincipalName"]">@user["displayName"]</a> (@user["mailNickname"])<br />@user["jobTitle"]
+            	</td>
+            </tr>
         }
-        <td>
-            <table>
-                @foreach (JObject user in directList)
-                {
-                    <tr class="highlightable">
-            		    <td style="display:none">@user["mailNickname"]</td>
-                        <td class="tdPersonImage">
-                            <img style="MAX-WIDTH: 50px; VERTICAL-ALIGN: bottom; MARGIN: 4px 4px 4px 4px; MAX-HEIGHT: 52px" 
-                                 src=@GeneratePhotoLink(user) 
-                                 alt="@user["mailNickname"]"/>
-                        </td>
-            		    <td class = @((bool)user["isManager"] ? "tdManagerDescription" : "tdPersonDescription")>
-                            <a href="/?upn=@user["userPrincipalName"]">@user["displayName"]</a> (@user["mailNickname"])<br />@user["jobTitle"]
-            		    </td>
-                    </tr>
-                }
-            </table>
-        </td>
+        </table>
+    </td>
 }
 }
 </tr>
 </table>
 </tr>
 <tr>
+<td>
+<div style="text-align: center">
+    <span style="color:red">
+        @ViewBag.strErrors
+    </span>
+</div>
+</td>
 <td class="tdFormBackground">
 	<form id="UserForm" action="/" method="post">
         <fieldset> <legend>Update/Delete/Create a User</legend>
