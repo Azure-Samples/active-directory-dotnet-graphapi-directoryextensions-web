@@ -284,9 +284,9 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
                     @:<div><label for="@property.Name"><pre>@property.Name: </pre></label> <input type="text" id="@property.Name" name="@property.Name"></div>
                 }
             }			
+    		<button type="submit" id="userCreate" name="submitButton" value="userCreate">Create</button>
             <button type="submit" id="userUpdate" name="submitButton" value="userUpdate">Update</button>
 		    <button type="submit" id="userDelete" name="submitButton" value="userDelete">Delete</button>
-    		<button type="submit" id="userCreate" name="submitButton" value="userCreate">Create</button>
 		</fieldset>
 	</form>
 </td>
@@ -301,6 +301,13 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
 <td class="tdFormBackground">
 	<form id="ApplicationForm" action="/" method="post">
         <fieldset> <legend>Update Application Credentials</legend>
+            <div><label for="ChooseCred"><pre>Choose Credential: </pre></label> 
+                <select id="ChooseCred" name="ChooseCred">
+                    <option value="dxtest orgchart" @(Org.whichCred == "dxtest orgchart" ? "selected" : "")>dxtest orgchart</option>
+                    <option value="new" @(Org.whichCred == "new" ? "selected" : "")>new</option>
+                </select>
+                <input type="text" id="WhichCred" name="WhichCred" value="@Org.whichCred" readonly="readonly">
+            </div>
             <div><label for="AppId"><pre>AppId: </pre></label> <input type="text" id="AppId" name="AppId" value="@StringConstants.clientId"></div>
             <div><label for="AppSecret"><pre>AppSecret: </pre></label> <input type="text" id="AppSecret" name="AppSecret" value="@StringConstants.clientSecret"></div>
             <div><label for="AppObjectId"><pre>AppObjectId: </pre></label> <input type="text" id="AppObjectId" name="AppObjectId" value="@StringConstants.AppObjectId"></div>
@@ -326,6 +333,14 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
         }
         @MvcHtmlString.Create(strMap)
     };
+    function cacheAppCreds() {
+        // store creds from UI to localstorage
+        var str = $("#ChooseCred option:selected").text();
+        localStorage.setItem(str + "AppId", $("#AppId").val());
+        localStorage.setItem(str + "AppSecret", $("#AppSecret").val());
+        localStorage.setItem(str + "AppObjectId", $("#AppObjectId").val());
+        localStorage.setItem(str + "AppTenant", $("#AppTenant").val());
+    }
     function hoverOn(eventObject) {
         var $td = $("td:first", this);
         var alias = $td[0].textContent;
@@ -349,21 +364,36 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
     function hoverOut(eventObject) {
         //leave text in input fields on losing focus
     }
+    function setEventHandlers() {
+        $("#userPrincipalName").on("input", function () {
+            var userFormAction = "/?upn=";
+            userFormAction += this.value;
+            $("#UserForm").attr("action", userFormAction);
+        });
+        $("#ChooseCred").change(function () {
+            var str = "";
+            $("#ChooseCred option:selected").each(function() {
+                // display settings from localstorage corresponding to selected option
+                str = $(this).text();
+                $("#WhichCred").val(str);
+                $("#AppId").val(localStorage.getItem(str + "AppId"));
+                $("#AppSecret").val(localStorage.getItem(str + "AppSecret"));
+                $("#AppObjectId").val(localStorage.getItem(str + "AppObjectId"));
+                $("#AppTenant").val(localStorage.getItem(str + "AppTenant"));
+            });
+        });        
+        $("#ApplicationForm").submit(function(event) {
+            // store current creds in localstorage
+            cacheAppCreds();
+        });
+    }
     function setHoverActions() {
         $("tr.highlightable").hover(hoverOn, hoverOut);
     }
-    function setInputChange() {
-        $("#userPrincipalName").each(function () {
-            $(this).on("input", function () {
-                var userFormAction = "/?upn=";
-                userFormAction += this.value;
-                $("#UserForm").attr("action", userFormAction);
-            });
-        });
-    }
     window.document.body.onload = function () {
         setHoverActions();
-        setInputChange();
+        setEventHandlers();
+        cacheAppCreds(); // store initial creds in local storage
     }
 </script>
 }

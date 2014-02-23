@@ -10,13 +10,14 @@ namespace OrgChart.Models
 {
     public class Org
     {
-        static public string getExtensionRegistryUser()
+        public static string getExtensionRegistryUser()
         {
             string strAdmin = "admin@";
             strAdmin += StringConstants.tenant;
             return strAdmin;
         }
-        static public string[] standardAttributes = { "displayName", "jobTitle", "userPrincipalName", "mailNickname", "managerUserPrincipalName" };
+        public static string[] standardAttributes = { "displayName", "jobTitle", "userPrincipalName", "mailNickname", "managerUserPrincipalName" };
+        public static string whichCred = "dxtest orgchart";
 
         private GraphQuery graphCall;
         public Org(GraphQuery gq)

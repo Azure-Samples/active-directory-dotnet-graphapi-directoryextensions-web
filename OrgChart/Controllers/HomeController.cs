@@ -21,6 +21,7 @@ namespace OrgChart.Controllers
             string strFormAction = Request["submitButton"];
             if(strFormAction == "applicationUpdate")
             {
+                Org.whichCred = Request["WhichCred"];
                 StringConstants.clientId = Request["AppId"];
                 StringConstants.clientSecret = Request["AppSecret"];
                 StringConstants.AppObjectId = Request["AppObjectId"];
