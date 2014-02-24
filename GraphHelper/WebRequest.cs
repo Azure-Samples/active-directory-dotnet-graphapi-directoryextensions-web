@@ -1617,7 +1617,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
-        public ExtensionDefinition createExtension(ExtensionDefinition extension)
+        public ExtensionDefinition createExtension(ExtensionDefinition extension, ref string strErrors)
         {
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
@@ -1682,6 +1682,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
                 ODataError getError = (ODataError)(ser.ReadObject(errorStream));
                 Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                strErrors += getError.error.message.value;
                 return null;
             }
         }

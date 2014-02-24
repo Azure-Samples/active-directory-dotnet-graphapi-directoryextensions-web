@@ -85,7 +85,7 @@ namespace OrgChart.Controllers
                         {
                             // register the passed extension
                             string strExtension = Request["Extension"];
-                            if (org.registerExtension(strExtension))
+                            if (org.registerExtension(strExtension, ref strErrors))
                             {
                                 // set this extension value to registered on the "registry" object
                                 ViewBag.extensionRegistryUser[StringConstants.getExtension(strExtension)] = "reserved";

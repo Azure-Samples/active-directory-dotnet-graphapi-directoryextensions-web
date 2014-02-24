@@ -212,7 +212,7 @@ namespace OrgChart.Models
                 return "NO MANAGER";
             }
         }
-        public bool registerExtension(string strExtension)
+        public bool registerExtension(string strExtension, ref string strErrors)
         {
             // setup the extension definition
             ExtensionDefinition extension = new ExtensionDefinition();
@@ -221,7 +221,7 @@ namespace OrgChart.Models
             extension.targetObjects.Add("User");
 
             // Execute the POST to create new extension
-            ExtensionDefinition returnedExtension = graphCall.createExtension(extension);
+            ExtensionDefinition returnedExtension = graphCall.createExtension(extension, ref strErrors);
             if(returnedExtension != null)
             {
                 return true;
