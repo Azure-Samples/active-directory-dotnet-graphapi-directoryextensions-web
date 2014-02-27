@@ -12,7 +12,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 {
     public class AzureADAuthentication
     {
-        public AuthenticationResult aadAuthenticationResult;
+        public AuthenticationResult AadAuthenticationResult;
 
         // First Authn method OAuth Client credential flow (2-legged, S2S)
         // *
@@ -105,24 +105,24 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         }
 
         // methods will get a new token.
-        public AuthenticationResult getNewAuthenticationResult(ref string strErrors)
+        public AuthenticationResult GetNewAuthenticationResult(ref string strErrors)
         {
             // check which type of token to acquire by checking to see if a refresh token is available 
             // (indicating OAuth Authz code grant flow)
-            if (this.aadAuthenticationResult.RefreshToken == null)
+            if (this.AadAuthenticationResult.RefreshToken == null)
             {
                 AzureADAuthentication appToken = new AzureADAuthentication();
-                AuthenticationResult applicationAuthnResult = appToken.GetAuthenticationResult(StringConstants.tenant,
-                                            StringConstants.clientId, StringConstants.clientSecret,
-                                            StringConstants.resource, StringConstants.authenticationEndpoint, ref strErrors);
+                AuthenticationResult applicationAuthnResult = appToken.GetAuthenticationResult(StringConstants.Tenant,
+                                            StringConstants.ClientId, StringConstants.ClientSecret,
+                                            StringConstants.Resource, StringConstants.AuthenticationEndpoint, ref strErrors);
                 return applicationAuthnResult;
             }
             else
             {
                 AzureADAuthentication appToken = new AzureADAuthentication();
-                AuthenticationResult userAuthnResult = appToken.GetAuthenticationResult(StringConstants.tenant, 
-                                            StringConstants.clientId, StringConstants.redirectUri,
-                                            StringConstants.resource, StringConstants.authenticationEndpoint, ref strErrors);
+                AuthenticationResult userAuthnResult = appToken.GetAuthenticationResult(StringConstants.Tenant, 
+                                            StringConstants.ClientId, StringConstants.RedirectUri,
+                                            StringConstants.Resource, StringConstants.AuthenticationEndpoint, ref strErrors);
                 return userAuthnResult;
             }
         
@@ -136,7 +136,7 @@ namespace ExtensionMethods
 {
     public static class MicrosoftIdentityModelExtensions
     {
-        public static bool isExpired(this AuthenticationResult authenticationResult)
+        public static bool IsExpired(this AuthenticationResult authenticationResult)
         {
             return WillExpireIn(authenticationResult, 0);
         }

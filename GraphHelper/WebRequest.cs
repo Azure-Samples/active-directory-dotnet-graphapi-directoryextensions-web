@@ -20,31 +20,31 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
     public class GraphQuery
     {
         // Graph API version
-        public string apiVersion;
+        public string ApiVersion;
 
         // Your tenant's name - can be the domain name 
         public string tenant;
 
         // The Graph service endpoint for a tenant
-        public string baseGraphUri;
+        public string BaseGraphUri;
 
      //   public string token;
 
-        public AuthenticationResult aadAuthenticationResult;
+        public AuthenticationResult AadAuthenticationResult;
 
         public AzureADAuthentication aadAuthentication;
 
         public AadUser getUser(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() || 
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-            //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() || 
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+            //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
             
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
                        
-            string uri = this.baseGraphUri + "/users/" + userId + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/users/" + userId + "?" + this.ApiVersion;
 
             try
             {
@@ -70,17 +70,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
-        public JObject getUserJson(string userId, ref string strErrors)
+        public JObject GetUserJson(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users/" + userId + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/users/" + userId + "?" + this.ApiVersion;
 
             try
             {
@@ -110,16 +110,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
-        public AadUser getUsersManager(string userId, ref string strErrors)
+        public AadUser GetUsersManager(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
-            string uri = this.baseGraphUri + "/users/" + userId + "/manager" + "?" + this.apiVersion;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
+            string uri = this.BaseGraphUri + "/users/" + userId + "/manager" + "?" + this.ApiVersion;
 
             try
             {
@@ -148,13 +148,13 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public JObject getUsersManagerJson(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
-            string uri = this.baseGraphUri + "/users/" + userId + "/manager" + "?" + this.apiVersion;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
+            string uri = this.BaseGraphUri + "/users/" + userId + "/manager" + "?" + this.ApiVersion;
 
             try
             {
@@ -187,14 +187,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadUsers getUsersDirectReports(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users/" + userId + "/directReports" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/users/" + userId + "/directReports" + "?" + this.ApiVersion;
 
             try
             {
@@ -223,14 +223,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public JUsers getUsersDirectReportsJson(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users/" + userId + "/directReports" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/users/" + userId + "/directReports" + "?" + this.ApiVersion;
 
             try
             {
@@ -263,14 +263,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadGroups getUsersGroupMembership(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users/" + userId + "/memberOf" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/users/" + userId + "/memberOf" + "?" + this.ApiVersion;
 
             try
             {
@@ -296,20 +296,20 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
-        public AadUsers getUsers(ref string strErrors)
+        public AadUsers GetUsers(ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/users" + "?" + this.ApiVersion;
 
             try
             {
@@ -343,22 +343,22 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
-        public AadUsers getUsers(AadFilter filter, int pageSize, ref string strErrors)
+        public AadUsers GetUsers(AadFilter filter, int pageSize, ref string strErrors)
         {
             //maximum number of objects for a filtered search = 999
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users" + "?$top=" + pageSize.ToString()
+            string uri = this.BaseGraphUri + "/users" + "?$top=" + pageSize.ToString()
                          + "&$filter=" + filter.objectProperty + " " + filter.operand + " '" + filter.propertyValue + "'"
-                         + "&" + this.apiVersion;
+                         + "&" + this.ApiVersion;
 
             try
             {
@@ -392,20 +392,20 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
-        public AadUsers getUsers(int pageSize, ref string strErrors)
+        public AadUsers GetUsers(int pageSize, ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users" + "?$top=" + pageSize.ToString() + "&" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/users" + "?$top=" + pageSize.ToString() + "&" + this.ApiVersion;
 
             try
             {
@@ -440,20 +440,20 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         }
 
         // this method supports getting the next link with the default pageSize = 99
-        public AadUsers getUsers(string nextLink, ref string strErrors)
+        public AadUsers GetUsers(string nextLink, ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/" + nextLink + "&" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/" + nextLink + "&" + this.ApiVersion;
 
             try
             {
@@ -488,21 +488,21 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         }
 
         // this method supports getting the next link and allows pageSize to be specified
-        public AadUsers getUsers(string nextLink, int pageSize, ref string strErrors)
+        public AadUsers GetUsers(string nextLink, int pageSize, ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
             
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/" + nextLink + "&$top=" + pageSize.ToString() + "&" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/" + nextLink + "&$top=" + pageSize.ToString() + "&" + this.ApiVersion;
 
             try
             {
@@ -536,32 +536,32 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
-        public AadUsers getUsers(int pageSize, string nextLink, string orderbyProperty, ref string strErrors)
+        public AadUsers GetUsers(int pageSize, string nextLink, string orderbyProperty, ref string strErrors)
         {
             // validate pageSize arguments (must be 1-999)
             if (pageSize <= 0 || pageSize >= 1000)
                 return null;
       
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
             string uri = "";
             if (nextLink == "" || nextLink == null)
-               uri = this.baseGraphUri + "/users"
+               uri = this.BaseGraphUri + "/users"
                          + "?$top=" + pageSize.ToString()
                          + "&" + "$orderby=" + orderbyProperty
-                         + "&" + this.apiVersion;
+                         + "&" + this.ApiVersion;
             else
-                uri = this.baseGraphUri + "/" + nextLink
+                uri = this.BaseGraphUri + "/" + nextLink
                       + "&$top=" + pageSize.ToString()
-                      + "&" + this.apiVersion;
+                      + "&" + this.ApiVersion;
 
             try
             {
@@ -598,14 +598,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public bool getUsersPhoto(string userId, string filePath, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
 
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users/" + userId + "/thumbnailPhoto" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/users/" + userId + "/thumbnailPhoto" + "?" + this.ApiVersion;
 
             try
             {
@@ -639,14 +639,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public bool setUsersPhoto(string userId, string filePath, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
 
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users/" + userId + "/thumbnailPhoto" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/users/" + userId + "/thumbnailPhoto" + "?" + this.ApiVersion;
 
 
             try
@@ -699,16 +699,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadGroup getGroup(string groupId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/groups/" + groupId + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/groups/" + groupId + "?" + this.ApiVersion;
 
             try
             {
@@ -737,16 +737,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadGroups getGroups(ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/groups" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/groups" + "?" + this.ApiVersion;
 
             try
             {
@@ -784,16 +784,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadGroups getGroups(int pageSize, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/groups" + "?$top=" + pageSize.ToString() + "&" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/groups" + "?$top=" + pageSize.ToString() + "&" + this.ApiVersion;
 
             try
             {
@@ -831,16 +831,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadGroups getGroups(int pageSize, string nextLink, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/" + nextLink + "&$top=" + pageSize.ToString() + "&" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/" + nextLink + "&$top=" + pageSize.ToString() + "&" + this.ApiVersion;
 
             try
             {
@@ -879,16 +879,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         {
 
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/contacts" + "?$top=" + pageSize.ToString() + "&" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/contacts" + "?$top=" + pageSize.ToString() + "&" + this.ApiVersion;
 
             try
             {
@@ -925,16 +925,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         {
 
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/" + nextLink + "&$top=" + pageSize.ToString() + "&" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/" + nextLink + "&$top=" + pageSize.ToString() + "&" + this.ApiVersion;
 
             try
             {
@@ -971,14 +971,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadContact getContact(string contactId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/contacts/" + contactId + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/contacts/" + contactId + "?" + this.ApiVersion;
 
             try
             {
@@ -1007,14 +1007,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadObjects getGroupMembership(string groupId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/groups/" + groupId + "/members" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/groups/" + groupId + "/members" + "?" + this.ApiVersion;
 
             try
             {
@@ -1043,12 +1043,12 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadObject getDirectoryObject(string objectType, string objectId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
             if (objectType.ToLower() == "group" || objectType.ToLower() == "groups")
                 objectType = "/groups";
@@ -1057,7 +1057,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             else
                 objectType = "/users";
 
-            string uri = this.baseGraphUri + objectType + "/" + objectId  + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + objectType + "/" + objectId  + "?" + this.ApiVersion;
 
             try
             {
@@ -1086,12 +1086,12 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadObjects getDirectoryObjects(string objectType, int pageSize, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
             if (objectType.ToLower() == "group" || objectType.ToLower() == "groups")
                 objectType = "groups";
@@ -1103,7 +1103,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (pageSize >= 1000)
                 pageSize = 999;
 
-            string uri = this.baseGraphUri + "/" + objectType + "?$top=" + pageSize.ToString() + "&" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/" + objectType + "?$top=" + pageSize.ToString() + "&" + this.ApiVersion;
 
             try
             {
@@ -1132,16 +1132,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadRoles getRoles(ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/roles" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/roles" + "?" + this.ApiVersion;
 
             try
             {
@@ -1179,16 +1179,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadRole getRole(string roleId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/roles/" + roleId + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/roles/" + roleId + "?" + this.ApiVersion;
 
             try
             {
@@ -1226,16 +1226,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadUsers getRoleMembers(string roleId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/roles/" + roleId + "/members" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/roles/" + roleId + "/members" + "?" + this.ApiVersion;
 
             try
             {
@@ -1273,16 +1273,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadTenantDetails getTenantDetails(ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/tenantDetails" + "?" + apiVersion;
+            string uri = this.BaseGraphUri + "/tenantDetails" + "?" + ApiVersion;
 
             try
             {
@@ -1319,16 +1319,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadSubscribedSkus getSubscribedSkus(ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/subscribedSkus" + "?" + apiVersion;
+            string uri = this.BaseGraphUri + "/subscribedSkus" + "?" + ApiVersion;
 
             try
             {
@@ -1387,19 +1387,19 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             return extendedObject;
         }
 
-        public JObject CreateUser(JObject user, ref string strErrors)
+        public JObject CreateUserJson(JObject user, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/users" + "?" + this.ApiVersion;
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
             jsonSettings.NullValueHandling = NullValueHandling.Ignore;
             jsonSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
@@ -1455,16 +1455,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
         public ExtensionDefinition createExtension(ExtensionDefinition extension, ref string strErrors)
         {
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/applications/" + StringConstants.AppObjectId + "/extensionProperties" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/applications/" + StringConstants.AppObjectId + "/extensionProperties" + "?" + this.ApiVersion;
 
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
             jsonSettings.NullValueHandling = NullValueHandling.Ignore;
@@ -1517,16 +1517,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
-        public AadUser createUser(AadUser user, ref string strErrors)
+        public AadUser CreateUser(AadUser user, ref string strErrors)
         {
             if (!this.ValidateAndRenewTokenIfRequired(ref strErrors))
             {
                 return null;
             }
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/users" + "?" + this.ApiVersion;
 
             //Setup AadUser object
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -1579,20 +1579,20 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         {
 
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
             string uri = "";
 
              if (method == "POST")
-                uri = this.baseGraphUri + "/users" + "?" + this.apiVersion;
+                uri = this.BaseGraphUri + "/users" + "?" + this.ApiVersion;
              else 
-               uri = this.baseGraphUri + "/users/" + user.userPrincipalName + "?" + this.apiVersion;
+               uri = this.BaseGraphUri + "/users/" + user.userPrincipalName + "?" + this.ApiVersion;
 
             //Setup AadUser object
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -1645,24 +1645,24 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
-        public bool modifyUserJson(string method, JObject user, ref string strErrors)
+        public bool ModifyUserJson(string method, JObject user, ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
             string uri = "";
 
             if (method == "POST")
-                uri = this.baseGraphUri + "/users" + "?" + this.apiVersion;
+                uri = this.BaseGraphUri + "/users" + "?" + this.ApiVersion;
             else
-                uri = this.baseGraphUri + "/users/" + user["userPrincipalName"] + "?" + this.apiVersion;
+                uri = this.BaseGraphUri + "/users/" + user["userPrincipalName"] + "?" + this.ApiVersion;
 
             //Setup user object
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -1718,15 +1718,15 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public bool modifyGroup(string method, AadGroup group, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
-            string uri = this.baseGraphUri + "/groups/" + group.objectId + "?" + this.apiVersion;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
+            string uri = this.BaseGraphUri + "/groups/" + group.objectId + "?" + this.ApiVersion;
 
             //Setup serialization
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -1787,15 +1787,15 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadGroup createGroup(AadGroup group, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
-            string uri = this.baseGraphUri + "/groups" + "?" + this.apiVersion;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
+            string uri = this.BaseGraphUri + "/groups" + "?" + this.ApiVersion;
             string method = "POST";
 
             //Setup serialization
@@ -1862,11 +1862,11 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 return null;
             
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
             //Setup AadUser object
@@ -1877,9 +1877,9 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             string method = "POST";
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users/" + user.userPrincipalName + "/assignLicense" + "?" + StringConstants.apiVersionPreview;
+            string uri = this.BaseGraphUri + "/users/" + user.userPrincipalName + "/assignLicense" + "?" + StringConstants.ApiVersionPreview;
 
             try
             {
@@ -1986,21 +1986,21 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 return false;
 
             urlLink link = new urlLink();
-            link.url = this.baseGraphUri + "/directoryObjects/" + memberId;
+            link.url = this.BaseGraphUri + "/directoryObjects/" + memberId;
             string graphUri = "";
             if (RoleOrGroup.ToUpper() == "GROUP")
-              graphUri = this.baseGraphUri + "/groups/" + parentId + "/$links" + "/members" + "?" + apiVersion;
+              graphUri = this.BaseGraphUri + "/groups/" + parentId + "/$links" + "/members" + "?" + ApiVersion;
             else 
-              graphUri = this.baseGraphUri + "/roles/" + parentId + "/$links" + "/members" + "?" + apiVersion;
+              graphUri = this.BaseGraphUri + "/roles/" + parentId + "/$links" + "/members" + "?" + ApiVersion;
 
 
             if (method == "DELETE")
             {
                 link.url = "";
                 if (RoleOrGroup.ToUpper() == "GROUP")
-                  graphUri = this.baseGraphUri + "/groups/" + parentId + "/$links" + "/members/" + memberId + "?" + apiVersion;
+                  graphUri = this.BaseGraphUri + "/groups/" + parentId + "/$links" + "/members/" + memberId + "?" + ApiVersion;
                 else
-                  graphUri = this.baseGraphUri + "/roles/" + parentId + "/$links" + "/members/" + memberId + "?" + apiVersion;
+                  graphUri = this.BaseGraphUri + "/roles/" + parentId + "/$links" + "/members/" + memberId + "?" + ApiVersion;
             }
 
             if (this.updateLink(graphUri, method, link, ref strErrors))
@@ -2012,14 +2012,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public bool updateLink(string uri, string method, urlLink link, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
        
             //Setup linked object
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -2075,15 +2075,15 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public bool isMemberOf(string groupId, string memberId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
-            string uri = this.baseGraphUri + "/isMemberOf" + "?" + apiVersion;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
+            string uri = this.BaseGraphUri + "/isMemberOf" + "?" + ApiVersion;
 
             try
             {
@@ -2134,16 +2134,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public string[] checkMemberGroups(string memberId, string[] groupIds, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
                         
-            string uri = this.baseGraphUri + "/users/" + memberId + "/checkMemberGroups" + "?" + apiVersion;
+            string uri = this.BaseGraphUri + "/users/" + memberId + "/checkMemberGroups" + "?" + ApiVersion;
 
             try
             {
@@ -2198,16 +2198,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public string[] getMemberGroups(string memberId, bool securityGroupsOnly, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/users/" + memberId + "/getMemberGroups" + "?" + apiVersion;
+            string uri = this.BaseGraphUri + "/users/" + memberId + "/getMemberGroups" + "?" + ApiVersion;
 
             string body = "";
             if (securityGroupsOnly)
@@ -2272,16 +2272,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadApplication createApplication(AadApplication application, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/applications" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/applications" + "?" + this.ApiVersion;
 
             //Setup object
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -2333,15 +2333,15 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public bool modifyApplication(string method, AadApplication application, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return false;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
-            string uri = this.baseGraphUri + "/applications/" + application.objectId + "?" + this.apiVersion;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
+            string uri = this.BaseGraphUri + "/applications/" + application.objectId + "?" + this.ApiVersion;
             
             //Setup serialization
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -2400,14 +2400,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadServicePrincipals getServicePrincipals(ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/servicePrincipals/" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/servicePrincipals/" + "?" + this.ApiVersion;
 
             try
             {
@@ -2436,14 +2436,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadServicePrincipal getServicePrincipal(string servicePrincipalObjectId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                //if (this.authnResult.IsExpired() || this.authnResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/servicePrincipals/" + servicePrincipalObjectId + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/servicePrincipals/" + servicePrincipalObjectId + "?" + this.ApiVersion;
 
             try
             {
@@ -2472,16 +2472,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadServicePrincipal createServicePrincipal(AadServicePrincipal servicePrincipal, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/servicePrincipals" + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/servicePrincipals" + "?" + this.ApiVersion;
 
             //Setup AadUser object
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -2533,16 +2533,16 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public AadServicePrincipal modifyServicePrincipal(string method, AadServicePrincipal servicePrincipal, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return null;
 
-            string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
 
-            string uri = this.baseGraphUri + "/servicePrincipals/" + servicePrincipal.objectId + "?" + this.apiVersion;
+            string uri = this.BaseGraphUri + "/servicePrincipals/" + servicePrincipal.objectId + "?" + this.ApiVersion;
 
             //Setup object
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -2596,11 +2596,11 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         private bool ValidateAndRenewTokenIfRequired(ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
-            if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
-                           this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
 
-            if (this.aadAuthentication.aadAuthenticationResult == null)
+            if (this.aadAuthentication.AadAuthenticationResult == null)
                 return false;
 
             return true;

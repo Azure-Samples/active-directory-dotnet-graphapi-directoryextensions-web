@@ -38,7 +38,7 @@
                 {
                     // skip special cases
                 }
-                else if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || Org.standardAttributes.Contains(property.Name))
+                else if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes.Contains(property.Name))
                 {
                     map += "\", ";
                     map += property.Name;
@@ -72,7 +72,7 @@
     }
 }
 
-@if (ViewBag.ancestorsAndMainPerson != null)
+@if (ViewBag.AncestorsAndMainPerson != null)
 {
 <table id="Splitter">
 <tr>
@@ -81,10 +81,10 @@
 		<th></th>
         <th>displayName (mailNickname)<br />jobTitle</th>
     </tr>
-@for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count - 1; i++)
+@for (int i = 0; i < ViewBag.AncestorsAndMainPerson.Count - 1; i++)
 {
 	<tr class="highlightable">
-    @foreach (JObject user in ViewBag.ancestorsAndMainPerson[i])
+    @foreach (JObject user in ViewBag.AncestorsAndMainPerson[i])
     {
 		<td style="display:none">@user["mailNickname"]</td>
         <td class="tdPersonDescription">
@@ -105,10 +105,10 @@
 <table id="MainPerson">
 	<tr class="highlightable">
 @{
-List<List<JObject>> ancestorsAndMainPerson = ViewBag.ancestorsAndMainPerson;
-if (ancestorsAndMainPerson.Count > 0)
+List<List<JObject>> AncestorsAndMainPerson = ViewBag.AncestorsAndMainPerson;
+if (AncestorsAndMainPerson.Count > 0)
 {
-    foreach (JObject user in ViewBag.ancestorsAndMainPerson[ViewBag.ancestorsAndMainPerson.Count - 1])
+    foreach (JObject user in ViewBag.AncestorsAndMainPerson[ViewBag.AncestorsAndMainPerson.Count - 1])
     {
 		<td style="display:none">@user["mailNickname"]</td>
 		<td class="tdPersonImage">
@@ -122,7 +122,7 @@ if (ancestorsAndMainPerson.Count > 0)
             </a> 
             (@user["mailNickname"])<br />
             @user["jobTitle"]
-            @if (user[StringConstants.getExtension("skype")] != null)
+            @if (user[StringConstants.GetExtension("skype")] != null)
             {
                 <br />
                 <script type="text/javascript" src="http://www.skypeassets.com/i/scom/js/skype-uri.js"></script>
@@ -131,7 +131,7 @@ if (ancestorsAndMainPerson.Count > 0)
                     Skype.ui({
                         "name": "call",
                         "element": "SkypeButton_Call_mailmongoose_1",
-                        "participants": ["@user[StringConstants.getExtension("skype")]"],
+                        "participants": ["@user[StringConstants.GetExtension("skype")]"],
                         "imageSize": 32
                     });
                 </script>
@@ -150,10 +150,10 @@ if (ancestorsAndMainPerson.Count > 0)
 @{
 int MAXROW = 9;
 int nextRowStart = 0;
-int count = ViewBag.directsOfDirects.Count;
-for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
+int count = ViewBag.DirectsOfDirects.Count;
+for (int j = 0; j < ViewBag.DirectsOfDirects.Count; j++)
 {
-    List<JObject> directList = ViewBag.directsOfDirects[j];
+    List<JObject> directList = ViewBag.DirectsOfDirects[j];
     // at each row start, read ahead to fill in trio row if necessary and determine next row start
     if (j == nextRowStart)
     {
@@ -173,8 +173,8 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
             {
                 break;
             }
-            List<JObject> dirList = ViewBag.directsOfDirects[k];
-            String newTrio = (String)dirList[0][StringConstants.getExtension("trio")];
+            List<JObject> dirList = ViewBag.DirectsOfDirects[k];
+            String newTrio = (String)dirList[0][StringConstants.GetExtension("trio")];
             String newUPN = (String)dirList[0]["userPrincipalName"];
             if (previousTrio == null)
             {
@@ -277,9 +277,9 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
 	<form id="UserForm" action="/" method="post">
         <fieldset> <legend>Update/Delete/Create a User</legend>
 			<!-- enumerate extension attributes from JSON object -->
-            @foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
+            @foreach (JProperty property in ViewBag.ExtensionRegistryUser.Properties())
             {
-                if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || Org.standardAttributes.Contains(property.Name))
+                if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes.Contains(property.Name))
                 {
                     @:<div><label for="@property.Name"><pre>@property.Name: </pre></label> <input type="text" id="@property.Name" name="@property.Name"></div>
                 }
@@ -303,15 +303,15 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
         <fieldset> <legend>Update Application Credentials</legend>
             <div><label for="ChooseCred"><pre>Choose Credential: </pre></label> 
                 <select id="ChooseCred" name="ChooseCred">
-                    <option value="dxtest orgchart" @(Org.whichCred == "dxtest orgchart" ? "selected" : "")>dxtest orgchart</option>
-                    <option value="new" @(Org.whichCred == "new" ? "selected" : "")>new</option>
+                    <option value="dxtest orgchart" @(Org.WhichCred == "dxtest orgchart" ? "selected" : "")>dxtest orgchart</option>
+                    <option value="new" @(Org.WhichCred == "new" ? "selected" : "")>new</option>
                 </select>
-                <input type="text" id="WhichCred" name="WhichCred" value="@Org.whichCred" readonly="readonly">
+                <input type="text" id="WhichCred" name="WhichCred" value="@Org.WhichCred" readonly="readonly">
             </div>
-            <div><label for="AppId"><pre>AppId: </pre></label> <input type="text" id="AppId" name="AppId" value="@StringConstants.clientId"></div>
-            <div><label for="AppSecret"><pre>AppSecret: </pre></label> <input type="text" id="AppSecret" name="AppSecret" value="@StringConstants.clientSecret"></div>
+            <div><label for="AppId"><pre>AppId: </pre></label> <input type="text" id="AppId" name="AppId" value="@StringConstants.ClientId"></div>
+            <div><label for="AppSecret"><pre>AppSecret: </pre></label> <input type="text" id="AppSecret" name="AppSecret" value="@StringConstants.ClientSecret"></div>
             <div><label for="AppObjectId"><pre>AppObjectId: </pre></label> <input type="text" id="AppObjectId" name="AppObjectId" value="@StringConstants.AppObjectId"></div>
-            <div><label for="AppTenant"><pre>AppTenant: </pre></label> <input type="text" id="AppTenant" name="AppTenant" value="@StringConstants.tenant"></div>
+            <div><label for="AppTenant"><pre>AppTenant: </pre></label> <input type="text" id="AppTenant" name="AppTenant" value="@StringConstants.Tenant"></div>
             <button type="submit" id="applicationUpdate" name="submitButton" value="applicationUpdate">Update</button>
 		</fieldset>
 	</form>
@@ -322,18 +322,18 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
     var userMap = {
         @{
             string strMap = "";
-            for (int i = 0; i < ViewBag.ancestorsAndMainPerson.Count; i++)
+            for (int i = 0; i < ViewBag.AncestorsAndMainPerson.Count; i++)
             {
-                GenerateMap(ref strMap, ViewBag.ancestorsAndMainPerson[i], ViewBag.extensionRegistryUser);
+                GenerateMap(ref strMap, ViewBag.AncestorsAndMainPerson[i], ViewBag.ExtensionRegistryUser);
             }
-            foreach (List<JObject> directList in ViewBag.directsOfDirects)
+            foreach (List<JObject> directList in ViewBag.DirectsOfDirects)
             {
-                GenerateMap(ref strMap, directList, ViewBag.extensionRegistryUser);
+                GenerateMap(ref strMap, directList, ViewBag.ExtensionRegistryUser);
             }
         }
         @MvcHtmlString.Create(strMap)
     };
-    function cacheAppCreds() {
+    function CacheAppCreds() {
         // store creds from UI to localstorage
         var str = $("#ChooseCred option:selected").text();
         localStorage.setItem(str + "AppId", $("#AppId").val());
@@ -341,7 +341,7 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
         localStorage.setItem(str + "AppObjectId", $("#AppObjectId").val());
         localStorage.setItem(str + "AppTenant", $("#AppTenant").val());
     }
-    function hoverOn(eventObject) {
+    function HoverOn(eventObject) {
         var $td = $("td:first", this);
         var alias = $td[0].textContent;
         var userFormAction = "/?upn=";
@@ -349,22 +349,22 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
         $("#UserForm").attr("action", userFormAction);
         // variable name is special case, enumerate variable attributes to update remaining fields
         $("#mailNickname").val(alias);
-        @foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
+        @foreach (JProperty property in ViewBag.ExtensionRegistryUser.Properties())
         {
             if (property.Name == "mailNickname")
             {
                 // skip special case
             }
-            else if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || Org.standardAttributes.Contains(property.Name))
+            else if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes.Contains(property.Name))
             {
                 @:$("#@property.Name").val(userMap[alias].@property.Name);
             }
         }
     }
-    function hoverOut(eventObject) {
+    function HoverOut(eventObject) {
         //leave text in input fields on losing focus
     }
-    function setEventHandlers() {
+    function SetEventHandlers() {
         $("#userPrincipalName").on("input", function () {
             var userFormAction = "/?upn=";
             userFormAction += this.value;
@@ -384,16 +384,16 @@ for (int j = 0; j < ViewBag.directsOfDirects.Count; j++)
         });        
         $("#ApplicationForm").submit(function(event) {
             // store current creds in localstorage
-            cacheAppCreds();
+            CacheAppCreds();
         });
     }
-    function setHoverActions() {
-        $("tr.highlightable").hover(hoverOn, hoverOut);
+    function SetHoverActions() {
+        $("tr.highlightable").hover(HoverOn, HoverOut);
     }
     window.document.body.onload = function () {
-        setHoverActions();
-        setEventHandlers();
-        cacheAppCreds(); // store initial creds in local storage
+        SetHoverActions();
+        SetEventHandlers();
+        CacheAppCreds(); // store initial creds in local storage
     }
 </script>
 }

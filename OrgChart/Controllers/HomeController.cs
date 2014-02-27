@@ -29,22 +29,22 @@ namespace OrgChart.Controllers
             string strFormAction = Request["submitButton"];
             if(strFormAction == "applicationUpdate")
             {
-                Org.whichCred = Request["WhichCred"];
-                StringConstants.clientId = Request["AppId"];
-                StringConstants.clientSecret = Request["AppSecret"];
+                Org.WhichCred = Request["WhichCred"];
+                StringConstants.ClientId = Request["AppId"];
+                StringConstants.ClientSecret = Request["AppSecret"];
                 StringConstants.AppObjectId = Request["AppObjectId"];
-                StringConstants.tenant = Request["AppTenant"];
+                StringConstants.Tenant = Request["AppTenant"];
             }
             // use ADAL library to connect to AAD tenant using authentication parameters
-            string baseGraphUri = StringConstants.baseGraphUri + StringConstants.tenant;
+            string baseGraphUri = StringConstants.BaseGraphUri + StringConstants.Tenant;
             GraphQuery graphCall = new GraphQuery();
-            graphCall.apiVersion = StringConstants.apiVersion;
-            graphCall.baseGraphUri = baseGraphUri;
+            graphCall.ApiVersion = StringConstants.ApiVersion;
+            graphCall.BaseGraphUri = baseGraphUri;
             // get token using OAuth Authorization Code
             AzureADAuthentication aadAuthentication = new AzureADAuthentication();
-            AuthenticationResult authenticationResult = aadAuthentication.GetAuthenticationResult(StringConstants.tenant,
-                                             StringConstants.clientId, StringConstants.clientSecret,
-                                             StringConstants.resource, StringConstants.authenticationEndpoint, ref strErrors);
+            AuthenticationResult authenticationResult = aadAuthentication.GetAuthenticationResult(StringConstants.Tenant,
+                                             StringConstants.ClientId, StringConstants.ClientSecret,
+                                             StringConstants.Resource, StringConstants.AuthenticationEndpoint, ref strErrors);
             if (authenticationResult != null)
             {
                 ViewBag.Message = "Authentication succeeded!";
@@ -53,17 +53,17 @@ namespace OrgChart.Controllers
                 string strUpn = queryValues["upn"];
                 // initialize graph
                 graphCall.aadAuthentication = aadAuthentication;
-                graphCall.aadAuthentication.aadAuthenticationResult = authenticationResult;
+                graphCall.aadAuthentication.AadAuthenticationResult = authenticationResult;
                 // configure appropriate model                
                 OrgChart.Models.Org org = new OrgChart.Models.Org(graphCall);
                 // retrieve user containing all extensions (and add manager UPN)
-                ViewBag.extensionRegistryUser = org.getUserJson(Org.getExtensionRegistryUser());
-                ViewBag.extensionRegistryUser["managerUserPrincipalName"] = org.getUsersManager(Org.getExtensionRegistryUser());
+                ViewBag.ExtensionRegistryUser = org.GetUser(Org.GetExtensionRegistryUser());
+                ViewBag.ExtensionRegistryUser["managerUserPrincipalName"] = org.GetUsersManager(Org.GetExtensionRegistryUser());
                 // setup JObject for setuser by enumerating registry user
                 JObject graphUser = new JObject();
-                foreach (JProperty property in ViewBag.extensionRegistryUser.Properties())
+                foreach (JProperty property in ViewBag.ExtensionRegistryUser.Properties())
                 {
-                    if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix) || Org.standardAttributes.Contains(property.Name))
+                    if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes.Contains(property.Name))
                     {
                         string value = Request[property.Name];
                         graphUser[property.Name] = (value == "") ? null : value;
@@ -74,48 +74,48 @@ namespace OrgChart.Controllers
                 {
                     case "userUpdate":
                         // set display name, manager, job title, trio, skype for given UPN
-                        org.setUser(graphUser, ref strErrors);
+                        org.SetUser(graphUser, ref strErrors);
                         // show the user, unless trio is set, then show the manager
                         strUpn = Request["userPrincipalName"];
-                        if ((string)graphUser[StringConstants.getExtension("trio")] != "") strUpn = Request["managerUserPrincipalName"];
+                        if ((string)graphUser[StringConstants.GetExtension("trio")] != "") strUpn = Request["managerUserPrincipalName"];
                         break;
                     case "userCreate":
                         // create user with given display name, UPN, and manager
-                        org.createUser(graphUser, ref strErrors);
+                        org.CreateUser(graphUser, ref strErrors);
                         strUpn = (string)graphUser["userPrincipalName"];
                         break;
                     case "userDelete":
                         // delete user with given UPN
-                        org.deleteUser((string)graphUser["userPrincipalName"], ref strErrors);
+                        org.DeleteUser((string)graphUser["userPrincipalName"], ref strErrors);
                         break;
                     case "extensionCreate":
                         {
                             // register the passed extension
                             string strExtension = Request["Extension"];
-                            if (org.registerExtension(strExtension, ref strErrors))
+                            if (org.RegisterExtension(strExtension, ref strErrors))
                             {
                                 // set this extension value to registered on the "registry" object
-                                ViewBag.extensionRegistryUser[StringConstants.getExtension(strExtension)] = "reserved";
-                                org.setUser(ViewBag.extensionRegistryUser, ref strErrors);
+                                ViewBag.ExtensionRegistryUser[StringConstants.GetExtension(strExtension)] = "reserved";
+                                org.SetUser(ViewBag.ExtensionRegistryUser, ref strErrors);
                             }
                         }
                         break;
                 }
                 // may have changed attributes, extension values, extension registration, or tenant credentials, re-retrieve extension registry user
-                ViewBag.extensionRegistryUser = org.getUserJson(Org.getExtensionRegistryUser());
-                ViewBag.extensionRegistryUser["managerUserPrincipalName"] = org.getUsersManager(Org.getExtensionRegistryUser());
+                ViewBag.ExtensionRegistryUser = org.GetUser(Org.GetExtensionRegistryUser());
+                ViewBag.ExtensionRegistryUser["managerUserPrincipalName"] = org.GetUsersManager(Org.GetExtensionRegistryUser());
                 // no UPN provided, get the UPN of the first user instead
                 if (strUpn == null)
                 {
-                    strUpn = org.getFirstUpn();
+                    strUpn = org.GetFirstUpn();
                 }
                 // initialize the ViewBag if we have a UPN
                 if (strUpn != null)
                 {
                     string strTrio = queryValues["trio"];
                     bool bTrio = (strTrio != null && String.Equals(strTrio, "true", StringComparison.CurrentCultureIgnoreCase));
-                    ViewBag.ancestorsAndMainPerson = org.getAncestorsAndMain(strUpn, bTrio, ref strErrors);
-                    ViewBag.directsOfDirects = org.getDirectsOfDirects(strUpn, bTrio, ref strErrors);
+                    ViewBag.AncestorsAndMainPerson = org.GetAncestorsAndMain(strUpn, bTrio, ref strErrors);
+                    ViewBag.DirectsOfDirects = org.GetDirectsOfDirects(strUpn, bTrio, ref strErrors);
                     ViewBag.strErrors = strErrors;
                 }
             }

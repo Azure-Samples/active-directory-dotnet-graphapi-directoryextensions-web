@@ -16,23 +16,28 @@ namespace OrgChart.Models
     public class Org
     {
         // this user has the word "registered" set on every extension registered by this app
-        public static string getExtensionRegistryUser()
+        public static string GetExtensionRegistryUser()
         {
             string strAdmin = "admin@";
-            strAdmin += StringConstants.tenant;
+            strAdmin += StringConstants.Tenant;
             return strAdmin;
         }
-        public static string[] standardAttributes = { "displayName", "jobTitle", "userPrincipalName", "mailNickname", "managerUserPrincipalName" };
-        public static string whichCred = "dxtest orgchart";
+        public static string[] StandardAttributes = { "displayName", "jobTitle", "userPrincipalName", "mailNickname", "managerUserPrincipalName" };
+        public static string WhichCred = "dxtest orgchart";
 
-        private GraphQuery graphCall;
         // initialize the object
+        private GraphQuery graphCall;
         public Org(GraphQuery gq)
         {
             graphCall = gq;
         }
-        // create user with requested extension values
-        public JObject createUser(JObject user, ref string strErrors)
+        /// <summary>
+        /// Create user (including extension attributes).  Foreach loop adds extension properties to object before calling CreateUserJson.
+        /// </summary>
+        /// <param name="user">User object containing values to be set on new object.</param>
+        /// <param name="strErrors">Error return value.</param>
+        /// <returns></returns>
+        public JObject CreateUser(JObject user, ref string strErrors)
         {
             // setup AadUser with standard attributes, accountEnabled, and password profile
             AadUser aadUser = new AadUser();
@@ -43,7 +48,7 @@ namespace OrgChart.Models
             aadUser.passwordProfile = new passwordProfile();
             aadUser.accountEnabled = true;
             aadUser.passwordProfile.forceChangePasswordNextLogin = true;
-            aadUser.passwordProfile.password = "P0rsche911";
+            aadUser.passwordProfile.password = "P@55w0rd!";
 
             // convert to JObject
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -60,37 +65,38 @@ namespace OrgChart.Models
                 {
                     // skip
                 }
-                else if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix))
+                else if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix))
                 {
                     newUser[property.Name] = property.Value;
                 }
             }
-            
             // create user
-            newUser = graphCall.CreateUser(newUser, ref strErrors);
-
+            newUser = graphCall.CreateUserJson(newUser, ref strErrors);
             // set manager
-            newUser["managerUserPrincipalName"] = user["managerUserPrincipalName"];
-            newUser = setUser(newUser, ref strErrors);
+            if (newUser != null)
+            {
+                newUser["managerUserPrincipalName"] = user["managerUserPrincipalName"];
+                newUser = SetUser(newUser, ref strErrors);
+            }
             return newUser;
         }
         //delete user
-        public void deleteUser(string strUpdateUPN, ref string strErrors)
+        public void DeleteUser(string strUpdateUPN, ref string strErrors)
         {
             // set new (or same) display name
             AadUser user = graphCall.getUser(strUpdateUPN, ref strErrors);
             bool bPass = graphCall.modifyUser("DELETE", user, ref strErrors);
         }
         /// <summary>
-        /// This method retrieves the ancestors for the main entity displayed in the org chart.
-        /// The org chart may display a single person as the main entity, in which case this will be a single chain of command to the CEO.
-        /// The org chart may display a trio of people as the main entity. In this case, this list will be a list of each members managers up to the CEO.
+        /// Retrieves chain of command for entity represented by strUPN.
+        /// If bTrio is not set, this returns list of single item lists terminating with single item list containing CEO.
+        /// If bTrio is set, this returns list of trio leader lists terminating with single item list containing CEO.
         /// </summary>
         /// <param name="strUPN">Main person we are displaying in the org chart.</param>
         /// <param name="bTrio">Whether we are displaying in trio mode.</param>
         /// <param name="strErrors">Error return value.</param>
         /// <returns></returns>       
-        public List<List<JObject>> getAncestorsAndMain(String strUPN, bool bTrio, ref string strErrors)
+        public List<List<JObject>> GetAncestorsAndMain(String strUPN, bool bTrio, ref string strErrors)
         {
             List<List<JObject>> returnedListOfLists = new List<List<JObject>>();
             // preserve original error
@@ -101,7 +107,7 @@ namespace OrgChart.Models
             {
                 // retrieve graph node for this person (or for each trio member) from graph
                 String strMainUPN = arrayUPN[idxTrio];
-                JObject graphUser = graphCall.getUserJson(strMainUPN, ref strErrors);
+                JObject graphUser = graphCall.GetUserJson(strMainUPN, ref strErrors);
 
                 // TODO: this logic is dependent on trios being properly filled in at each level of hierarchy
 
@@ -120,7 +126,7 @@ namespace OrgChart.Models
                     graphUser["managerUserPrincipalName"] = (graphUserParent != null) ? graphUserParent["userPrincipalName"] : "NO MANAGER";
                     // insert user at end of the correct AncestorOrMain trio list
                     JToken tokenTrio = null;
-                    if (bTrio && graphUser.TryGetValue(StringConstants.getExtension("trio"), out tokenTrio))
+                    if (bTrio && graphUser.TryGetValue(StringConstants.GetExtension("trio"), out tokenTrio))
                     {
                         // trio mode and there is a trio set on this object, add to list each time through
                         returnedListOfLists.ElementAt(returnedListOfLists.Count - idxAncestorOrMain - 1).Add(graphUser);
@@ -150,14 +156,14 @@ namespace OrgChart.Models
             return returnedListOfLists;
         }
         /// <summary>
-        /// This method retrieves the subordinates for the main entity displayed in the org chart.
-        /// Each direct subordinate is at the head of a list, with the subordinates of that direct as elements of that list.
+        /// Retrieves subordinates for entity represented by strUPN.
+        /// Each direct subordinate is head of a list, with subordinates of that direct as elements of that list.
         /// </summary>
         /// <param name="strUPN">Main person we are displaying in the org chart.</param>
         /// <param name="bTrio">Whether we are displaying in trio mode.</param>
         /// <param name="strErrors">Error return value.</param>
         /// <returns></returns>
-        public List<List<JObject>> getDirectsOfDirects(string strUPN, bool bTrio, ref string strErrors)
+        public List<List<JObject>> GetDirectsOfDirects(string strUPN, bool bTrio, ref string strErrors)
         {
             List<List<JObject>> returnedListOfLists = new List<List<JObject>>();
 
@@ -165,7 +171,7 @@ namespace OrgChart.Models
             string[] arrayUPN = strUPN.Split(',');
 
             // TODO: if in trio mode and only one passed member, do filtered query for rest of trio
-            // TODO: more efficient to do this filtered query for rest of trio in getAncestorsAndMain
+            // TODO: more efficient to do this filtered query for rest of trio in GetAncestorsAndMain
 
             // now retrieve direct reports for single person or trio
             for (int i = 0; i < arrayUPN.Length; i++)
@@ -201,9 +207,9 @@ namespace OrgChart.Models
                 delegate(List<JObject> x, List<JObject> y)
                 {
                     JToken tokenTrioX = null;
-                    bool bxTrio = x.ElementAt(0).TryGetValue(StringConstants.getExtension("trio"), out tokenTrioX);
+                    bool bxTrio = x.ElementAt(0).TryGetValue(StringConstants.GetExtension("trio"), out tokenTrioX);
                     JToken tokenTrioY = null;
-                    bool byTrio = y.ElementAt(0).TryGetValue(StringConstants.getExtension("trio"), out tokenTrioY);
+                    bool byTrio = y.ElementAt(0).TryGetValue(StringConstants.GetExtension("trio"), out tokenTrioY);
                     // if neither has a trio, they are equal
                     if (!bxTrio && !byTrio) return 0;
                     // if only one has a trio, that one comes first
@@ -217,28 +223,28 @@ namespace OrgChart.Models
             return returnedListOfLists;
         }
         // pick a user to display first if none selected by user
-        public string getFirstUpn()
+        public string GetFirstUpn()
         {
             string userPrincipalName = null;
             string strErrors = "";
-            AadUsers users = graphCall.getUsers(ref strErrors);
+            AadUsers users = graphCall.GetUsers(ref strErrors);
             if (users.user != null)
             {
                 userPrincipalName = users.user[0].userPrincipalName;
             }
             return userPrincipalName;
         }
-        // get user JSON object
-        public JObject getUserJson(string strUpn)
+        // get user JSON object (including extension attributes)
+        public JObject GetUser(string strUpn)
         {
             string strErrors = "";
-            return graphCall.getUserJson(strUpn, ref strErrors);
+            return graphCall.GetUserJson(strUpn, ref strErrors);
         }
         // get users manager
-        public string getUsersManager(string strUpn)
+        public string GetUsersManager(string strUpn)
         {
             string strErrors = "";
-            AadUser manager = graphCall.getUsersManager(strUpn, ref strErrors);
+            AadUser manager = graphCall.GetUsersManager(strUpn, ref strErrors);
             if (manager != null)
             {
                 return manager.userPrincipalName;
@@ -248,8 +254,8 @@ namespace OrgChart.Models
                 return "NO MANAGER";
             }
         }
-        // register an extension
-        public bool registerExtension(string strExtension, ref string strErrors)
+        // register an extension attribute
+        public bool RegisterExtension(string strExtension, ref string strErrors)
         {
             // setup the extension definition
             ExtensionDefinition extension = new ExtensionDefinition();
@@ -265,28 +271,33 @@ namespace OrgChart.Models
             }
             return false;
         }
-        // set user extension attributes and manager
-        public JObject setUser(JObject user, ref string strErrors)
+        /// <summary>
+        /// Set user extension attributes and manager. Foreach loop adds extension properties to object before calling ModifyUserJson.
+        /// </summary>
+        /// <param name="user">User object with attributes set as intended on the target object.</param>
+        /// <param name="strErrors">Error return value.</param>
+        /// <returns></returns>
+        public JObject SetUser(JObject user, ref string strErrors)
         {
             // set new (or same) display name and job title
-            JObject graphUser = graphCall.getUserJson((string)user["userPrincipalName"], ref strErrors);
+            JObject graphUser = graphCall.GetUserJson((string)user["userPrincipalName"], ref strErrors);
             graphUser["displayName"] = user["displayName"];
             graphUser["jobTitle"] = user["jobTitle"];
             // enumerate extension attributes from JSON object
             foreach (JProperty property in user.Properties())
             {
-                if (property.Name.StartsWith(StringConstants.extensionPropertyPrefix))
+                if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix))
                 {
                     graphUser[property.Name] = user[property.Name];
                 }
             }            
-            bool bPass = graphCall.modifyUserJson("PATCH", graphUser, ref strErrors);
+            bool bPass = graphCall.ModifyUserJson("PATCH", graphUser, ref strErrors);
             if (!bPass)
             {
                 return null;
             }
             // set/clear manager
-            string updateManagerURI = graphCall.baseGraphUri + "/users/" + (string)user["userPrincipalName"] + "/$links/manager?" + graphCall.apiVersion;
+            string updateManagerURI = graphCall.BaseGraphUri + "/users/" + (string)user["userPrincipalName"] + "/$links/manager?" + graphCall.ApiVersion;
             urlLink managerlink = new urlLink();
             string method;
             if ((string)user["managerUserPrincipalName"] != "NO MANAGER")
@@ -296,7 +307,7 @@ namespace OrgChart.Models
                 {
                     return null;
                 }
-                managerlink.url = graphCall.baseGraphUri + "/directoryObjects/" + manager.objectId;
+                managerlink.url = graphCall.BaseGraphUri + "/directoryObjects/" + manager.objectId;
                 method = "PUT";
             }
             else

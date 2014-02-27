@@ -30,7 +30,7 @@ namespace OrgChart
             GraphHelperEventTextFormatter formatter = new GraphHelperEventTextFormatter();
             var consoleListener = ConsoleLog.CreateListener(formatter);
             consoleListener.EnableEvents(GraphHelperEventSource.Log, System.Diagnostics.Tracing.EventLevel.Informational);
-            var fileListener = RollingFlatFileLog.CreateListener(StringConstants.logfile, 1024, "yyyy.MM.dd", Microsoft.Practices.EnterpriseLibrary.SemanticLogging.Sinks.RollFileExistsBehavior.Increment, Microsoft.Practices.EnterpriseLibrary.SemanticLogging.Sinks.RollInterval.None, formatter);
+            var fileListener = RollingFlatFileLog.CreateListener(StringConstants.LogFile, 1024, "yyyy.MM.dd", Microsoft.Practices.EnterpriseLibrary.SemanticLogging.Sinks.RollFileExistsBehavior.Increment, Microsoft.Practices.EnterpriseLibrary.SemanticLogging.Sinks.RollInterval.None, formatter);
             fileListener.EnableEvents(GraphHelperEventSource.Log, System.Diagnostics.Tracing.EventLevel.Informational);
         }
     }
