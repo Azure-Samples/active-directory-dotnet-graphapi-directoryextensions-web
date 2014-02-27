@@ -48,5 +48,6 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             trioExtension += strExtensionName;
             return trioExtension;
         }
+        public const string logfile = "AADGraph.log";
     }
 }

@@ -8,8 +8,14 @@ using Newtonsoft.Json;
 
 namespace OrgChart.Models
 {
+    /// <summary>
+    /// The Org class is the main model class that interacts with the GraphHelper library to make calls to Graph.
+    /// The Org class is called by the HomeController to assemble data to send to the Home Index view.
+    /// "Trio" is used to group/sort managers and subordinates for appropriate display in Home Index orgchart view.
+    /// </summary>
     public class Org
     {
+        // this user has the word "registered" set on every extension registered by this app
         public static string getExtensionRegistryUser()
         {
             string strAdmin = "admin@";
@@ -20,10 +26,12 @@ namespace OrgChart.Models
         public static string whichCred = "dxtest orgchart";
 
         private GraphQuery graphCall;
+        // initialize the object
         public Org(GraphQuery gq)
         {
             graphCall = gq;
         }
+        // create user with requested extension values
         public JObject createUser(JObject user, ref string strErrors)
         {
             // setup AadUser with standard attributes, accountEnabled, and password profile
@@ -59,31 +67,41 @@ namespace OrgChart.Models
             }
             
             // create user
-            newUser = graphCall.CreateUser(newUser);
+            newUser = graphCall.CreateUser(newUser, ref strErrors);
 
             // set manager
             newUser["managerUserPrincipalName"] = user["managerUserPrincipalName"];
             newUser = setUser(newUser, ref strErrors);
             return newUser;
         }
+        //delete user
         public void deleteUser(string strUpdateUPN, ref string strErrors)
         {
             // set new (or same) display name
             AadUser user = graphCall.getUser(strUpdateUPN, ref strErrors);
             bool bPass = graphCall.modifyUser("DELETE", user, ref strErrors);
         }
-        // list with main person (or main trio) as the last item in list
+        /// <summary>
+        /// This method retrieves the ancestors for the main entity displayed in the org chart.
+        /// The org chart may display a single person as the main entity, in which case this will be a single chain of command to the CEO.
+        /// The org chart may display a trio of people as the main entity. In this case, this list will be a list of each members managers up to the CEO.
+        /// </summary>
+        /// <param name="strUPN">Main person we are displaying in the org chart.</param>
+        /// <param name="bTrio">Whether we are displaying in trio mode.</param>
+        /// <param name="strErrors">Error return value.</param>
+        /// <returns></returns>       
         public List<List<JObject>> getAncestorsAndMain(String strUPN, bool bTrio, ref string strErrors)
         {
             List<List<JObject>> returnedListOfLists = new List<List<JObject>>();
-            
+            // preserve original error
+            string strOriginalError = strErrors;
             // split comma delimited UPN list into UPNs
             string[] arrayUPN = strUPN.Split(',');
             for (int idxTrio = 0; idxTrio < arrayUPN.Length; idxTrio++)
             {
                 // retrieve graph node for this person (or for each trio member) from graph
                 String strMainUPN = arrayUPN[idxTrio];
-                JObject graphUser = graphCall.getUserJson(strMainUPN);
+                JObject graphUser = graphCall.getUserJson(strMainUPN, ref strErrors);
 
                 // TODO: this logic is dependent on trios being properly filled in at each level of hierarchy
 
@@ -97,7 +115,7 @@ namespace OrgChart.Models
                         returnedListOfLists.Insert(0, new List<JObject>());
                     }
                     // get next graph user
-                    JObject graphUserParent = graphCall.getUsersManagerJson((string)graphUser["userPrincipalName"]);
+                    JObject graphUserParent = graphCall.getUsersManagerJson((string)graphUser["userPrincipalName"], ref strErrors);
                     // tag user with manager attribute
                     graphUser["managerUserPrincipalName"] = (graphUserParent != null) ? graphUserParent["userPrincipalName"] : "NO MANAGER";
                     // insert user at end of the correct AncestorOrMain trio list
@@ -123,10 +141,22 @@ namespace OrgChart.Models
                     // increment the ancestor level
                     idxAncestorOrMain++;
                 }
+                // we know that root doesn't have a manager, restore original error
+                if (graphUser == null)
+                {
+                    strErrors = strOriginalError;
+                }
             }
             return returnedListOfLists;
         }
-        // get subordinates list of lists with ICs as single person lists and leads as multiple person lists
+        /// <summary>
+        /// This method retrieves the subordinates for the main entity displayed in the org chart.
+        /// Each direct subordinate is at the head of a list, with the subordinates of that direct as elements of that list.
+        /// </summary>
+        /// <param name="strUPN">Main person we are displaying in the org chart.</param>
+        /// <param name="bTrio">Whether we are displaying in trio mode.</param>
+        /// <param name="strErrors">Error return value.</param>
+        /// <returns></returns>
         public List<List<JObject>> getDirectsOfDirects(string strUPN, bool bTrio, ref string strErrors)
         {
             List<List<JObject>> returnedListOfLists = new List<List<JObject>>();
@@ -141,7 +171,7 @@ namespace OrgChart.Models
             for (int i = 0; i < arrayUPN.Length; i++)
             {
                 String strMainUPN = arrayUPN[i];
-                JObjects directs = graphCall.getUsersDirectReportsJson(strMainUPN);
+                JUsers directs = graphCall.getUsersDirectReportsJson(strMainUPN, ref strErrors);
                 if (directs != null && directs.users != null)
                 {
                     foreach (JObject directReport in directs.users)
@@ -153,7 +183,7 @@ namespace OrgChart.Models
                         // insert the direct report at front of newly inserted list
                         returnedListOfLists.ElementAt(0).Insert(0, directReport);
                         // get direct reports of the direct report (and tag manager state to color code managers among directs)
-                        JObjects directsOfDirect = graphCall.getUsersDirectReportsJson((string)directReport["userPrincipalName"]);
+                        JUsers directsOfDirect = graphCall.getUsersDirectReportsJson((string)directReport["userPrincipalName"], ref strErrors);
                         directReport["isManager"] = (directsOfDirect.users.Count > 0);
                         foreach (JObject directOfDirect in directsOfDirect.users)
                         {
@@ -186,23 +216,29 @@ namespace OrgChart.Models
             );
             return returnedListOfLists;
         }
+        // pick a user to display first if none selected by user
         public string getFirstUpn()
         {
             string userPrincipalName = null;
-            AadUsers users = graphCall.getUsers();
+            string strErrors = "";
+            AadUsers users = graphCall.getUsers(ref strErrors);
             if (users.user != null)
             {
                 userPrincipalName = users.user[0].userPrincipalName;
             }
             return userPrincipalName;
         }
+        // get user JSON object
         public JObject getUserJson(string strUpn)
         {
-            return graphCall.getUserJson(strUpn);
+            string strErrors = "";
+            return graphCall.getUserJson(strUpn, ref strErrors);
         }
+        // get users manager
         public string getUsersManager(string strUpn)
         {
-            AadUser manager = graphCall.getUsersManager(strUpn);
+            string strErrors = "";
+            AadUser manager = graphCall.getUsersManager(strUpn, ref strErrors);
             if (manager != null)
             {
                 return manager.userPrincipalName;
@@ -212,6 +248,7 @@ namespace OrgChart.Models
                 return "NO MANAGER";
             }
         }
+        // register an extension
         public bool registerExtension(string strExtension, ref string strErrors)
         {
             // setup the extension definition
@@ -228,10 +265,11 @@ namespace OrgChart.Models
             }
             return false;
         }
+        // set user extension attributes and manager
         public JObject setUser(JObject user, ref string strErrors)
         {
             // set new (or same) display name and job title
-            JObject graphUser = graphCall.getUserJson((string)user["userPrincipalName"]);
+            JObject graphUser = graphCall.getUserJson((string)user["userPrincipalName"], ref strErrors);
             graphUser["displayName"] = user["displayName"];
             graphUser["jobTitle"] = user["jobTitle"];
             // enumerate extension attributes from JSON object
@@ -266,17 +304,8 @@ namespace OrgChart.Models
                 managerlink.url = null;
                 method = "DELETE";
             }
-            bPass = (bPass && graphCall.updateLink(updateManagerURI, method, managerlink));
+            bPass = (bPass && graphCall.updateLink(updateManagerURI, method, managerlink, ref strErrors));
             return graphUser;
         }
-        
-        // TODO: figure out how to implement observer pattern - publish subscribe mechanism, for differential query
-		
-        // these can only be done with a cache
-        //public List<AadUser> matchPartialAlias(string strPartial); // (fast full-text lookups)
-		//public AadUser cacheAADGraph(string strUPN); // (makes 2 passes to load kids and grandkids, return requested AADUser)
-		//public AadUser cacheLinkedIn(string strUPN); // (load connections, schools, employers)
-		//public List<AadUser> findShortestPath(); // (connections)
-        //public List<AadUser> findSharedHistory(); // (schools, employers)
     }
 }

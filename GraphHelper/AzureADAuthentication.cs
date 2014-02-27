@@ -12,20 +12,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 {
     public class AzureADAuthentication
     {
-
-
         public AuthenticationResult aadAuthenticationResult;
-
-
 
         // First Authn method OAuth Client credential flow (2-legged, S2S)
         // *
-        public string GetToken(string tenant, string clientId, string clientSecret, string resource, string authnEndpoint)
+        public string GetToken(string tenant, string clientId, string clientSecret, string resource, string authnEndpoint, ref string strErrors)
         {
-
             string authString = authnEndpoint + tenant;
             AuthenticationContext authenticationContext = new AuthenticationContext(authString);
-
             try
             {
                 ClientCredential clientCred = new ClientCredential(clientId, clientSecret);
@@ -35,30 +29,20 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (ActiveDirectoryAuthenticationException ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Acquiring a token failed with the following error: {0}", ex.Message);
-                if (ex.InnerException != null)
-                {
-                    //You should implement retry and back-off logic per the guidance given here:http://msdn.microsoft.com/en-us/library/dn168916.aspx
-                    //InnerException Message will contain the HTTP error status codes mentioned in the link above
-                    Console.WriteLine("Error detail: {0}", ex.InnerException.Message);
-                }
-                Console.ResetColor();
+                GraphHelperEventSourceLogger.Log(ex, ref strErrors);
                 return "";
             }
         }
 
         // Second Authn method using OAuth Authorization Code grant flow (3-legged OAuth, user impersonation/delegation)
         // *
-        public string GetToken(string tenant, string clientId, Uri redirectUri, string resourceAppIdUri, string authnEndpoint)
+        public string GetToken(string tenant, string clientId, Uri redirectUri, string resourceAppIdUri, string authnEndpoint, ref string strErrors)
              {
-              // This method requests OAuth token using client code authn flow (3-legged)
-              // user must authenticate
-             
+                // This method requests OAuth token using client code authn flow (3-legged)
+                // user must authenticate
                 string authString = authnEndpoint + tenant;
                 AuthenticationContext authenticationContext = new AuthenticationContext(authString);
                 AuthenticationResult userAuthnResult = null;
-               
                 try
                 {                  
                    userAuthnResult = authenticationContext.AcquireToken(resourceAppIdUri, clientId, redirectUri);
@@ -68,24 +52,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 }
                 catch (ActiveDirectoryAuthenticationException ex)
                 {
-                    string message = ex.Message;
-                    if (ex.InnerException != null)
-                        message += "InnerException : " + ex.InnerException.Message;
-                    Console.WriteLine(message);
+                    GraphHelperEventSourceLogger.Log(ex, ref strErrors);
                     return "";
                 }
              }
 
         // Third Authn method OAuth Client credential flow (2-legged, S2S)
         // returns entire Authentication Result
-        public AuthenticationResult GetAuthenticationResult(string tenant, string clientId, string clientSecret, 
-                                                            string resource, string authnEndpoint)
+        public AuthenticationResult GetAuthenticationResult(string tenant, string clientId, string clientSecret,
+                                                            string resource, string authnEndpoint, ref string strErrors)
         {   
-
-
             string authString = authnEndpoint + tenant;
             AuthenticationContext authenticationContext = new AuthenticationContext(authString);
-
             try
             {
                 ClientCredential clientCred = new ClientCredential(clientId, clientSecret);
@@ -95,23 +73,15 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (ActiveDirectoryAuthenticationException ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Acquiring a token failed with the following error: {0}", ex.Message);
-                if (ex.InnerException != null)
-                {
-                    //You should implement retry and back-off logic per the guidance given here:http://msdn.microsoft.com/en-us/library/dn168916.aspx
-                    //InnerException Message will contain the HTTP error status codes mentioned in the link above
-                    Console.WriteLine("Error detail: {0}", ex.InnerException.Message);
-                }
-                Console.ResetColor();
+                GraphHelperEventSourceLogger.Log(ex, ref strErrors);
                 return null;
             }
         }
 
         // Fourth Authn method OAuth Client Authorization Code grant flow (3-legged, user impersonation/delagion)
         // returns entire Authentication Result
-        public AuthenticationResult GetAuthenticationResult(string tenant, string clientId, Uri redirectUri, 
-                                                              string resourceAppIdUri, string authnEndpoint)
+        public AuthenticationResult GetAuthenticationResult(string tenant, string clientId, Uri redirectUri,
+                                                              string resourceAppIdUri, string authnEndpoint, ref string strErrors)
         {
             // This method requests OAuth token using client code authn flow (3-legged)
             // user must authenticate
@@ -129,16 +99,13 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (ActiveDirectoryAuthenticationException ex)
             {
-                string message = ex.Message;
-                if (ex.InnerException != null)
-                    message += "InnerException : " + ex.InnerException.Message;
-                Console.WriteLine(message);
+                GraphHelperEventSourceLogger.Log(ex, ref strErrors);
                 return null;
             }
         }
 
         // methods will get a new token.
-        public AuthenticationResult getNewAuthenticationResult()
+        public AuthenticationResult getNewAuthenticationResult(ref string strErrors)
         {
             // check which type of token to acquire by checking to see if a refresh token is available 
             // (indicating OAuth Authz code grant flow)
@@ -147,7 +114,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 AzureADAuthentication appToken = new AzureADAuthentication();
                 AuthenticationResult applicationAuthnResult = appToken.GetAuthenticationResult(StringConstants.tenant,
                                             StringConstants.clientId, StringConstants.clientSecret,
-                                            StringConstants.resource, StringConstants.authenticationEndpoint);
+                                            StringConstants.resource, StringConstants.authenticationEndpoint, ref strErrors);
                 return applicationAuthnResult;
             }
             else
@@ -155,14 +122,13 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 AzureADAuthentication appToken = new AzureADAuthentication();
                 AuthenticationResult userAuthnResult = appToken.GetAuthenticationResult(StringConstants.tenant, 
                                             StringConstants.clientId, StringConstants.redirectUri,
-                                            StringConstants.resource, StringConstants.authenticationEndpoint);
+                                            StringConstants.resource, StringConstants.authenticationEndpoint, ref strErrors);
                 return userAuthnResult;
             }
         
         }
     }
 }
-
 
 // Extension methods for Azure AD Authentication Library (ADAL)
 // check if token is expired or about to expire in specified minutes)
@@ -180,9 +146,5 @@ namespace ExtensionMethods
             DateTimeOffset datetimeoffset = DateTimeOffset.Now.UtcDateTime;
             return datetimeoffset.AddMinutes(minutes) > authenticationResult.ExpiresOn;
         }
-
-
     }
-
-
 }

@@ -38,13 +38,16 @@ C:\Users\Rakesh\Documents\Visual Studio 2012\Projects\AADApp\GraphHelper\obj\Deb
 \\bec-file01\usershare\ravarna\AADApp\GraphHelper\obj\Debug\Microsoft.WindowsAzure.ActiveDirectory.GraphHelper.dll
 \\bec-file01\usershare\ravarna\AADApp\GraphHelper\obj\Debug\Microsoft.WindowsAzure.ActiveDirectory.GraphHelper.pdb
 \\bec-file01\usershare\ravarna\AADApp\GraphHelper\obj\Debug\GraphHelper.csprojResolveAssemblyReference.cache
+C:\src\AAD\OrgChart\GraphHelper\bin\Debug\Microsoft.WindowsAzure.ActiveDirectory.GraphHelper.dll.config
 C:\src\AAD\OrgChart\GraphHelper\bin\Debug\Microsoft.WindowsAzure.ActiveDirectory.GraphHelper.dll
 C:\src\AAD\OrgChart\GraphHelper\bin\Debug\Microsoft.WindowsAzure.ActiveDirectory.GraphHelper.pdb
 C:\src\AAD\OrgChart\GraphHelper\bin\Debug\Microsoft.IdentityModel.Clients.ActiveDirectory.dll
 C:\src\AAD\OrgChart\GraphHelper\bin\Debug\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll
+C:\src\AAD\OrgChart\GraphHelper\bin\Debug\Microsoft.Practices.EnterpriseLibrary.SemanticLogging.dll
 C:\src\AAD\OrgChart\GraphHelper\bin\Debug\Newtonsoft.Json.dll
 C:\src\AAD\OrgChart\GraphHelper\bin\Debug\Microsoft.IdentityModel.Clients.ActiveDirectory.xml
+C:\src\AAD\OrgChart\GraphHelper\bin\Debug\Microsoft.Practices.EnterpriseLibrary.SemanticLogging.xml
 C:\src\AAD\OrgChart\GraphHelper\bin\Debug\Newtonsoft.Json.xml
-C:\src\AAD\OrgChart\GraphHelper\obj\Debug\GraphHelper.csprojResolveAssemblyReference.cache
 C:\src\AAD\OrgChart\GraphHelper\obj\Debug\Microsoft.WindowsAzure.ActiveDirectory.GraphHelper.dll
 C:\src\AAD\OrgChart\GraphHelper\obj\Debug\Microsoft.WindowsAzure.ActiveDirectory.GraphHelper.pdb
+C:\src\AAD\OrgChart\GraphHelper\obj\Debug\GraphHelper.csprojResolveAssemblyReference.cache

@@ -19,7 +19,6 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
     public class GraphQuery
     {
-
         // Graph API version
         public string apiVersion;
 
@@ -41,7 +40,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() || 
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
             //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
             
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
                        
@@ -64,28 +63,20 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                     }
                 }
             }
-               
-           catch (WebException webException)
-           {
-               Console.WriteLine("Error: " + webException.Message);
-
-               var errorStream = webException.Response.GetResponseStream();
-               DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-               ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-               Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
-               strErrors += getError.error.message.value;
-               return null;
-           }
-
+            catch (WebException webException)
+            {
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
+                return null;
+            }
         }
 
-        public JObject getUserJson(string userId)
+        public JObject getUserJson(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -114,24 +105,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
-
         }
 
-        public AadUser getUsersManager(string userId)
+        public AadUser getUsersManager(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             string uri = this.baseGraphUri + "/users/" + userId + "/manager" + "?" + this.apiVersion;
@@ -155,23 +140,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public JObject getUsersManagerJson(string userId)
+        public JObject getUsersManagerJson(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             string uri = this.baseGraphUri + "/users/" + userId + "/manager" + "?" + this.apiVersion;
@@ -197,27 +177,20 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                     }
                 }
             }
-
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
-
         }
 
-        public AadUsers getUsersDirectReports(string userId)
+        public AadUsers getUsersDirectReports(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -242,23 +215,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public JObjects getUsersDirectReportsJson(string userId)
+        public JUsers getUsersDirectReportsJson(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -280,29 +248,25 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                         {
                             payload = reader.ReadToEnd();
                         }
-                        return JObject.Parse(payload).ToObject<JObjects>();
+                        return JObject.Parse(payload).ToObject<JUsers>();
                     }
                 }
             }
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadGroups getUsersGroupMembership(string userId)
+        public AadGroups getUsersGroupMembership(string userId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -327,23 +291,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadUsers getUsers()
+        public AadUsers getUsers(ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -379,25 +338,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadUsers getUsers(AadFilter filter, int pageSize)
+        public AadUsers getUsers(AadFilter filter, int pageSize, ref string strErrors)
         {
             //maximum number of objects for a filtered search = 999
-            
-
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -435,23 +387,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadUsers getUsers(int pageSize)
+        public AadUsers getUsers(int pageSize, ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -487,24 +434,19 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
         // this method supports getting the next link with the default pageSize = 99
-        public AadUsers getUsers(string nextLink)
+        public AadUsers getUsers(string nextLink, ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -540,25 +482,20 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
         // this method supports getting the next link and allows pageSize to be specified
-        public AadUsers getUsers(string nextLink, int pageSize)
+        public AadUsers getUsers(string nextLink, int pageSize, ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
             
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -594,17 +531,12 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadUsers getUsers(int pageSize, string nextLink, string orderbyProperty)
+        public AadUsers getUsers(int pageSize, string nextLink, string orderbyProperty, ref string strErrors)
         {
             // validate pageSize arguments (must be 1-999)
             if (pageSize <= 0 || pageSize >= 1000)
@@ -613,7 +545,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -658,23 +590,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public bool getUsersPhoto(string userId, string filePath)
+        public bool getUsersPhoto(string userId, string filePath, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
 
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -703,24 +630,19 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return false;
             }
 
         }
 
-        public bool setUsersPhoto(string userId, string filePath)
+        public bool setUsersPhoto(string userId, string filePath, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
 
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -768,23 +690,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return false;
             }
 
         }
         
-        public AadGroup getGroup(string groupId)
+        public AadGroup getGroup(string groupId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -812,22 +729,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadGroups getGroups()
+        public AadGroups getGroups(ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -864,22 +776,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadGroups getGroups(int pageSize)
+        public AadGroups getGroups(int pageSize, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -916,22 +823,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadGroups getGroups(int pageSize, string nextLink)
+        public AadGroups getGroups(int pageSize, string nextLink, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -968,23 +870,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadContacts getContacts(int pageSize)
+        public AadContacts getContacts(int pageSize, ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -1019,23 +916,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadContacts getContacts(int pageSize, string nextLink)
+        public AadContacts getContacts(int pageSize, string nextLink, ref string strErrors)
         {
 
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -1071,23 +963,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadContact getContact(string contactId)
+        public AadContact getContact(string contactId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -1112,23 +999,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadObjects getGroupMembership(string groupId)
+        public AadObjects getGroupMembership(string groupId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -1153,23 +1035,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadObject getDirectoryObject(string objectType, string objectId)
+        public AadObject getDirectoryObject(string objectType, string objectId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -1201,23 +1078,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadObjects getDirectoryObjects(string objectType, int pageSize)
+        public AadObjects getDirectoryObjects(string objectType, int pageSize, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -1252,22 +1124,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadRoles getRoles()
+        public AadRoles getRoles(ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -1304,22 +1171,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadRole getRole(string roleId)
+        public AadRole getRole(string roleId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -1356,22 +1218,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadUsers getRoleMembers(string roleId)
+        public AadUsers getRoleMembers(string roleId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -1408,22 +1265,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadTenantDetails getTenantDetails()
+        public AadTenantDetails getTenantDetails(ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -1459,22 +1311,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadSubscribedSkus getSubscribedSkus()
+        public AadSubscribedSkus getSubscribedSkus(ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -1510,12 +1357,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
@@ -1545,16 +1387,15 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             return extendedObject;
         }
 
-        public JObject CreateUser(JObject user)
+        public JObject CreateUser(JObject user, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
-
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -1607,12 +1448,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
@@ -1621,7 +1457,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         {
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -1676,20 +1512,14 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
-                strErrors += getError.error.message.value;
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadUser createUser(AadUser user)
+        public AadUser createUser(AadUser user, ref string strErrors)
         {
-            if (!this.ValidateAndRenewTokenIfRequired())
+            if (!this.ValidateAndRenewTokenIfRequired(ref strErrors))
             {
                 return null;
             }
@@ -1740,12 +1570,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
@@ -1756,11 +1581,10 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
-
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             string uri = "";
@@ -1816,13 +1640,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
-                strErrors += getError.error.message.value;
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return false;
             }
         }
@@ -1833,11 +1651,10 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
-
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             string uri = "";
@@ -1893,30 +1710,23 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
-                strErrors += getError.error.message.value;
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return false;
             }
         }
 
-        public bool modifyGroup(string method, AadGroup group)
+        public bool modifyGroup(string method, AadGroup group, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             string uri = this.baseGraphUri + "/groups/" + group.objectId + "?" + this.apiVersion;
-
 
             //Setup serialization
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -1969,22 +1779,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return false;
             }
         }
 
-        public AadGroup createGroup(AadGroup group)
+        public AadGroup createGroup(AadGroup group, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -2045,17 +1850,12 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadUser licenseUser(AadUser user, userLicense license)
+        public AadUser licenseUser(AadUser user, userLicense license, ref string strErrors)
         {
             // return null, if the user's location location is not populated, then we can't assign a license            
             if (user.usageLocation == null)
@@ -2064,11 +1864,10 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
-
 
             //Setup AadUser object
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
@@ -2125,17 +1924,12 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public bool licenseUser(AadUser user, string skuToAddOrUpdate, string skuToRemove, string[] disabledPlans)
+        public bool licenseUser(AadUser user, string skuToAddOrUpdate, string skuToRemove, string[] disabledPlans, ref string strErrors)
         {
             // if incorrect parameters are passed in, return null
             if (user == null || (skuToAddOrUpdate == skuToRemove))
@@ -2172,7 +1966,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             else
                 license.removeLicenses = new string[0] { };
             
-            AadUser returnedUser = this.licenseUser(user, license);
+            AadUser returnedUser = this.licenseUser(user, license, ref strErrors);
 
             if (returnedUser != null)
                return true;
@@ -2181,7 +1975,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         
         }
 
-        public bool updateMembership(string RoleOrGroup, string action, string memberId, string parentId)
+        public bool updateMembership(string RoleOrGroup, string action, string memberId, string parentId, ref string strErrors)
         { 
             string method;
             if (action.ToLower() == "add" || action.ToLower() == "post")
@@ -2209,20 +2003,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                   graphUri = this.baseGraphUri + "/roles/" + parentId + "/$links" + "/members/" + memberId + "?" + apiVersion;
             }
 
-            if (this.updateLink(graphUri, method, link))
+            if (this.updateLink(graphUri, method, link, ref strErrors))
                   return true;
             else
                   return false;
-        
-        
         }
 
-        public bool updateLink(string uri, string method, urlLink link)
+        public bool updateLink(string uri, string method, urlLink link, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
@@ -2275,22 +2067,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return false;
             }
         }
 
-        public bool isMemberOf(string groupId, string memberId)
+        public bool isMemberOf(string groupId, string memberId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
@@ -2300,18 +2087,13 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             try
             {
-                
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
                 System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
-
-
-               
                 request.Headers.Add(authnHeader);
                 request.Method = "POST";
                
                 string body = "{ " + "\"groupId\":" + "\"" + groupId + "\"" + ", " 
                                    + "\"memberId\":" + "\"" + memberId + "\"" + " }";
-
 
                 byte[] data = encoding.GetBytes(body);
                 request.Method = "POST";
@@ -2344,35 +2126,27 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return false;
             }
- 
         }
 
-        public string[] checkMemberGroups(string memberId, string[] groupIds)
+        public string[] checkMemberGroups(string memberId, string[] groupIds, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
-            
                         
             string uri = this.baseGraphUri + "/users/" + memberId + "/checkMemberGroups" + "?" + apiVersion;
 
             try
             {
-
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
                 System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
 
@@ -2385,7 +2159,6 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
                 jsonSettings.NullValueHandling = NullValueHandling.Ignore;
                 string body = JsonConvert.SerializeObject(groupIdList, jsonSettings);
-
 
                 byte[] data = encoding.GetBytes(body);
                 request.Method = "POST";
@@ -2417,23 +2190,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
-
         }
 
-        public string[] getMemberGroups(string memberId, bool securityGroupsOnly)
+        public string[] getMemberGroups(string memberId, bool securityGroupsOnly, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -2487,15 +2254,9 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
-
         }
 
         public bool updateHasResponseError(HttpWebResponse response)
@@ -2506,20 +2267,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                 return false;
             else
                 return true;
-
         }
 
-        public AadApplication createApplication(AadApplication application)
+        public AadApplication createApplication(AadApplication application, ref string strErrors)
         {
-
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
-
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -2567,30 +2325,24 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public bool modifyApplication(string method, AadApplication application)
+        public bool modifyApplication(string method, AadApplication application, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
             string uri = this.baseGraphUri + "/applications/" + application.objectId + "?" + this.apiVersion;
-
-
+            
             //Setup serialization
             JsonSerializerSettings jsonSettings = new JsonSerializerSettings();
             jsonSettings.NullValueHandling = NullValueHandling.Ignore;
@@ -2598,7 +2350,6 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             string body = "";
             if (uri.Contains("/applications"))
                 body = JsonConvert.SerializeObject(application, jsonSettings);
-
 
             try
             {
@@ -2639,26 +2390,20 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                         }
                 }
             }
-
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return false;
             }
         }
 
-        public AadServicePrincipals getServicePrincipals()
+        public AadServicePrincipals getServicePrincipals(ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -2683,23 +2428,18 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadServicePrincipal getServicePrincipal(string servicePrincipalObjectId)
+        public AadServicePrincipal getServicePrincipal(string servicePrincipalObjectId, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
                 //if (this.authnResult.isExpired() || this.authnResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -2724,27 +2464,20 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadServicePrincipal createServicePrincipal(AadServicePrincipal servicePrincipal)
+        public AadServicePrincipal createServicePrincipal(AadServicePrincipal servicePrincipal, ref string strErrors)
         {
-
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
-
 
             string authnHeader = "Authorization: " + this.aadAuthentication.aadAuthenticationResult.AccessToken;
 
@@ -2792,23 +2525,17 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        public AadServicePrincipal modifyServicePrincipal(string method, AadServicePrincipal servicePrincipal)
+        public AadServicePrincipal modifyServicePrincipal(string method, AadServicePrincipal servicePrincipal, ref string strErrors)
         {
-
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return null;
@@ -2854,36 +2581,30 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
                     else
                         using (var stream = response.GetResponseStream())
                         {
-                            return this.getServicePrincipal(servicePrincipal.objectId);
+                            return this.getServicePrincipal(servicePrincipal.objectId, ref strErrors);
                         }
                 }
             }
 
             catch (WebException webException)
             {
-                Console.WriteLine("Error: " + webException.Message);
-
-                var errorStream = webException.Response.GetResponseStream();
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(ODataError));
-                ODataError getError = (ODataError)(ser.ReadObject(errorStream));
-                Console.WriteLine("Error: " + getError.error.code + " " + getError.error.message.value);
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
                 return null;
             }
         }
 
-        private bool ValidateAndRenewTokenIfRequired()
+        private bool ValidateAndRenewTokenIfRequired(ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.aadAuthenticationResult.isExpired() ||
                            this.aadAuthentication.aadAuthenticationResult.WillExpireIn(2))
-                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult();
+                this.aadAuthentication.aadAuthenticationResult = this.aadAuthentication.getNewAuthenticationResult(ref strErrors);
 
             if (this.aadAuthentication.aadAuthenticationResult == null)
                 return false;
 
             return true;
         }
-
     }
  
     // filter object used for Graph Queries
@@ -2897,4 +2618,3 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         public string propertyValue;
     }
 }
-

@@ -62,7 +62,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
     }
 
     [DataContract]
-    public class JObjects
+    public class JUsers
     {
         [DataMember(Name = "odata.metadata")]
         public string ODataMetadata { get; set; }

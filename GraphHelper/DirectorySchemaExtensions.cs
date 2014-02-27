@@ -8,7 +8,7 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    class DirectorySchemaExtensions
+    class DirectorySchemaExtensionsHelper
     {
         /// <summary>
         /// Adds schema extensions to a specified object. The object passed in is usually a strongly typed version of an 

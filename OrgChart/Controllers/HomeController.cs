@@ -14,10 +14,18 @@ namespace OrgChart.Controllers
 {
     public class HomeController : Controller
     {
+        /// <summary>
+        /// The Index method is the main method called when the front page of the website is launched. This method:
+        /// 1. authenticates the application
+        /// 2. performs requested actions in response to form submissions
+        /// 3. calls the model to retrieve user data
+        /// 4. calls the view to display user data
+        /// </summary>
+        /// <returns>ActionResult (generally a View).</returns>
         public ActionResult Index()
         {
             string strErrors = "";
-            // check if we have changed the app credentials as that affects how we authenticate
+            // check if we have changed authentication parameters
             string strFormAction = Request["submitButton"];
             if(strFormAction == "applicationUpdate")
             {
@@ -27,8 +35,7 @@ namespace OrgChart.Controllers
                 StringConstants.AppObjectId = Request["AppObjectId"];
                 StringConstants.tenant = Request["AppTenant"];
             }
-
-            // use ADAL library to connect to AAD tenant using fake parameters
+            // use ADAL library to connect to AAD tenant using authentication parameters
             string baseGraphUri = StringConstants.baseGraphUri + StringConstants.tenant;
             GraphQuery graphCall = new GraphQuery();
             graphCall.apiVersion = StringConstants.apiVersion;
@@ -37,7 +44,7 @@ namespace OrgChart.Controllers
             AzureADAuthentication aadAuthentication = new AzureADAuthentication();
             AuthenticationResult authenticationResult = aadAuthentication.GetAuthenticationResult(StringConstants.tenant,
                                              StringConstants.clientId, StringConstants.clientSecret,
-                                             StringConstants.resource, StringConstants.authenticationEndpoint);
+                                             StringConstants.resource, StringConstants.authenticationEndpoint, ref strErrors);
             if (authenticationResult != null)
             {
                 ViewBag.Message = "Authentication succeeded!";
@@ -62,7 +69,7 @@ namespace OrgChart.Controllers
                         graphUser[property.Name] = (value == "") ? null : value;
                     }
                 }
-                // process any (non-app credential impacting) form submission requests
+                // strFormAction set at top of Index() to process auth parameter actions, process the rest of the actions here
                 switch (strFormAction)
                 {
                     case "userUpdate":
@@ -118,14 +125,20 @@ namespace OrgChart.Controllers
             }
             return View();
         }
-
+        /// <summary>
+        /// Generates the About page.
+        /// </summary>
+        /// <returns>View</returns>
         public ActionResult About()
         {
             ViewBag.Message = "Here is where you learn about the app.";
 
             return View();
         }
-
+        /// <summary>
+        /// Generates the Contact page.
+        /// </summary>
+        /// <returns>View</returns>
         public ActionResult Contact()
         {
             ViewBag.Message = "Here is where you learn about the authors.";
