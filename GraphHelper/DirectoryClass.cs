@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 
 // for Graph API version 1.0, api-version=2013-04-05
 
-namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
+namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
 {
 
     [DataContract]

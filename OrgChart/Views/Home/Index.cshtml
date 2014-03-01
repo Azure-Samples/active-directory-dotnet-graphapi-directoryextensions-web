@@ -1,4 +1,4 @@
-﻿@using Microsoft.WindowsAzure.ActiveDirectory.GraphHelper;
+﻿@using Microsoft.WindowsAzure.ActiveDirectory.GraphClient;
 @using OrgChart.Models;
 @using Newtonsoft.Json.Linq;
 @using Newtonsoft.Json;
@@ -38,7 +38,7 @@
                 {
                     // skip special cases
                 }
-                else if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes.Contains(property.Name))
+                else if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes().Contains(property.Name))
                 {
                     map += "\", ";
                     map += property.Name;
@@ -279,7 +279,7 @@ for (int j = 0; j < ViewBag.DirectsOfDirects.Count; j++)
 			<!-- enumerate extension attributes from JSON object -->
             @foreach (JProperty property in ViewBag.ExtensionRegistryUser.Properties())
             {
-                if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes.Contains(property.Name))
+                if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes().Contains(property.Name))
                 {
                     @:<div><label for="@property.Name"><pre>@property.Name: </pre></label> <input type="text" id="@property.Name" name="@property.Name"></div>
                 }
@@ -303,10 +303,10 @@ for (int j = 0; j < ViewBag.DirectsOfDirects.Count; j++)
         <fieldset> <legend>Update Application Credentials</legend>
             <div><label for="ChooseCred"><pre>Choose Credential: </pre></label> 
                 <select id="ChooseCred" name="ChooseCred">
-                    <option value="dxtest orgchart" @(Org.WhichCred == "dxtest orgchart" ? "selected" : "")>dxtest orgchart</option>
-                    <option value="new" @(Org.WhichCred == "new" ? "selected" : "")>new</option>
+                    <option value="dxtest orgchart" @(Org.WhichCred() == "dxtest orgchart" ? "selected" : "")>dxtest orgchart</option>
+                    <option value="new" @(Org.WhichCred() == "new" ? "selected" : "")>new</option>
                 </select>
-                <input type="text" id="WhichCred" name="WhichCred" value="@Org.WhichCred" readonly="readonly">
+                <input type="text" id="WhichCred" name="WhichCred" value="@Org.WhichCred()" readonly="readonly">
             </div>
             <div><label for="AppId"><pre>AppId: </pre></label> <input type="text" id="AppId" name="AppId" value="@StringConstants.ClientId"></div>
             <div><label for="AppSecret"><pre>AppSecret: </pre></label> <input type="text" id="AppSecret" name="AppSecret" value="@StringConstants.ClientSecret"></div>
@@ -355,7 +355,7 @@ for (int j = 0; j < ViewBag.DirectsOfDirects.Count; j++)
             {
                 // skip special case
             }
-            else if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes.Contains(property.Name))
+            else if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes().Contains(property.Name))
             {
                 @:$("#@property.Name").val(userMap[alias].@property.Name);
             }

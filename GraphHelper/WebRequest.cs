@@ -14,21 +14,15 @@ using Newtonsoft.Json;
 using ExtensionMethods;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
+namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
 {
-
     public class GraphQuery
     {
         // Graph API version
         public string ApiVersion;
 
-        // Your tenant's name - can be the domain name 
-        public string tenant;
-
         // The Graph service endpoint for a tenant
         public string BaseGraphUri;
-
-     //   public string token;
 
         public AuthenticationResult AadAuthenticationResult;
 
@@ -1387,7 +1381,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             return extendedObject;
         }
 
-        public JObject CreateUserJson(JObject user, ref string strErrors)
+        public JObject CreateUserJSON(JObject user, ref string strErrors)
         {
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
@@ -1575,9 +1569,47 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
+        public bool DeleteUser(string strDeleteUPN, ref string strErrors)
+        {
+            // check if token is expired or about to expire in 2 minutes
+            if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
+                           this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
+                this.aadAuthentication.AadAuthenticationResult = this.aadAuthentication.GetNewAuthenticationResult(ref strErrors);
+            if (this.aadAuthentication.AadAuthenticationResult == null)
+                return false;
+            string authnHeader = "Authorization: " + this.aadAuthentication.AadAuthenticationResult.AccessToken;
+            string uri = this.BaseGraphUri + "/users/" + strDeleteUPN + "?" + this.ApiVersion;
+
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+                System.Text.ASCIIEncoding encoding = new System.Text.ASCIIEncoding();
+                request.Headers.Add(authnHeader);
+                request.Method = "DELETE";
+                using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+                {
+                    if (response.StatusCode != HttpStatusCode.NoContent)
+                    {
+                        throw new Exception(String.Format(
+                            "Server error (HTTP {0}: {1}).",
+                            response.StatusCode,
+                            response.StatusDescription));
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (WebException webException)
+            {
+                GraphHelperEventSourceLogger.Log(webException, ref strErrors);
+                return false;
+            }
+        }
+
         public bool modifyUser(string method, AadUser user, ref string strErrors)
         {
-
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
                            this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))
@@ -1645,9 +1677,8 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
             }
         }
 
-        public bool ModifyUserJson(string method, JObject user, ref string strErrors)
+        public bool ModifyUserJSON(string method, JObject user, ref string strErrors)
         {
-
             // check if token is expired or about to expire in 2 minutes
             if (this.aadAuthentication.AadAuthenticationResult.IsExpired() ||
                            this.aadAuthentication.AadAuthenticationResult.WillExpireIn(2))

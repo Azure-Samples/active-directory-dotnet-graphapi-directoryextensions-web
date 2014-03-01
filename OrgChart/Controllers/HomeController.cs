@@ -1,17 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
-using Microsoft.WindowsAzure.ActiveDirectory.GraphHelper;
-using Microsoft.IdentityModel.Clients.ActiveDirectory;
-using OrgChart.Models;
-using System.Collections.Specialized;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
+﻿// <copyright file="HomeController.cs" company="Microsoft">
+//     Copyright (c) Microsoft. All rights reserved.
+// </copyright>
 
 namespace OrgChart.Controllers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.Specialized;
+    using System.Linq;
+    using System.Web;
+    using System.Web.Mvc;
+    using Microsoft.IdentityModel.Clients.ActiveDirectory;
+    using Microsoft.WindowsAzure.ActiveDirectory.GraphClient;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
+    using OrgChart.Models;
+
+    /// <summary>
+    /// main controller provides methods for each page of the site
+    /// </summary>
     public class HomeController : Controller
     {
         /// <summary>
@@ -24,64 +31,83 @@ namespace OrgChart.Controllers
         /// <returns>ActionResult (generally a View).</returns>
         public ActionResult Index()
         {
-            string strErrors = "";
+            string strErrors = string.Empty;
+            
             // check if we have changed authentication parameters
-            string strFormAction = Request["submitButton"];
-            if(strFormAction == "applicationUpdate")
+            string strFormAction = this.Request["submitButton"];
+            if (strFormAction == "applicationUpdate")
             {
-                Org.WhichCred = Request["WhichCred"];
-                StringConstants.ClientId = Request["AppId"];
-                StringConstants.ClientSecret = Request["AppSecret"];
-                StringConstants.AppObjectId = Request["AppObjectId"];
-                StringConstants.Tenant = Request["AppTenant"];
+                Org.WhichCred(this.Request["WhichCred"]);
+                StringConstants.ClientId = this.Request["AppId"];
+                StringConstants.ClientSecret = this.Request["AppSecret"];
+                StringConstants.AppObjectId = this.Request["AppObjectId"];
+                StringConstants.Tenant = this.Request["AppTenant"];
             }
+            
             // use ADAL library to connect to AAD tenant using authentication parameters
             string baseGraphUri = StringConstants.BaseGraphUri + StringConstants.Tenant;
             GraphQuery graphCall = new GraphQuery();
             graphCall.ApiVersion = StringConstants.ApiVersion;
             graphCall.BaseGraphUri = baseGraphUri;
+            
             // get token using OAuth Authorization Code
             AzureADAuthentication aadAuthentication = new AzureADAuthentication();
-            AuthenticationResult authenticationResult = aadAuthentication.GetAuthenticationResult(StringConstants.Tenant,
-                                             StringConstants.ClientId, StringConstants.ClientSecret,
-                                             StringConstants.Resource, StringConstants.AuthenticationEndpoint, ref strErrors);
+            AuthenticationResult authenticationResult = aadAuthentication.GetAuthenticationResult(
+                StringConstants.Tenant,
+                StringConstants.ClientId, 
+                StringConstants.ClientSecret,
+                StringConstants.Resource, 
+                StringConstants.AuthenticationEndpoint, 
+                ref strErrors);
             if (authenticationResult != null)
             {
                 ViewBag.Message = "Authentication succeeded!";
+                
                 // initialize view data based on default or query string UPN
                 NameValueCollection queryValues = Request.QueryString;
                 string strUpn = queryValues["upn"];
+                
                 // initialize graph
                 graphCall.aadAuthentication = aadAuthentication;
                 graphCall.aadAuthentication.AadAuthenticationResult = authenticationResult;
-                // configure appropriate model                
+                
+                // configure org and extensions model objects
                 OrgChart.Models.Org org = new OrgChart.Models.Org(graphCall);
+                OrgChart.Models.Extensions extensions = new OrgChart.Models.Extensions(graphCall);
+                
                 // retrieve user containing all extensions (and add manager UPN)
-                ViewBag.ExtensionRegistryUser = org.GetUser(Org.GetExtensionRegistryUser());
+                ViewBag.ExtensionRegistryUser = extensions.GetUser(Org.GetExtensionRegistryUser());
                 ViewBag.ExtensionRegistryUser["managerUserPrincipalName"] = org.GetUsersManager(Org.GetExtensionRegistryUser());
+                
                 // setup JObject for setuser by enumerating registry user
                 JObject graphUser = new JObject();
                 foreach (JProperty property in ViewBag.ExtensionRegistryUser.Properties())
                 {
-                    if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes.Contains(property.Name))
+                    if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes().Contains(property.Name))
                     {
-                        string value = Request[property.Name];
-                        graphUser[property.Name] = (value == "") ? null : value;
+                        string value = this.Request[property.Name];
+                        graphUser[property.Name] = (value == string.Empty) ? null : value;
                     }
                 }
+                
                 // strFormAction set at top of Index() to process auth parameter actions, process the rest of the actions here
                 switch (strFormAction)
                 {
                     case "userUpdate":
                         // set display name, manager, job title, trio, skype for given UPN
-                        org.SetUser(graphUser, ref strErrors);
+                        extensions.SetUser(graphUser, ref strErrors);
+                        
                         // show the user, unless trio is set, then show the manager
-                        strUpn = Request["userPrincipalName"];
-                        if ((string)graphUser[StringConstants.GetExtension("trio")] != "") strUpn = Request["managerUserPrincipalName"];
+                        strUpn = this.Request["userPrincipalName"];
+                        if ((string)graphUser[StringConstants.GetExtension("trio")] != string.Empty)
+                        {
+                            strUpn = this.Request["managerUserPrincipalName"];
+                        }
+
                         break;
                     case "userCreate":
                         // create user with given display name, UPN, and manager
-                        org.CreateUser(graphUser, ref strErrors);
+                        extensions.CreateUser(graphUser, ref strErrors);
                         strUpn = (string)graphUser["userPrincipalName"];
                         break;
                     case "userDelete":
@@ -91,29 +117,33 @@ namespace OrgChart.Controllers
                     case "extensionCreate":
                         {
                             // register the passed extension
-                            string strExtension = Request["Extension"];
-                            if (org.RegisterExtension(strExtension, ref strErrors))
+                            string strExtension = this.Request["Extension"];
+                            if (extensions.RegisterExtension(strExtension, ref strErrors))
                             {
                                 // set this extension value to registered on the "registry" object
                                 ViewBag.ExtensionRegistryUser[StringConstants.GetExtension(strExtension)] = "reserved";
-                                org.SetUser(ViewBag.ExtensionRegistryUser, ref strErrors);
+                                extensions.SetUser(ViewBag.ExtensionRegistryUser, ref strErrors);
                             }
                         }
+
                         break;
                 }
+                
                 // may have changed attributes, extension values, extension registration, or tenant credentials, re-retrieve extension registry user
-                ViewBag.ExtensionRegistryUser = org.GetUser(Org.GetExtensionRegistryUser());
+                ViewBag.ExtensionRegistryUser = extensions.GetUser(Org.GetExtensionRegistryUser());
                 ViewBag.ExtensionRegistryUser["managerUserPrincipalName"] = org.GetUsersManager(Org.GetExtensionRegistryUser());
+
                 // no UPN provided, get the UPN of the first user instead
                 if (strUpn == null)
                 {
                     strUpn = org.GetFirstUpn();
                 }
+                
                 // initialize the ViewBag if we have a UPN
                 if (strUpn != null)
                 {
                     string strTrio = queryValues["trio"];
-                    bool bTrio = (strTrio != null && String.Equals(strTrio, "true", StringComparison.CurrentCultureIgnoreCase));
+                    bool bTrio = strTrio != null && string.Equals(strTrio, "true", StringComparison.CurrentCultureIgnoreCase);
                     ViewBag.AncestorsAndMainPerson = org.GetAncestorsAndMain(strUpn, bTrio, ref strErrors);
                     ViewBag.DirectsOfDirects = org.GetDirectsOfDirects(strUpn, bTrio, ref strErrors);
                     ViewBag.strErrors = strErrors;
@@ -123,28 +153,30 @@ namespace OrgChart.Controllers
             {
                 ViewBag.Message = "Authentication Failed!";
             }
-            return View();
+
+            return this.View();
         }
+        
         /// <summary>
         /// Generates the About page.
         /// </summary>
-        /// <returns>View</returns>
+        /// <returns>About View</returns>
         public ActionResult About()
         {
             ViewBag.Message = "Here is where you learn about the app.";
 
-            return View();
+            return this.View();
         }
+
         /// <summary>
         /// Generates the Contact page.
         /// </summary>
-        /// <returns>View</returns>
+        /// <returns>Contact View</returns>
         public ActionResult Contact()
         {
             ViewBag.Message = "Here is where you learn about the authors.";
 
-            return View();
+            return this.View();
         }
-
     }
 }

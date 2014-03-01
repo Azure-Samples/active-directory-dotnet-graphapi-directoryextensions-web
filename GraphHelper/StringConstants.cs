@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
+namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
 {
     public class StringConstants
     {

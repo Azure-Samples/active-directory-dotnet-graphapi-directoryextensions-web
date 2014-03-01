@@ -11,7 +11,7 @@ using Microsoft.Practices.EnterpriseLibrary.SemanticLogging.Formatters;
 using Microsoft.Practices.EnterpriseLibrary.SemanticLogging;
 using System.IO;
 
-namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
+namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
 {
     // text formatter for concise output
     public class GraphHelperEventTextFormatter : IEventTextFormatter

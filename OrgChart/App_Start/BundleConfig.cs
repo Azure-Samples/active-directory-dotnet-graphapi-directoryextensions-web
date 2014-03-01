@@ -1,11 +1,22 @@
-﻿using System.Web;
-using System.Web.Optimization;
+﻿// <copyright file="BundleConfig.cs" company="Microsoft">
+//     Copyright (c) Microsoft. All rights reserved.
+// </copyright>
 
 namespace OrgChart
 {
+    using System.Web;
+    using System.Web.Optimization;
+
+    /// <summary>
+    /// BundleConfig bundles directives
+    /// </summary>
     public class BundleConfig
     {
-        // For more information on Bundling, visit http://go.microsoft.com/fwlink/?LinkId=254725
+        /// <summary>
+        /// Registers bundles
+        /// </summary>
+        /// <param name="bundles">bundle parameter</param>
+        /// For more information on Bundling, visit http://go.microsoft.com/fwlink/?LinkId=254725.
         public static void RegisterBundles(BundleCollection bundles)
         {
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(

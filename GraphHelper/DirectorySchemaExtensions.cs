@@ -1,4 +1,4 @@
-﻿namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
+﻿namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
 {
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;

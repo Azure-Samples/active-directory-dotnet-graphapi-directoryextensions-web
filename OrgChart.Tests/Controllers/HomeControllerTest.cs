@@ -1,17 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web.Mvc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OrgChart;
-using OrgChart.Controllers;
+﻿// <copyright file="HomeControllerTest.cs" company="Microsoft">
+//     Copyright (c) Microsoft. All rights reserved.
+// </copyright>
 
 namespace OrgChart.Tests.Controllers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Web.Mvc;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using OrgChart;
+    using OrgChart.Controllers;
+
+    /// <summary>
+    /// HomeControllerTest tests HomeController.
+    /// </summary>
     [TestClass]
     public class HomeControllerTest
     {
+        /// <summary>
+        /// Index tests Index
+        /// </summary>
         [TestMethod]
         public void Index()
         {
@@ -25,6 +35,9 @@ namespace OrgChart.Tests.Controllers
             Assert.AreEqual("Modify this template to jump-start your ASP.NET MVC application.", result.ViewBag.Message);
         }
 
+        /// <summary>
+        /// About tests About
+        /// </summary>
         [TestMethod]
         public void About()
         {
@@ -38,6 +51,9 @@ namespace OrgChart.Tests.Controllers
             Assert.IsNotNull(result);
         }
 
+        /// <summary>
+        /// Contact tests Contact
+        /// </summary>
         [TestMethod]
         public void Contact()
         {

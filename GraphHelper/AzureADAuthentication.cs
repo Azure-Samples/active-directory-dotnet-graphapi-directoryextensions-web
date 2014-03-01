@@ -8,14 +8,21 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using System.Threading;
 using System.Diagnostics;
 
-namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
+namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
 {
     public class AzureADAuthentication
     {
         public AuthenticationResult AadAuthenticationResult;
 
         // First Authn method OAuth Client credential flow (2-legged, S2S)
-        // *
+        //
+        // 2-legged OAuth, describes a typical client-server scenario, without any user involvement. 
+        // An example for such a scenario could be your Azure AD application accessing a consented tenant with no user interaction.
+        //
+        // On a conceptual level 2-legged OAuth simply consists of the first and last steps of 3-legged OAuth (see below):
+        //      Client has signed up to the server and got his client credentials (also known as “consumer key and secret”)
+        //      Client uses his client credentials (and empty token credentials) to access the protected resources on the server
+        //
         public string GetToken(string tenant, string clientId, string clientSecret, string resource, string authnEndpoint, ref string strErrors)
         {
             string authString = authnEndpoint + tenant;
@@ -35,7 +42,22 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphHelper
         }
 
         // Second Authn method using OAuth Authorization Code grant flow (3-legged OAuth, user impersonation/delegation)
-        // *
+        //
+        // 3-legged OAuth describes the scenario for which OAuth was originally developed: a resource owner wants to give a client 
+        // access to a server without sharing his credentials (i.e. username/password).
+        //
+        // A typical example is a Facebook user (resource owner) who wants to give a facebook app (client) ability to write to her wall (server).
+        //
+        // On a conceptual level it works in the following way:
+        //      Client has signed up to the server and got his client credentials (also known as “consumer key and secret”) ahead of time
+        //      User wants to give the client access to his protected resources on the server
+        //      Client retrieves the temporary credentials (also known as “request token”) from the server
+        //      Client redirects the resource owner to the server
+        //      Resource owner grants the client access to his protected resources on the server
+        //      Server redirects the user back to the client
+        //      Client uses the temporary credentials to retrieve the token credentials (also known as “access token”) from the server
+        //      Client uses the token credentials to access the protected resources on the server
+        //
         public string GetToken(string tenant, string clientId, Uri redirectUri, string resourceAppIdUri, string authnEndpoint, ref string strErrors)
              {
                 // This method requests OAuth token using client code authn flow (3-legged)

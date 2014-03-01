@@ -83,4 +83,4 @@ https://github.com/WindowsAzureAD/WindowsAzureAD-GraphAPI-Sample-PHP
 OrgChart Sample
 https://github.com/WindowsAzureAD/WindowsAzureAD-GraphAPI-Sample-OrgChart
 This app allows reading extension values in a sample tenant out of the box. If provides credentials to your Application, this app provides UI to register and write extension attributes as well.
-You can focus on the RegisterExtension, CreateUser, GetUser, and SetUser calls in the Models\Org.cs source file as these are directly related to working with extension attributes.
+You can focus on the RegisterExtension, CreateUser, GetUser, and SetUser methods in the Models\Extensions.cs as these illustrate how to work with extension attributes.
