@@ -35,23 +35,18 @@ namespace OrgChart.Models
         private GraphQuery graphCall;
 
         /// <summary>
+        /// DirectoryExtensions object for making calls that register extension attributes, or read/write objects with extension attributes
+        /// </summary>
+        private DirectoryExtensions extensions;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Org"/> class.
         /// </summary>
         /// <param name="gq">initialized graph client object</param>
         public Org(GraphQuery gq)
         {
             this.graphCall = gq;
-        }
-
-        /// <summary>
-        /// this user has the word "registered" set on every extension registered by this app
-        /// </summary>
-        /// <returns>user UPN</returns>
-        public static string GetExtensionRegistryUser()
-        {
-            string strAdmin = "admin@";
-            strAdmin += StringConstants.Tenant;
-            return strAdmin;
+            this.extensions = new DirectoryExtensions(gq);
         }
 
         /// <summary>
@@ -115,7 +110,7 @@ namespace OrgChart.Models
             {
                 // retrieve graph node for this person (or for each trio member) from graph
                 string strMainUPN = arrayUPN[idxTrio];
-                JObject graphUser = this.graphCall.GetUserJson(strMainUPN, ref strErrors);
+                JObject graphUser = this.extensions.GetUser(strMainUPN, ref strErrors);
 
                 // TODO: this logic is dependent on trios being properly filled in at each level of hierarchy
 
@@ -130,14 +125,14 @@ namespace OrgChart.Models
                     }
             
                     // get next graph user
-                    JObject graphUserParent = this.graphCall.getUsersManagerJson((string)graphUser["userPrincipalName"], ref strErrors);
+                    JObject graphUserParent = this.extensions.GetUsersManager((string)graphUser["userPrincipalName"], ref strErrors);
                     
                     // tag user with manager attribute
                     graphUser["managerUserPrincipalName"] = (graphUserParent != null) ? graphUserParent["userPrincipalName"] : "NO MANAGER";
                     
                     // insert user at end of the correct AncestorOrMain trio list
                     JToken tokenTrio = null;
-                    if (bTrio && graphUser.TryGetValue(StringConstants.GetExtension("trio"), out tokenTrio))
+                    if (bTrio && graphUser.TryGetValue(DirectoryExtensions.GetExtensionName("trio"), out tokenTrio))
                     {
                         // trio mode and there is a trio set on this object, add to list each time through
                         returnedListOfLists.ElementAt(returnedListOfLists.Count - idxAncestorOrMain - 1).Add(graphUser);
@@ -194,7 +189,7 @@ namespace OrgChart.Models
             for (int i = 0; i < arrayUPN.Length; i++)
             {
                 string strMainUPN = arrayUPN[i];
-                JUsers directs = this.graphCall.getUsersDirectReportsJson(strMainUPN, ref strErrors);
+                JUsers directs = this.extensions.GetUsersDirectReports(strMainUPN, ref strErrors);
                 if (directs != null && directs.users != null)
                 {
                     foreach (JObject directReport in directs.users)
@@ -209,7 +204,7 @@ namespace OrgChart.Models
                         returnedListOfLists.ElementAt(0).Insert(0, directReport);
                         
                         // get direct reports of the direct report (and tag manager state to color code managers among directs)
-                        JUsers directsOfDirect = this.graphCall.getUsersDirectReportsJson((string)directReport["userPrincipalName"], ref strErrors);
+                        JUsers directsOfDirect = this.extensions.GetUsersDirectReports((string)directReport["userPrincipalName"], ref strErrors);
                         directReport["isManager"] = directsOfDirect.users.Count > 0;
                         foreach (JObject directOfDirect in directsOfDirect.users)
                         {
@@ -228,9 +223,9 @@ namespace OrgChart.Models
                 delegate(List<JObject> x, List<JObject> y)
                 {
                     JToken tokenTrioX = null;
-                    bool bxTrio = x.ElementAt(0).TryGetValue(StringConstants.GetExtension("trio"), out tokenTrioX);
+                    bool bxTrio = x.ElementAt(0).TryGetValue(DirectoryExtensions.GetExtensionName("trio"), out tokenTrioX);
                     JToken tokenTrioY = null;
-                    bool byTrio = y.ElementAt(0).TryGetValue(StringConstants.GetExtension("trio"), out tokenTrioY);
+                    bool byTrio = y.ElementAt(0).TryGetValue(DirectoryExtensions.GetExtensionName("trio"), out tokenTrioY);
                     
                     if (!bxTrio && !byTrio)
                     {

@@ -1,4 +1,4 @@
-﻿// <copyright file="Extensions.cs" company="Microsoft">
+﻿// <copyright file="DirectoryExtensions.cs" company="Microsoft">
 //     Copyright (c) Microsoft. All rights reserved.
 // </copyright>
 
@@ -17,20 +17,79 @@ namespace OrgChart.Models
     /// The Org class is called by the HomeController to assemble data to send to the Home Index view.
     /// "Trio" is used to group/sort managers and subordinates for appropriate display in Home Index org chart view.
     /// </summary>
-    public class Extensions
+    public class DirectoryExtensions
     {
+        /// <summary>
+        /// indicates prefix that all extension attribute names share
+        /// </summary>
+        public const string ExtensionPropertyPrefix = "extension_";
+
         /// <summary>
         /// internal graph client for making REST calls to AAD
         /// </summary>
         private GraphQuery graphCall;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Extensions"/> class.
+        /// Initializes a new instance of the <see cref="DirectoryExtensions"/> class.
         /// </summary>
         /// <param name="gq">initializes graph client</param>
-        public Extensions(GraphQuery gq)
+        public DirectoryExtensions(GraphQuery gq)
         {
             this.graphCall = gq;
+        }
+
+        /// <summary>
+        /// return full extension name given a short name
+        /// </summary>
+        /// <param name="strExtensionName">short extension name</param>
+        /// <returns>name string</returns>
+        public static string GetExtensionName(string strExtensionName)
+        {
+            string extension = ExtensionPropertyPrefix;
+            string strippedClientId = StringConstants.ClientId.Replace("-", string.Empty);
+            extension += strippedClientId;
+            extension += "_";
+            extension += strExtensionName;
+            return extension;
+        }
+
+        /// <summary>
+        /// this application uses this user to set the value "registered" on each extension this app registers
+        /// </summary>
+        /// <returns>user UPN</returns>
+        public static string GetExtensionRegistryUserUpn()
+        {
+            string strAdmin = "admin@";
+            strAdmin += StringConstants.Tenant;
+            return strAdmin;
+        }
+
+        /// <summary>
+        /// register an extension attribute, this version only registers a string extension attribute on users
+        /// </summary>
+        /// <param name="strExtension">extension name</param>
+        /// <param name="extensionregistryUser">registry user</param>
+        /// <param name="strErrors">error return value</param>
+        /// <returns>success or failure</returns>
+        public bool RegisterExtension(string strExtension, JObject extensionregistryUser, ref string strErrors)
+        {
+            // setup the extension definition
+            ExtensionDefinition extension = new ExtensionDefinition();
+            extension.name = strExtension;
+            extension.dataType = "String";
+            extension.targetObjects.Add("User");
+
+            // Execute the POST to create new extension
+            ExtensionDefinition returnedExtension = this.graphCall.createExtension(extension, ref strErrors);
+            if (returnedExtension != null)
+            {
+                // set this extension value to "registered" on the "registry" object
+                extensionregistryUser[DirectoryExtensions.GetExtensionName(strExtension)] = "reserved";
+                JObject returnedUser = this.SetUser(extensionregistryUser, ref strErrors);
+                return returnedUser != null;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -67,7 +126,7 @@ namespace OrgChart.Models
                 {
                     // skip
                 }
-                else if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix))
+                else if (property.Name.StartsWith(DirectoryExtensions.ExtensionPropertyPrefix))
                 {
                     newUser[property.Name] = property.Value;
                 }
@@ -87,38 +146,47 @@ namespace OrgChart.Models
         }
 
         /// <summary>
+        /// get user JSON object (including extension attributes) for object storing extensions registered by this module
+        /// </summary>
+        /// <param name="strErrors">error return value</param>
+        /// <returns>user object</returns>
+        public JObject GetExtensionRegistryUser(ref string strErrors)
+        {
+            string strUpn = DirectoryExtensions.GetExtensionRegistryUserUpn();
+            return this.GetUser(strUpn, ref strErrors);
+        }
+
+        /// <summary>
         /// get user JSON object (including extension attributes)
         /// </summary>
         /// <param name="strUpn">user UPN</param>
+        /// <param name="strErrors">error return value</param>
         /// <returns>user object</returns>
-        public JObject GetUser(string strUpn)
+        public JObject GetUser(string strUpn, ref string strErrors)
         {
-            string strErrors = string.Empty;
             return this.graphCall.GetUserJson(strUpn, ref strErrors);
         }
 
         /// <summary>
-        /// register an extension attribute, this version only registers a string extension attribute on users
+        /// get user's direct reports JSON objects (including extension attributes)
         /// </summary>
-        /// <param name="strExtension">extension name</param>
+        /// <param name="strUpn">user UPN</param>
         /// <param name="strErrors">error return value</param>
-        /// <returns>success or failure</returns>
-        public bool RegisterExtension(string strExtension, ref string strErrors)
+        /// <returns>JUsers user object list</returns>
+        public JUsers GetUsersDirectReports(string strUpn, ref string strErrors)
         {
-            // setup the extension definition
-            ExtensionDefinition extension = new ExtensionDefinition();
-            extension.name = strExtension;
-            extension.dataType = "String";
-            extension.targetObjects.Add("User");
+            return this.graphCall.getUsersDirectReportsJson(strUpn, ref strErrors);
+        }
 
-            // Execute the POST to create new extension
-            ExtensionDefinition returnedExtension = this.graphCall.createExtension(extension, ref strErrors);
-            if (returnedExtension != null)
-            {
-                return true;
-            }
-            
-            return false;
+        /// <summary>
+        /// get user's manager JSON object (including extension attributes)
+        /// </summary>
+        /// <param name="strUpn">user UPN</param>
+        /// <param name="strErrors">error return value</param>
+        /// <returns>user object</returns>
+        public JObject GetUsersManager(string strUpn, ref string strErrors)
+        {
+            return this.graphCall.getUsersManagerJson(strUpn, ref strErrors);
         }
 
         /// <summary>
@@ -137,7 +205,7 @@ namespace OrgChart.Models
             // enumerate extension attributes from JSON object
             foreach (JProperty property in user.Properties())
             {
-                if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix))
+                if (property.Name.StartsWith(DirectoryExtensions.ExtensionPropertyPrefix))
                 {
                     graphUser[property.Name] = user[property.Name];
                 }

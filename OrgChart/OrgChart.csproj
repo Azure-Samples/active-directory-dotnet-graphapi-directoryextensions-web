@@ -164,7 +164,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\Extensions.cs" />
+    <Compile Include="Models\DirectoryExtensions.cs" />
     <Compile Include="Models\Org.cs">
       <SubType>Code</SubType>
     </Compile>

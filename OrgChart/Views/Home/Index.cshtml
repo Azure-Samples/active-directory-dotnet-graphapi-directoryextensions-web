@@ -38,7 +38,7 @@
                 {
                     // skip special cases
                 }
-                else if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes().Contains(property.Name))
+                else if (property.Name.StartsWith(DirectoryExtensions.ExtensionPropertyPrefix) || Org.StandardAttributes().Contains(property.Name))
                 {
                     map += "\", ";
                     map += property.Name;
@@ -122,7 +122,7 @@ if (AncestorsAndMainPerson.Count > 0)
             </a> 
             (@user["mailNickname"])<br />
             @user["jobTitle"]
-            @if (user[StringConstants.GetExtension("skype")] != null)
+            @if (user[DirectoryExtensions.GetExtensionName("skype")] != null)
             {
                 <br />
                 <script type="text/javascript" src="http://www.skypeassets.com/i/scom/js/skype-uri.js"></script>
@@ -131,7 +131,7 @@ if (AncestorsAndMainPerson.Count > 0)
                     Skype.ui({
                         "name": "call",
                         "element": "SkypeButton_Call_mailmongoose_1",
-                        "participants": ["@user[StringConstants.GetExtension("skype")]"],
+                        "participants": ["@user[DirectoryExtensions.GetExtensionName("skype")]"],
                         "imageSize": 32
                     });
                 </script>
@@ -174,7 +174,7 @@ for (int j = 0; j < ViewBag.DirectsOfDirects.Count; j++)
                 break;
             }
             List<JObject> dirList = ViewBag.DirectsOfDirects[k];
-            String newTrio = (String)dirList[0][StringConstants.GetExtension("trio")];
+            String newTrio = (String)dirList[0][DirectoryExtensions.GetExtensionName("trio")];
             String newUPN = (String)dirList[0]["userPrincipalName"];
             if (previousTrio == null)
             {
@@ -279,7 +279,7 @@ for (int j = 0; j < ViewBag.DirectsOfDirects.Count; j++)
 			<!-- enumerate extension attributes from JSON object -->
             @foreach (JProperty property in ViewBag.ExtensionRegistryUser.Properties())
             {
-                if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes().Contains(property.Name))
+                if (property.Name.StartsWith(DirectoryExtensions.ExtensionPropertyPrefix) || Org.StandardAttributes().Contains(property.Name))
                 {
                     @:<div><label for="@property.Name"><pre>@property.Name: </pre></label> <input type="text" id="@property.Name" name="@property.Name"></div>
                 }
@@ -355,7 +355,7 @@ for (int j = 0; j < ViewBag.DirectsOfDirects.Count; j++)
             {
                 // skip special case
             }
-            else if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes().Contains(property.Name))
+            else if (property.Name.StartsWith(DirectoryExtensions.ExtensionPropertyPrefix) || Org.StandardAttributes().Contains(property.Name))
             {
                 @:$("#@property.Name").val(userMap[alias].@property.Name);
             }

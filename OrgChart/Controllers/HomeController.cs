@@ -73,17 +73,17 @@ namespace OrgChart.Controllers
                 
                 // configure org and extensions model objects
                 OrgChart.Models.Org org = new OrgChart.Models.Org(graphCall);
-                OrgChart.Models.Extensions extensions = new OrgChart.Models.Extensions(graphCall);
+                OrgChart.Models.DirectoryExtensions extensions = new OrgChart.Models.DirectoryExtensions(graphCall);
                 
-                // retrieve user containing all extensions (and add manager UPN)
-                ViewBag.ExtensionRegistryUser = extensions.GetUser(Org.GetExtensionRegistryUser());
-                ViewBag.ExtensionRegistryUser["managerUserPrincipalName"] = org.GetUsersManager(Org.GetExtensionRegistryUser());
+                // retrieve template user containing all extensions and add manager UPN
+                ViewBag.ExtensionRegistryUser = extensions.GetExtensionRegistryUser(ref strErrors);
+                ViewBag.ExtensionRegistryUser["managerUserPrincipalName"] = org.GetUsersManager(DirectoryExtensions.GetExtensionRegistryUserUpn());
                 
                 // setup JObject for setuser by enumerating registry user
                 JObject graphUser = new JObject();
                 foreach (JProperty property in ViewBag.ExtensionRegistryUser.Properties())
                 {
-                    if (property.Name.StartsWith(StringConstants.ExtensionPropertyPrefix) || Org.StandardAttributes().Contains(property.Name))
+                    if (property.Name.StartsWith(DirectoryExtensions.ExtensionPropertyPrefix) || Org.StandardAttributes().Contains(property.Name))
                     {
                         string value = this.Request[property.Name];
                         graphUser[property.Name] = (value == string.Empty) ? null : value;
@@ -99,14 +99,14 @@ namespace OrgChart.Controllers
                         
                         // show the user, unless trio is set, then show the manager
                         strUpn = this.Request["userPrincipalName"];
-                        if ((string)graphUser[StringConstants.GetExtension("trio")] != string.Empty)
+                        if ((string)graphUser[DirectoryExtensions.GetExtensionName("trio")] != string.Empty)
                         {
                             strUpn = this.Request["managerUserPrincipalName"];
                         }
 
                         break;
                     case "userCreate":
-                        // create user with given display name, UPN, and manager
+                        // create user with given display name, UPN, and manager, show the new user
                         extensions.CreateUser(graphUser, ref strErrors);
                         strUpn = (string)graphUser["userPrincipalName"];
                         break;
@@ -118,20 +118,15 @@ namespace OrgChart.Controllers
                         {
                             // register the passed extension
                             string strExtension = this.Request["Extension"];
-                            if (extensions.RegisterExtension(strExtension, ref strErrors))
-                            {
-                                // set this extension value to registered on the "registry" object
-                                ViewBag.ExtensionRegistryUser[StringConstants.GetExtension(strExtension)] = "reserved";
-                                extensions.SetUser(ViewBag.ExtensionRegistryUser, ref strErrors);
-                            }
+                            extensions.RegisterExtension(strExtension, ViewBag.ExtensionRegistryUser, ref strErrors);
                         }
 
                         break;
                 }
                 
                 // may have changed attributes, extension values, extension registration, or tenant credentials, re-retrieve extension registry user
-                ViewBag.ExtensionRegistryUser = extensions.GetUser(Org.GetExtensionRegistryUser());
-                ViewBag.ExtensionRegistryUser["managerUserPrincipalName"] = org.GetUsersManager(Org.GetExtensionRegistryUser());
+                ViewBag.ExtensionRegistryUser = extensions.GetExtensionRegistryUser(ref strErrors);
+                ViewBag.ExtensionRegistryUser["managerUserPrincipalName"] = org.GetUsersManager(DirectoryExtensions.GetExtensionRegistryUserUpn());
 
                 // no UPN provided, get the UPN of the first user instead
                 if (strUpn == null)

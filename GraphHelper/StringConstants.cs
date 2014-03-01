@@ -38,16 +38,6 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
         //public const string clientIdForUserAuthn = "7318ca25-0f32-4d77-8843-2c4bc2a44326";  //for user_impersonation
         public const string RedirectUri = "https://localhost";
 
-        public const string ExtensionPropertyPrefix = "extension_";
-        static public string GetExtension(string strExtensionName)
-        {
-            string extension = ExtensionPropertyPrefix;
-            string strippedClientId = ClientId.Replace("-", "");
-            extension += strippedClientId;
-            extension += "_";
-            extension += strExtensionName;
-            return extension;
-        }
         public const string LogFile = "AADGraph.log";
     }
 }
