@@ -83,9 +83,9 @@ namespace OrgChart.Models
         /// </summary>
         /// <param name="strUpdateUPN">user to delete</param>
         /// <param name="strErrors">error return value</param>
-        public void DeleteUser(string strUpdateUPN, ref string strErrors)
+        public bool DeleteUser(string strUpdateUPN, ref string strErrors)
         {
-            bool bPass = this.graphCall.DeleteUser(strUpdateUPN, ref strErrors);
+            return this.graphCall.DeleteUser(strUpdateUPN, ref strErrors);
         }
 
         /// <summary>

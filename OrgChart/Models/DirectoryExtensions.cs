@@ -65,13 +65,13 @@ namespace OrgChart.Models
         }
 
         /// <summary>
-        /// register an extension attribute, this version only registers a string extension attribute on users
+        /// register an extension attribute on the Application specified by StringConstants.AppObjectId
+        /// this version only registers a string extension attribute on users
         /// </summary>
         /// <param name="strExtension">extension name</param>
-        /// <param name="extensionregistryUser">registry user</param>
         /// <param name="strErrors">error return value</param>
         /// <returns>success or failure</returns>
-        public bool RegisterExtension(string strExtension, JObject extensionregistryUser, ref string strErrors)
+        public bool RegisterExtension(string strExtension, ref string strErrors)
         {
             // setup the extension definition
             ExtensionDefinition extension = new ExtensionDefinition();
@@ -81,15 +81,7 @@ namespace OrgChart.Models
 
             // Execute the POST to create new extension
             ExtensionDefinition returnedExtension = this.graphCall.createExtension(extension, ref strErrors);
-            if (returnedExtension != null)
-            {
-                // set this extension value to "registered" on the "registry" object
-                extensionregistryUser[DirectoryExtensions.GetExtensionName(strExtension)] = "reserved";
-                JObject returnedUser = this.SetUser(extensionregistryUser, ref strErrors);
-                return returnedUser != null;
-            }
-
-            return false;
+            return returnedExtension != null;
         }
 
         /// <summary>
@@ -121,7 +113,7 @@ namespace OrgChart.Models
             // add supported extension values
             foreach (JProperty property in user.Properties())
             {
-                // exclude unsupported attributes added by my application logic
+                // exclude unsupported attributes added by application logic
                 if (property.Name == "isManager" || property.Name == "managerUserPrincipalName")
                 {
                     // skip
@@ -190,43 +182,50 @@ namespace OrgChart.Models
         }
 
         /// <summary>
-        /// Set user extension attributes and manager. Foreach loop adds extension properties to object before calling ModifyUserJSON.
+        /// Set user extension attributes and manager based on passed JObject.
         /// </summary>
         /// <param name="user">User object with attributes set as intended on the target object.</param>
         /// <param name="strErrors">Error return value.</param>
         /// <returns>set object</returns>
         public JObject SetUser(JObject user, ref string strErrors)
         {
-            // set new (or same) display name and job title
-            JObject graphUser = this.graphCall.GetUserJson((string)user["userPrincipalName"], ref strErrors);
-            graphUser["displayName"] = user["displayName"];
-            graphUser["jobTitle"] = user["jobTitle"];
-            
-            // enumerate extension attributes from JSON object
-            foreach (JProperty property in user.Properties())
-            {
-                if (property.Name.StartsWith(DirectoryExtensions.ExtensionPropertyPrefix))
-                {
-                    graphUser[property.Name] = user[property.Name];
-                }
-            }            
+            string managerUserPrincipalName = (string)user["managerUserPrincipalName"];
 
-            bool bPass = this.graphCall.ModifyUserJSON("PATCH", graphUser, ref strErrors);
+            // remove unsupported properties added by application logic
+            user.Remove("isManager");
+            user.Remove("managerUserPrincipalName");
+
+            // set object with passed attributes
+            bool bPass = this.graphCall.ModifyUserJSON("PATCH", user, ref strErrors);
             if (!bPass)
             {
                 return null;
             }
-            
-            // set/clear manager
-            string updateManagerURI = this.graphCall.BaseGraphUri + "/users/" + (string)user["userPrincipalName"] + "/$links/manager?" + this.graphCall.ApiVersion;
+
+            // set user manager
+            bPass = this.SetUserManager((string)user["userPrincipalName"], managerUserPrincipalName, ref strErrors);
+            return user;
+        }
+        
+        /// <summary>
+        /// Set user manager. 
+        /// </summary>
+        /// <param name="userPrincipalName">User UPN.</param>
+        /// <param name="managerUserPrincipalName">Manager UPN.</param>
+        /// <param name="strErrors">Error return value.</param>
+        /// <returns>set object</returns>
+        public bool SetUserManager(string userPrincipalName, string managerUserPrincipalName, ref string strErrors)
+        {
+            // construct URI, method, and managerLink
+            string updateManagerURI = this.graphCall.BaseGraphUri + "/users/" + userPrincipalName + "/$links/manager?" + this.graphCall.ApiVersion;
             urlLink managerlink = new urlLink();
             string method;
-            if ((string)user["managerUserPrincipalName"] != "NO MANAGER")
+            if (managerUserPrincipalName != "NO MANAGER")
             {
-                AadUser manager = this.graphCall.getUser((string)user["managerUserPrincipalName"], ref strErrors);
+                AadUser manager = this.graphCall.getUser(managerUserPrincipalName, ref strErrors);
                 if (manager == null)
                 {
-                    return null;
+                    return false;
                 }
 
                 managerlink.url = this.graphCall.BaseGraphUri + "/directoryObjects/" + manager.objectId;
@@ -237,9 +236,8 @@ namespace OrgChart.Models
                 managerlink.url = null;
                 method = "DELETE";
             }
-            
-            bPass = bPass && this.graphCall.updateLink(updateManagerURI, method, managerlink, ref strErrors);
-            return graphUser;
+
+            return this.graphCall.updateLink(updateManagerURI, method, managerlink, ref strErrors);
         }
     }
 }

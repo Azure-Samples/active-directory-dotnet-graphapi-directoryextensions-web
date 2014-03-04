@@ -84,10 +84,11 @@ OrgChart Sample
 https://github.com/WindowsAzureAD/WindowsAzureAD-GraphAPI-Sample-OrgChart
 This app allows reading extension values in a sample tenant out of the box. If provides credentials to your Application, this app provides UI to register and write extension attributes as well.
 You can focus on the DirectoryExtensions class in Models\DirectoryExtensions.cs as these methods focus on working with extension attributes:
-	RegisterExtension - registers a user extension with given name
+	RegisterExtension - registers a user extension with given name on Application specified by StringConstants.AppObjectId
 	CreateUser - creates users with extensions, calls set user to set manager
 	GetUser - gets user with extensions
-	SetUser - sets extension and manger attribute on a user
+	SetUser - sets extension and manager attribute on a user
+	SetUserManager - sets user's manager attribute
 	GetUsersManager - get user's manager with extensions
 	GetUsersDirectReports - get user's direct reports with extensions
 	GetExtensionName - gets extension name based on app id

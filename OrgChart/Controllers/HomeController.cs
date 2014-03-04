@@ -118,7 +118,12 @@ namespace OrgChart.Controllers
                         {
                             // register the passed extension
                             string strExtension = this.Request["Extension"];
-                            extensions.RegisterExtension(strExtension, ViewBag.ExtensionRegistryUser, ref strErrors);
+                            if (extensions.RegisterExtension(strExtension, ref strErrors))
+                            {
+                                // set this extension value to "registered" on the "registry" object
+                                ViewBag.ExtensionRegistryUser[DirectoryExtensions.GetExtensionName(strExtension)] = "reserved";
+                                JObject returnedUser = extensions.SetUser(ViewBag.ExtensionRegistryUser, ref strErrors);
+                            }
                         }
 
                         break;
