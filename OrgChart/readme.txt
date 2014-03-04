@@ -11,13 +11,6 @@ Since most people think of directory extensions as belonging to the tenant, let 
 Types and Limitations
 Currently “User”, “Group”, “TenantDetail”, “Device”, “Application” and “ServicePrincipal” entities can be extended with “String” type or “Binary” type single-valued attributes. String type extensions can have maximum of 256 characters and binary extensions are limited to 256 bytes. 100 extension values (across ALL types and ALL applications) can be written to any single object. Prefix searches on extensions are limited to 71 characters for string searches and 207 bytes for searches on binary extensions.
  
-Preparing your Application to Register Directory Extensions
-When your Application is consented to read or write in your tenant, a service principal is created in your tenant. In order to register directory extensions, your this service principal must be a member of the “Company Administrator” role. In order to add your Application service principal to the “Company Administrator” role the following PowerShell commands may be helpful:
-Get-MsolServicePrincipal – to retrieve the ObjectId for the service principal corresponding to your Application
-Get-MsolRole – to retrieve the ObjectId for your “Company Administrator” role in your tenant
-Add-MsolRoleMember -RoleObjectId <Company Administrator ObjectId> -RoleMemberObjectId <Service Principal ObjectId> -RoleMemberType ServicePrincipal
-Get-MsolRoleMember -RoleObjectId <Company Administrator ObjectId> to confirm you have successfully added your service principal to the “Company Administrator” role
-
 Registering an Extension
 Let’s walk through an example. Contoso has built an OrgChart application and wants to allow users to make Skype calls from it. AAD does not expose a SkypeID user property. The OrgChart developer could use a separate store such as SQL Azure to store a record for each user’s SkypeID. Instead, the developer registers a String extension on the User object in his tenant. He does this by creating an “extensionProperty” on the Application using Graph API.
 POST https://graph.windows.net/contoso.com/applications/<applicationObjectID>/extensionProperties?api-version=1.21-preview 
@@ -82,7 +75,13 @@ https://github.com/WindowsAzureAD/WindowsAzureAD-GraphAPI-Sample-PHP
 
 OrgChart Sample
 https://github.com/WindowsAzureAD/WindowsAzureAD-GraphAPI-Sample-OrgChart
-This app allows reading extension values in a sample tenant out of the box. If provides credentials to your Application, this app provides UI to register and write extension attributes as well.
+This app allows reading extension values in a sample tenant (dxtest.onmicrosoft.com) out of the box.
+This app allows registering and writing extension attributes if you provide the following information about your consented Application:
+	AppId: You can retrieve this from the "Client ID" textbox in the Application view in the Azure Portal.
+	AppSecret: You can retrieve this from the "keys" section of the Application view in the Azure Portal.
+	AppObjectId: Retrieve from "objectid" field in GraphExplorer (https://graphexplorer.cloudapp.net/) by navigating to Resource: https://graph.windows.net/<MOERA_Domain>/applications.
+	AppTenant: The MOERA domain or any verified domain for the tenant owning the Application.
+
 You can focus on the DirectoryExtensions class in Models\DirectoryExtensions.cs as these methods focus on working with extension attributes:
 	RegisterExtension - registers a user extension with given name on Application specified by StringConstants.AppObjectId
 	CreateUser - creates users with extensions, calls set user to set manager
