@@ -75,13 +75,19 @@ https://github.com/WindowsAzureAD/WindowsAzureAD-GraphAPI-Sample-PHP
 
 OrgChart Sample
 https://github.com/WindowsAzureAD/WindowsAzureAD-GraphAPI-Sample-OrgChart
+
 This app allows reading extension values in a sample tenant (dxtest.onmicrosoft.com) out of the box.
-This app allows registering and writing extension attributes if you provide the following information about your consented Application:
+
+This app is designed to register new extension attributes on one Application (the current Application) at a time. This app allows registering and writing extension attributes to a tenant if you provide credentials to an Application consented for write in that tenant:
 	AppId: You can retrieve this from the "Client ID" textbox in the Application view in the Azure Portal.
 	AppSecret: You can retrieve this from the "keys" section of the Application view in the Azure Portal.
-	AppObjectId: Retrieve from "objectid" field in GraphExplorer (https://graphexplorer.cloudapp.net/) by navigating to Resource: https://graph.windows.net/<MOERA_Domain>/applications.
-	AppTenant: The MOERA domain or any verified domain for the tenant owning the Application.
+	AppObjectId: Retrieve from "objectid" field in GraphExplorer (https://graphexplorer.cloudapp.net/) by navigating to Resource: https://graph.windows.net/<any_verified_domain>/applications.
+	AppTenant: Any verified domain for the tenant owning the Application.
 
+This app will use the following string extension values if they are present on users:
+	trio: users marked with a trio extension attribute will be grouped by that trio name at each level of the orgchart
+	skype: users marked with a skype extension attribute will present UI for making a skype call to the referenced skype username
+	
 You can focus on the DirectoryExtensions class in Models\DirectoryExtensions.cs as these methods focus on working with extension attributes:
 	RegisterExtension - registers a user extension with given name on Application specified by StringConstants.AppObjectId
 	CreateUser - creates users with extensions, calls set user to set manager
@@ -93,3 +99,4 @@ You can focus on the DirectoryExtensions class in Models\DirectoryExtensions.cs 
 	GetExtensionName - gets extension name based on app id
 	GetExtensionRegistryUserUpn - username of user where "registered" value is set on all registered extensions
 	GetExtensionRegistryUser - user where "registered" value is set on all registered extensions
+	
