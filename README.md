@@ -88,9 +88,11 @@ This app allows registering and writing extension attributes to a tenant if you 
 * AppSecret: You can retrieve this from the "keys" section of the Application view in the Azure Portal.
 * AppObjectId: Retrieve from "objectid" field in GraphExplorer (https://graphexplorer.cloudapp.net/) by navigating to * Resource: https://graph.windows.net/<any_verified_domain>/applications.
 * AppTenant: Any verified domain for the tenant owning the Application.
+
 This app will use the following string extension values if they are present on users:
 * trio: users marked with a trio extension attribute will be grouped by that trio name at each level of the orgchart
 * skype: users marked with a skype extension attribute will present UI for making a skype call to the referenced skype username
+
 You can focus on the DirectoryExtensions class in Models\DirectoryExtensions.cs as these methods focus on working with extension attributes:
 * RegisterExtension - registers a user extension with given name on Application specified by StringConstants.AppObjectId
 * CreateUser - creates users with extensions, calls set user to set manager
