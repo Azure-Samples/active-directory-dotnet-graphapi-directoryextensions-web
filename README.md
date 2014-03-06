@@ -1,17 +1,17 @@
-Goals
+#Goals
 When we started working on directory extensions, we had two goals:
 1.	Enable organizations to move their applications to the cloud. Seamlessly synchronizing on-premises schema extensions to Azure AD will allow organizations to leverage investments in on-premises applications as they move to the cloud.
 2.	Enable ISVs to build more powerful directory-aware applications. Allowing application developers to extend the directory allows them to develop richer directory-aware applications without worrying about access controls, availability requirements, etc. of a user profile store.
  
 The first goal really brings on-premises AD and Azure AD together, which we know is hugely important to you. However, the second goal is a prerequisite for the first; therefore, that is where we started. This preview provides REST interfaces for registering, reading, writing, and filtering by extension values.
  
-Application-Centric Model
+#Application-Centric Model
 Since most people think of directory extensions as belonging to the tenant, let me take a moment to explain our application-centric approach. You may want to read this post to understand how to write an application to access the Graph API. To enable an application to register extensions (goal #2), the extensions are registered on the Application object in the directory and referenced from all the tenants consenting to that Application. Once a customer tenant has consented to an Application (even for read) the extensions registered on that Application are available in the consenting tenant for reading/writing by any Application that has the appropriate access. If the app developer wants to add more extension attributes, she can update her Application (in her developer tenant) and any tenants that are currently consented to this Application will instantly be enabled for the new attributes. If consent is removed, if the extension is deleted, or if the Application is deleted, the extension values will no longer be accessible (and cleaned up as a background task once we implement garbage collection) on the corresponding directory objects.
  
-Types and Limitations
+#Types and Limitations
 Currently “User”, “Group”, “TenantDetail”, “Device”, “Application” and “ServicePrincipal” entities can be extended with “String” type or “Binary” type single-valued attributes. String type extensions can have maximum of 256 characters and binary extensions are limited to 256 bytes. 100 extension values (across ALL types and ALL applications) can be written to any single object. Prefix searches on extensions are limited to 71 characters for string searches and 207 bytes for searches on binary extensions.
  
-Registering an Extension
+#Registering an Extension
 Let’s walk through an example. Contoso has built an OrgChart application and wants to allow users to make Skype calls from it. AAD does not expose a SkypeID user property. The OrgChart developer could use a separate store such as SQL Azure to store a record for each user’s SkypeID. Instead, the developer registers a String extension on the User object in his tenant. He does this by creating an “extensionProperty” on the Application using Graph API.
 POST https://graph.windows.net/contoso.com/applications/<applicationObjectID>/extensionProperties?api-version=1.21-preview 
 {
@@ -29,17 +29,17 @@ If the operation is successful, it will return 201 along with the fully qualifie
 “targetObjects”: [“User”]
 }
  
-Viewing Directory Extensions Registered by your Application
+#Viewing Directory Extensions Registered by your Application
 You can view extensions registered by your application by issuing a GET of the extension properties of the application. This will provide object ID, data type, and target objects for each extension registered by the application.
 GET https://graph.windows.net/contoso.com/applications/<applicationObjectID>/extensionProperties?api-version=1.21-preview 
 
 
-Unregistering an Extension
+#Unregistering an Extension
 You can unregister an extension registered by your application by issuing a DELETE of the extension object ID as follows:
 DELETE https://graph.windows.net/contoso.com/applications/<applicationObjectID>/extensionProperties/<extensionObjectID>?api-version=1.21-preview 
 
 
-Writing Extension Values
+#Writing Extension Values
 Once this application is consented by the admin, any user in the tenant can be updated to include this new property. For example,
 PATCH https://graph.windows.net/contoso.com/users/joe@contoso.com?api-version=1.21-preview 
 {
@@ -51,7 +51,7 @@ PATCH https://graph.windows.net/contoso.com/users/joe@contoso.com?api-version=1.
 “extension_d8dde29f1095422e91537a6cb22a2f74_skypeId”: null
 }
  
-Reading Extension Values
+#Reading Extension Values
 When directory objects are retrieved, they automatically include the extension values. For example:
 GET https://graph.windows.net/contoso.com/users/joe@contoso.com?api-version=1.21-preview 
 200 OK
@@ -65,32 +65,28 @@ GET https://graph.windows.net/contoso.com/users/joe@contoso.com?api-version=1.21
 “extension_d8dde29f1095422e91537a6cb22a2f74_skypeId”: “joe.smith”
 }
  
-Filtering by Extension Values
+#Filtering by Extension Values
 The extension values can also be used as a part of $filter to search directory similar to any existing property. For example:
 GET https://graph.windows.net/contoso.com/users/joe@contoso.com?api-version=1.21-preview&$filter=extension_d8dde29f1095422e91537a6cb22a2f74_skypeId+eq+'joe.smith'
 
-
-Sample Code
+#Sample Code
 We have published a couple of samples to GitHub to showcase and illustrate the use of directory extensions. We plan to enhance them based on your feedback and as the feature evolves. 
 
-
-PHP Sample
+##PHP Sample
 https://github.com/WindowsAzureAD/WindowsAzureAD-GraphAPI-Sample-PHP
 
-
-OrgChart Sample
+##OrgChart Sample
 https://github.com/WindowsAzureAD/WindowsAzureAD-GraphAPI-Sample-OrgChart
-
 
 This app allows reading extension values in a sample tenant (dxtest.onmicrosoft.com) out of the box.
 
+This app is designed to register new extension attributes on one Application (the current Application) at a time. 
 
-This app is designed to register new extension attributes on one Application (the current Application) at a time. This app allows registering and writing extension attributes to a tenant if you provide credentials to an Application consented for write in that tenant:
+This app allows registering and writing extension attributes to a tenant if you provide credentials to an Application consented for write in that tenant:
 	AppId: You can retrieve this from the "Client ID" textbox in the Application view in the Azure Portal.
 	AppSecret: You can retrieve this from the "keys" section of the Application view in the Azure Portal.
 	AppObjectId: Retrieve from "objectid" field in GraphExplorer (https://graphexplorer.cloudapp.net/) by navigating to Resource: https://graph.windows.net/<any_verified_domain>/applications.
 	AppTenant: Any verified domain for the tenant owning the Application.
-
 
 This app will use the following string extension values if they are present on users:
 	trio: users marked with a trio extension attribute will be grouped by that trio name at each level of the orgchart
