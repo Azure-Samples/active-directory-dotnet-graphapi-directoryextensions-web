@@ -34,7 +34,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
                 Console.WriteLine("Token: \nToken Type: {0} \nExpires: {1}", authenticationResult.AccessTokenType, authenticationResult.ExpiresOn);
                 return authenticationResult.AccessToken;
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
                 GraphHelperEventSourceLogger.Log(ex, ref strErrors);
                 return "";
@@ -72,7 +72,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
                    //Console.WriteLine("RefreshToken: {0}", userAuthnResult.RefreshToken);
                    return userAuthnResult.AccessToken;
                 }
-                catch (ActiveDirectoryAuthenticationException ex)
+                catch (AdalException ex)
                 {
                     GraphHelperEventSourceLogger.Log(ex, ref strErrors);
                     return "";
@@ -93,7 +93,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
                 //Console.WriteLine("Token: \nToken Type: {0} \nExpires: {1}", authenticationResult.AccessTokenType, authenticationResult.ExpiresOn);
                 return authenticationResult;
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
                 GraphHelperEventSourceLogger.Log(ex, ref strErrors);
                 return null;
@@ -119,7 +119,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
                 //Console.WriteLine("RefreshToken: {0}", userAuthnResult.RefreshToken);
                 return userAuthnResult;
             }
-            catch (ActiveDirectoryAuthenticationException ex)
+            catch (AdalException ex)
             {
                 GraphHelperEventSourceLogger.Log(ex, ref strErrors);
                 return null;

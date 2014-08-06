@@ -70,7 +70,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
 
     public class GraphHelperEventSourceLogger
     {
-        static public void Log(ActiveDirectoryAuthenticationException authException, ref string strErrors)
+        static public void Log(AdalException authException, ref string strErrors)
         {
             string strMessage = authException.Message;
             string strDetail = null;
