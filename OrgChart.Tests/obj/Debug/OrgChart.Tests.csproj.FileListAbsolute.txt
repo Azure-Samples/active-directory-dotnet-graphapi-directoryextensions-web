@@ -40,7 +40,6 @@ C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgCha
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart.Tests\bin\Debug\Microsoft.Data.OData.xml
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart.Tests\bin\Debug\System.Spatial.xml
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart.Tests\bin\Debug\Microsoft.WindowsAzure.ActiveDirectory.GraphHelper.pdb
-C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart.Tests\bin\Debug\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart.Tests\bin\Debug\Microsoft.IdentityModel.Clients.ActiveDirectory.xml
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart.Tests\bin\Debug\de\Microsoft.Data.Edm.resources.dll
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart.Tests\bin\Debug\es\Microsoft.Data.Edm.resources.dll

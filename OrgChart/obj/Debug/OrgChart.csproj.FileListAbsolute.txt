@@ -27,9 +27,7 @@ C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgCha
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart\bin\System.Web.WebPages.Razor.dll
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart\bin\WebGrease.dll
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart\bin\Microsoft.WindowsAzure.ActiveDirectory.GraphHelper.pdb
-C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart\bin\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart\bin\Microsoft.IdentityModel.Clients.ActiveDirectory.xml
-C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart\bin\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.pdb
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart\bin\Microsoft.Practices.EnterpriseLibrary.SemanticLogging.xml
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart\bin\Newtonsoft.Json.xml
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\OrgChart\bin\EntityFramework.xml

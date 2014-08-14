@@ -59,9 +59,7 @@ C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\GraphH
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\GraphHelper\bin\Debug\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\GraphHelper\bin\Debug\Microsoft.Practices.EnterpriseLibrary.SemanticLogging.dll
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\GraphHelper\bin\Debug\Newtonsoft.Json.dll
-C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\GraphHelper\bin\Debug\Microsoft.IdentityModel.Clients.ActiveDirectory.pdb
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\GraphHelper\bin\Debug\Microsoft.IdentityModel.Clients.ActiveDirectory.xml
-C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\GraphHelper\bin\Debug\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.pdb
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\GraphHelper\bin\Debug\Microsoft.Practices.EnterpriseLibrary.SemanticLogging.xml
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\GraphHelper\bin\Debug\Newtonsoft.Json.xml
 C:\Users\dastrock\Source\Repos\WebApp-GraphAPI-DirectoryExtensions-DotNet\GraphHelper\obj\Debug\Microsoft.WindowsAzure.ActiveDirectory.GraphHelper.dll
