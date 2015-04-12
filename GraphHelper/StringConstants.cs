@@ -13,7 +13,7 @@ namespace Microsoft.WindowsAzure.ActiveDirectory.GraphClient
         public const string Resource = "https://graph.windows.net";
 
         //this is the STS endpoint for Windows Azure AD
-        public const string AuthenticationEndpoint = "https://login.windows.net/";
+        public const string AuthenticationEndpoint = "https://login.microsoftonline.com/";
 
         // The URL of Graph service endpoint 
         public const string BaseGraphUri = "https://graph.windows.net/";
