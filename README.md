@@ -1,3 +1,9 @@
+---
+services:
+platforms:
+author: azure
+---
+
 #Goals
 When we started working on directory extensions, we had two goals:
 
