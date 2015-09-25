@@ -1,11 +1,11 @@
 ---
-services:
-platforms:
-author: azure
+services: active-directory
+platforms: dotnet
+author: dstrockis
 ---
 
 # Extending the Azure AD directory schema with custom properties
-======================================
+
 
 ## Goals
 When we started working on directory extensions, we had two goals:
