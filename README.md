@@ -96,8 +96,8 @@ https://github.com/WindowsAzureAD/WindowsAzureAD-GraphAPI-Sample-OrgChart
 This app allows reading extension values in a sample tenant (dxtest.onmicrosoft.com) out of the box.
 This app is designed to register new extension attributes on one Application (the current Application) at a time. 
 This app allows registering and writing extension attributes to a tenant if you provide credentials to an Application consented for write in that tenant:
-* AppId: You can retrieve this from the "Client ID" textbox in the Application view in the Azure Portal.
-* AppSecret: You can retrieve this from the "keys" section of the Application view in the Azure Portal.
+* AppId: You can retrieve this from the "Application ID" textbox in the Properties section of the Settings menu in the Azure Portal.
+* AppSecret: You can retrieve this from the "Keys" section of the Settings menu in the Azure Portal.
 * AppObjectId: Retrieve from "objectid" field in GraphExplorer (https://graphexplorer.cloudapp.net/) by navigating to Resource: https://graph.windows.net/any_verified_domain/applications.
 * AppTenant: Any verified domain for the tenant owning the Application.
 
