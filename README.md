@@ -19,7 +19,19 @@ This first preview focuses on goal #1 above. This preview provides REST interfac
 Since most people think of directory extensions as belonging to the tenant, let me take a moment to explain our application-centric approach. You may want to read [this post](http://msdn.microsoft.com/en-us/library/windowsazure/dn151791.aspx) to understand how to write an application to access the Graph API. To enable an application to register extensions, the extensions are registered on the Application object in the directory and referenced from all the tenants consenting to that Application. Once a customer tenant has consented to an Application (even for read) the extensions registered on that Application are available in the consenting tenant for reading/writing by any Application that has the appropriate access. If the app developer wants to add more extension attributes, she can update her Application (in her developer tenant) and any tenants that are currently consented to this Application will instantly be enabled for the new attributes. If consent is removed, if the extension is deleted, or if the Application is deleted, the extension values will no longer be accessible (and cleaned up as a background task once we implement garbage collection) on the corresponding directory objects.
 
 ## Types and Limitations
-Currently “User”, “Group”, “TenantDetail”, “Device”, “Application” and “ServicePrincipal” entities can be extended with “String” type or “Binary” type single-valued attributes. String type extensions can have maximum of 256 characters and binary extensions are limited to 256 bytes. 100 extension values (across ALL types and ALL applications) can be written to any single object. Prefix searches on extensions are limited to 71 characters for string searches and 207 bytes for searches on binary extensions.
+
+Property | Remarks
+--- | ---
+Binary |	256 bytes maximum.
+Boolean	|
+DateTime |	Must be specified in ISO 8601 format. Will be stored in UTC.
+Integer	| 32-bit value.
+LargeInteger |	64-bit value.
+String |	256 characters maximum.
+
+The property types above can be registered on the following objects in a directory: “User”, “Group”, “TenantDetail”, “Device”, “Application” and “ServicePrincipal”.
+
+https://msdn.microsoft.com/en-us/library/azure/ad/graph/howto/azure-ad-graph-api-directory-schema-extensions
 
 ## Registering an Extension
 Let’s walk through an example. Contoso has built an OrgChart application and wants to allow users to make Skype calls from it. AAD does not expose a SkypeID user property. The OrgChart developer could use a separate store such as SQL Azure to store a record for each user’s SkypeID. Instead, the developer registers a String extension on the User object in his tenant. He does this by creating an “extensionProperty” on the Application using Graph API.
